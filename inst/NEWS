@@ -1,0 +1,10 @@
+Changes in randomLCA version 0.1-2
+
+  o fixed bug where convergence failure wasn't identified for some
+    models, resulting in infinite loops
+    
+  o fixed bug causing outcome probabilities of 0 or 1 not to be plotted
+  
+  o included vignette for examples
+
+First realease version 0.1-1

@@ -122,11 +122,9 @@
 		currll <- oneiteration$logl
 		if (verbose) cat("current ll",currll,"\n")		
 		
-		currll <- 1
-		
-		last2ll <- currll*2
-		while(abs((last2ll-currll)/last2ll)>1.0e-6) {
-			last2ll <- currll
+		adaptive <- TRUE
+		prevll <- -Inf
+        while(adaptive) {
 			# need to do an optimisation on the other parameters
 			fitresults <- fitparams(classx,outcomex,lambdacoef,
 				momentdata,FALSE,gh)
@@ -137,12 +135,15 @@
 			if (verbose) cat("current ll from optimisation",currll,"\n")		
 			# shift the quadrature points again
 			momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
-			# fix up any strange se
-			momentdata[,2] <- ifelse(is.finite(momentdata[,2]),momentdata[,2],1)
 			oneiteration <- calclikelihood(classx,outcomex,lambdacoef,
 			momentdata,gh)
+			# check if moving quadrature points has changed likelihood
+        	adaptive <- (abs((oneiteration$logl-currll)/oneiteration$logl)>1.0e-7) ||
+        		(abs((oneiteration$logl-prevll)/oneiteration$logl)>1.0e-7)
 			currll <- oneiteration$logl
-			if (verbose) cat("current ll",currll,"\n")		
+			if (verbose) cat("current ll",currll,"\n")
+        	if ((prevll-currll)/abs(currll) > 1.0e-4) stop("divergence - increase quadrature points")
+        	prevll <- currll
 		}
 		fitresults <- fitparams(classx,outcomex,lambdacoef,
 				momentdata,calcSE,gh,noiterations=500)
@@ -230,7 +231,7 @@
 	 classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
 
     if (probit) outcomep <- pnorm(outcomex)
-    else outcomep <- exp(outcomex)/(1+exp(outcomex))
+    else outcomep <- 1/(1+exp(-outcomex))
 	
 # extract the se
 	if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))

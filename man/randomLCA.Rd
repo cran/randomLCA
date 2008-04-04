@@ -41,13 +41,16 @@ There are some improvements that will be made to improve the speed. The first of
 }
 \author{Ken Beath}
 \examples{
-# uterine carcinoma data
-data(uterinecarcinoma)
+# dentist data
+data(dentistry)
 # standard latent class with 2 classes
-uterinecarcinoma.lca <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq)
-# by class random effects model with constant random effect loading
-# this is the LCR1 model from Qu et al (1996)
-uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq,
-	initmodel=uterinecarcinoma.lca,random=TRUE,byclass=TRUE,blocksize=1,probit=TRUE)
+dentistry.lca2 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,nclass=2)
+# random effects model with constant random effect loading
+dentistry.lca2random <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
+	initmodel=dentistry.lca2,nclass=2,random=TRUE,probit=TRUE)
+# allow loading to vary by dentist
+# this is the 2LCR model from Qu et al (1996)
+dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
+	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,blocksize=5)
 }
 \keyword{multivariate}

@@ -163,7 +163,7 @@ fit.adapt.random2byclass.randomLCA <- function(outcomes,freq,nclass=2,initoutcom
         }
     
 
-        oneiteration <- calclikelihood(classx, outcomex, lambdacoef,ltaucoef,
+       oneiteration <- calclikelihood(classx, outcomex, lambdacoef,ltaucoef,
             momentdata,gh,updatemoments=TRUE)
         currll <- oneiteration$logl
         if (verbose) cat('Initial ll',currll,"\n")
@@ -178,9 +178,9 @@ fit.adapt.random2byclass.randomLCA <- function(outcomes,freq,nclass=2,initoutcom
             if (verbose) cat("current ll",currll,"\n")       
         }
                 
-        last2ll <- currll*2
-        while(abs((last2ll-currll)/last2ll)>1.0e-6) {
-            last2ll <- currll
+		adaptive <- TRUE
+		prevll <- -Inf
+        while(adaptive) {
             # need to do an optimisation on the other parameters
             fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
                 momentdata,gh,calcSE=FALSE)
@@ -189,13 +189,14 @@ fit.adapt.random2byclass.randomLCA <- function(outcomes,freq,nclass=2,initoutcom
             classx <- fitresults$classx
             lambdacoef <- fitresults$lambdacoef
             ltaucoef <- fitresults$ltaucoef
-            if (verbose) cat("current ll from optimisation",currll,"\n")     
+            if (verbose) cat("current ll from optimisation",currll,"\n") 
+            optll <- currll
             # shift the quadrature points again
             oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
                 momentdata,gh,updatemoments=TRUE)
             currll <- oneiteration$logl
             lastll <- 2*currll
-            while(abs((lastll-currll)/lastll)>1.0e-6) {
+            while(abs((lastll-currll)/lastll)>1.0e-7) {
                 lastll <- currll
                 momentdata <- oneiteration$moments
                 oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
@@ -203,7 +204,11 @@ fit.adapt.random2byclass.randomLCA <- function(outcomes,freq,nclass=2,initoutcom
                 currll <- oneiteration$logl
             if (verbose) cat("current ll",currll,"\n")       
             }
-        }
+        	adaptive <- (abs((currll-optll)/currll)>1.0e-7) ||
+        		(abs((currll-prevll)/currll)>1.0e-7)
+        	if ((prevll-currll)/abs(currll) > 1.0e-4) stop("divergence - increase quadrature points")
+        	prevll <- currll
+       }
         fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
                 momentdata,gh,calcSE=calcSE,noiterations=500)
         return(list(nlm=fitresults$nlm,momentdata=momentdata))

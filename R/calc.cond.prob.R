@@ -16,7 +16,7 @@ function(object,conditionalp=0.5) {
 		outcomex <- outcomex+offset*lambdacoef
 	}
 	if (object$probit) outcomep <- pnorm(outcomex)
-	else outcomep <- exp(outcomex)/(1+exp(outcomex))
+	else outcomep <- 1/(1+exp(-outcomex))
 	perc <- factor(rep(conditionalp,times=length(as.vector(object$outcomep))))
  
  	outcome <- factor(rep(1:object$blocksize,each=length(conditionalp)*object$nclass,times=nblocks))
