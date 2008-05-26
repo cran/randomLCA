@@ -1,3 +1,11 @@
+Changes in randomLCA version 0.1-4
+
+  o fixed bug in adaptive random by class model fit
+  
+Changes in randomLCA version 0.1-3
+
+  o made vignette creation faster
+
 Changes in randomLCA version 0.1-2
 
   o fixed bug where convergence failure wasn't identified for some

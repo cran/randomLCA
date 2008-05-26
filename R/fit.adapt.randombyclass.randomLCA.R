@@ -34,7 +34,7 @@
 				# outcome data
 				myoutcomex <- outcomex[iclass,]
 				# now start calculating for each level 2 quadrature point
-				myoutcomex2 <- t(myoutcomex+t(as.vector(level2p) %o% rep(exp(lambdacoef[iclass,]),nrepeats)))
+				myoutcomex2 <- t(myoutcomex+t(as.vector(level2p) %o% rep(lambdacoef[iclass,],nrepeats)))
 				if (probit) {
 					lmyoutcomep <- pnorm(myoutcomex2,log.p=TRUE)
 					nlmyoutcomep <- pnorm(-myoutcomex2,log.p=TRUE)

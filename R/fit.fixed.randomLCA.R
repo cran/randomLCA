@@ -85,6 +85,9 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 			outcomep[i,] <- apply(patterns*classprob[,i],2,weighted.mean,w=freq,na.rm=TRUE)/
 								apply(ifelse(is.na(patterns),NA,1)*classprob[,i],2,weighted.mean,w=freq,na.rm=TRUE)
 		}
+# make sure probabilities don't get too close to 0 or 1
+		outcomep <- ifelse(outcomep < 1.0e-10,1.0e-10,outcomep)
+		outcomep <- ifelse(outcomep > 1-1.0e-10,1-1.0e-10,outcomep)
 		emit <- emit+1
 		if (((emit %% 100)==0) & verbose) cat('iteration ',emit,' logl ',ll,'\n')
 	}
