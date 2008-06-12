@@ -35,7 +35,9 @@
 data(dentistry)
 # fit LCR model from Qu et al (1996)
 dentistry.lca <- randomLCA(dentistry[,1:5],freq=dentistry$freq,blocksize=5)
+dentistry.lcarandom <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
+	initmodel=dentistry.lca,random=TRUE,blocksize=1,probit=TRUE)
 dentistry.lcarandomunequal <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	initmodel=dentistry.lca,random=TRUE,blocksize=5,probit=TRUE)
+	initmodel=dentistry.lcarandom,random=TRUE,blocksize=5,probit=TRUE)
 }
 \keyword{datasets}

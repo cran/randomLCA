@@ -10,12 +10,10 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 #   calcSE calculate standard errors ?
 #   verbose print information about algorithm    
 
-	nlevel1 <- dim(patterns)[2]
+	patterns <- as.matrix(patterns)
+	mode(patterns) <- "double"
 	
-	npatterns <- 1-patterns
-	# if an NA setting to zero in both patterns excludes from calculation
-	mypatterns <- ifelse(is.na(as.matrix(patterns)),0,as.matrix(patterns))
-	mynpatterns <- ifelse(is.na(as.matrix(npatterns)),0,as.matrix(npatterns))
+	nlevel1 <- dim(patterns)[2]
 
     loglik <- function(params) {
         if (nclass==1) classp <- 1
@@ -28,21 +26,43 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
        		classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
         }       
         outcomex <- matrix(params[nclass:length(params)],ncol=nlevel1)
-        outcomex <- ifelse(abs(outcomex)>10,sign(outcomex)*10,outcomex)
 		ill <- matrix(rep(NA,nclass*length(freq)),ncol=nclass)
 # calculate probabilities under each class
         for (i in 1:nclass) {
 # calculate the outcome probabilities for this class
-			loutcomep <- -log(1+exp(-outcomex[i,]))
-			nloutcomep <- -log(1+exp(outcomex[i,]))
-			ill[,i] <- exp(mypatterns %*% loutcomep+ mynpatterns %*% nloutcomep)*classp[i]
+			outcomep <- 1/(1+exp(-outcomex[i,]))
+			ill[,i] <- .Call("bernoulliprob",patterns,outcomep)*classp[i]
 # multiply by class probabilities
         }
 		ill2 <- rowSums(ill)
         ll <- -sum(log(ill2)*freq)
-		attr(ll, "fitted") <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
-		attr(ll, "classprob") <- ill/ill2		
-	  return(ll)
+ 	  return(ll)
+    }
+	
+    calcfitted <- function(params) {
+        if (nclass==1) classp <- 1
+        else {
+            classx <- params[1:(nclass-1)]
+# add extra column to classx
+        	classx <- ifelse(abs(classx)>10,sign(classx)*10,classx)
+             classx <- c(0,classx)
+# transform using logistic to probabilities		
+       		classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
+        }       
+        outcomex <- matrix(params[nclass:length(params)],ncol=nlevel1)
+		ill <- matrix(rep(NA,nclass*length(freq)),ncol=nclass)
+# calculate probabilities under each class
+        for (i in 1:nclass) {
+# calculate the outcome probabilities for this class
+			outcomep <- 1/(1+exp(-outcomex[i,]))
+			ill[,i] <- .Call("bernoulliprob",patterns,outcomep)*classp[i]
+# multiply by class probabilities
+        }
+		ill2 <- rowSums(ill)
+        ll <- -sum(log(ill2)*freq)
+		fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
+		classprob <- ill/ill2
+	  	return(list(fitted=fitted,classprob=classprob))
     }
 
 	if (missing(initclassp))  initclassp <- runif(nclass)
@@ -56,84 +76,44 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 	outcomep <- matrix(initoutcomep,nrow=nclass)
 
 # now do the em algorithm
+	x <- .Call("lcemalgorithm",patterns,outcomep,classp,as.numeric(freq),verbose)	
+	ll <- x[[1]]
+	outcomep <- x[[2]]
+	classp <- x[[3]]
 
-	ill <- matrix(rep(NA,nclass*length(freq)),ncol=nclass)
-	oldll <- NA
-	emit <- 0
-	repeat {
-		# calculate probabilities under each class
-		for (i in 1:nclass) {
-			# calculate the outcome probabilities for this class
-			ill[,i]  <- t(apply(t(patterns)*outcomep[i,]+t(1-patterns)*(1-outcomep[i,]),2,
-							prod,na.rm=TRUE))*classp[i]
-		}
-		ill2 <- apply(ill,1,sum,na.rm=TRUE)
-		ll <- sum(log(ill2)*freq,na.rm=TRUE)
-
-		if(is.na(oldll)) oldll <- 2*ll
-		if (abs((ll-oldll)/ll) < 1.0e-9) break()
-		oldll <- ll
-		
-		# estimated posterior probability
-		classprob <- ill/ill2
-		
-		# new classp
-		classp <- apply(classprob,2,weighted.mean,w=freq)
-		
-		#new outcome probabilities
-		for (i in 1:nclass) {
-			outcomep[i,] <- apply(patterns*classprob[,i],2,weighted.mean,w=freq,na.rm=TRUE)/
-								apply(ifelse(is.na(patterns),NA,1)*classprob[,i],2,weighted.mean,w=freq,na.rm=TRUE)
-		}
-# make sure probabilities don't get too close to 0 or 1
-		outcomep <- ifelse(outcomep < 1.0e-10,1.0e-10,outcomep)
-		outcomep <- ifelse(outcomep > 1-1.0e-10,1-1.0e-10,outcomep)
-		emit <- emit+1
-		if (((emit %% 100)==0) & verbose) cat('iteration ',emit,' logl ',ll,'\n')
+	outcomex <- log(outcomep/(1-outcomep))
+	
+	if (nclass==1) classx <- NULL
+	else  {
+		classx <- rep(NA,nclass-1)
+		for (i in 2:nclass) classx[i-1] <- log(classp[i]/classp[1])
 	}
-	fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
-	# if SE required then use quasi-Newton
+ 
+	  optim.fit <- nlm(loglik,c(as.vector(classx),as.vector(outcomex)),hessian=calcSE,print.level=ifelse(verbose,2,0),
+		gradtol=1.0e-6,iterlim=1000)
+	if (optim.fit$code >= 3)
+		warning("nlm exited with code ",optim.fit$code," .\n")
 	if (calcSE) {
-		outcomex <- log(outcomep/(1-outcomep))
-		outcomex <- ifelse(abs(outcomex) > 6,6*sign(outcomex),outcomex)
-		
-		if (nclass==1) classx <- NULL
-		else  {
-			classx <- rep(NA,nclass-1)
-			for (i in 2:nclass) classx[i-1] <- log(classp[i]/classp[1])
-			classx <- ifelse(abs(classx) > 6,6*sign(classx),classx)
-		}
-	 
-		  optim.fit <- nlm(loglik,c(as.vector(classx),as.vector(outcomex)),hessian=calcSE,print.level=ifelse(verbose,2,0),
-			gradtol=1.0e-6,iterlim=1000)
-		if (optim.fit$code >= 3)
-			warning("nlm exited with code ",optim.fit$code," .\n")
 		s <- svd(optim.fit$hessian)
 		separ <- sqrt(diag(s$v %*% diag(ifelse(s$d==0,NA,1/s$d)) %*% t(s$u)))
+	} else separ <- rep(NA,length(c(as.vector(classp),as.vector(outcomep))));
 # calculate the probabilities
-		if (nclass==1) classx <- 0
-		else {
-			classx <- optim.fit$estimate[1:(nclass-1)]
+	if (nclass==1) classx <- 0
+	else {
+		classx <- optim.fit$estimate[1:(nclass-1)]
 # add extra column to classx
-			classx <- c(0,classx)       
-		}       
-		outcomep <- matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate))],ncol=nlevel1)
+		classx <- c(0,classx)       
+	}       
+	outcomep <- matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate))],ncol=nlevel1)
 # transform using logistic to probabilities     
-		classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
-		outcomep <- exp(outcomep)/(1+exp(outcomep))
-	
-		final <- loglik(optim.fit$estimate)
-		fitted <- attr(final,"fitted")
-		classprob <- attr(final,"classprob")
-		ll <- -optim.fit$minimum
-   }
-    else {
-    	optim.fit <- NULL
-    	separ <- rep(NA,length(c(as.vector(classp),as.vector(outcomep))))
-    }
-    
+	classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
+	outcomep <- exp(outcomep)/(1+exp(outcomep))
 
-    if (verbose) {
+	final <- calcfitted(optim.fit$estimate)
+	fitted <- final$fitted
+	classprob <- final$classprob
+	ll <- -optim.fit$minimum
+	if (verbose) {
 		print("results")
 		print(classp)
 		print(outcomep)

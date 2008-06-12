@@ -1,7 +1,24 @@
+Changes in randomLCA version 0.3-2
+
+  o changes to vignette to allow running on some systems
+
+Changes in randomLCA version 0.3-1
+
+  o recode of algorithm for single level random effects in C
+
+  o for standard LC always perform Quasi-Newton to guarantee convergence
+
+Changes in randomLCA version 0.2-1
+
+  o fixed bug which could cause very occaisonal crash when outcome
+    probabilities approached 0 or 1
+    
+  o recode of EM algorith for standard LC models in C, so very much faster
+
 Changes in randomLCA version 0.1-4
 
   o fixed bug in adaptive random by class model fit
-  
+
 Changes in randomLCA version 0.1-3
 
   o made vignette creation faster

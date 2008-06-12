@@ -1,8 +1,13 @@
 `randomLCA` <-
-function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,adapt=TRUE,probit=FALSE,verbose=FALSE) {
+function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,verbose=FALSE) {
     if (quadpoints > 75)
         stop("Maximum of 75 quadrature points due to limitation in statmod package\n")
 	cl <- match.call()
+	# check that patterns doesn't contain column which is all missing
+	if (any(apply(as.matrix(patterns),2,function(x) all(is.na(x)))))
+		stop("patterns cannot contain columns consisting entirely of missing")
+	if (random & ((dim(patterns)[2] %% blocksize)!=0))
+		stop("outcomes must be a multiple of blocksize")
 	# if no frequencies given, then assume that the data needs to be summaried
 	if (missing(freq)) {
 		pats <- apply(patterns, 1, function(x) {paste(ifelse(is.na(x),"N",x),collapse="")})
@@ -14,6 +19,10 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 		if (is.null(names(patterns))) names(newpatterns) <- paste("X",1:dim(patterns)[2],sep="")
 		else names(newpatterns) <- names(patterns)
 		patterns <- newpatterns
+	}
+	else {
+	# check that freq doesn't contain missing
+		if (any(is.na(freq))) stop("freq cannot contain missing values")
 	}
 	if (missing(initmodel)) {
 		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
@@ -72,15 +81,9 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 					gh=norm.gauss.hermite(quadpoints),blocksize=blocksize,
 					probit=probit,verbose=verbose)
    			else {
-				if (adapt) fit <- fit.adapt.random.randomLCA(patterns,freq=freq,nclass=nclass,
+				fit <- fit.adapt.random.randomLCA(patterns,freq=freq,nclass=nclass,
 					calcSE=calcSE,initoutcomep=initmodel$outcomep,
 					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
-					gh=norm.gauss.hermite(quadpoints),
-					blocksize=blocksize,probit=probit,verbose=verbose)
-				else fit <- fit.random.randomLCA(patterns,freq=freq,nclass=nclass,
-					calcSE=calcSE,
-					initoutcomep=initmodel$outcomep,initclassp=initmodel$classp,
-					initlambdacoef=initlambdacoef,
 					gh=norm.gauss.hermite(quadpoints),
 					blocksize=blocksize,probit=probit,verbose=verbose)
 				}
@@ -93,12 +96,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 					gh=norm.gauss.hermite(quadpoints),blocksize=blocksize,
 					probit=probit,verbose=verbose)
    			else {
-				if (adapt) fit <- fit.adapt.randombyclass.randomLCA(patterns,freq=freq,
-					nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
-					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
-					gh=norm.gauss.hermite(quadpoints),
-					blocksize=blocksize,probit=probit,verbose=verbose)
-				else fit <- fit.randombyclass.randomLCA(patterns,freq=freq,
+				fit <- fit.adapt.randombyclass.randomLCA(patterns,freq=freq,
 					nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
 					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
 					gh=norm.gauss.hermite(quadpoints),

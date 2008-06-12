@@ -5,7 +5,7 @@
 Fit latent class models, which may include a random effect.
 }
 \usage{
-randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,adapt=TRUE,probit=FALSE,verbose=FALSE)
+randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,verbose=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -19,7 +19,6 @@ randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrial
   \item{random}{Random effect}
   \item{byclass}{Random effect by class}
   \item{quadpoints}{Number of quadrature points for adaptive quadrature}
-  \item{adapt}{Use adaptive quadrature (this will eventually become the only option)}
   \item{level2}{Fit 2 level random effects model (further details to follow)}
   \item{probit}{Probit model for random effect}
   \item{verbose}{Prints verbose of fit progress}
@@ -28,7 +27,7 @@ randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrial
 The structure of the patterns is assumed to be a number of blocks of different outcomes each of blocksize, allowing outcomes to be repeated. Each outcome is assumed to have it's own loading.
 An example is the width of the patterns is n and the blocksize is n, resulting in n outcomes and therefore n loadings. Alternatively if the blocksize is 1, then there are n repeats of the same outcome (but with different probabilities) with the same loading. In practice they may not be the same type of outcome, but usually will be.
 
-The algorithm used is EM for the standard latent class and either adaptive or non-adaptive Gauss-Hermite quadrature for the single level random effects model, and adaptive for the 2 level random effects model. The number of quadrature points defaults to 21.
+The algorithm used is EM for the standard latent class and adaptive (in the sense of moving the location of teh quadrature points) Gauss-Hermite quadrature for the random effects models. The number of quadrature points defaults to 21.
 
 There are some improvements that will be made to improve the speed. The first of these will be to allow Bayesian estimation or penalised likelihood using a Dirichlet prior for the outcome probabilities. This should allow a considerable improvement in convergence. The second will be to recode the major part of the likelihood calculations in C. Switching to a GEM algorithm to improve convergence may also be a possibility.
 }

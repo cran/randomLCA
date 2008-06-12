@@ -1,3 +1,4 @@
+useDynLib(randomLCA)
 # Exported functions
 #export(randomLCA,calc.cond.prob,calc.marg.prob,plot,summary,
 #ranef,fitted)
