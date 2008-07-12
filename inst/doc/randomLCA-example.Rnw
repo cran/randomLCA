@@ -2,7 +2,11 @@
 
 %\VignetteIndexEntry{randomLCA Example}
 
+\title{randomLCA Examples}
+\author{Ken Beath}
+
 \begin{document}
+\maketitle
 
 <<echo=false,results=hide>>=
 library(lattice)
@@ -13,6 +17,93 @@ options(width=60)
 @ 
 
 \section{Introduction}
+
+Following are two examples of using randomLCA for latent class analysis. Some aspects will certainly change but most code should still work. Two things that will change are the use of accessor functions and better labelling of results.
+
+\section{Example 1}
+
+This example demonstrates the fitting of data from Rindskopf and Rindskopf (1986), where latent class analysis is used to determine diagnostic classifications based on medical tests. Although this example is for medical data, the model is simply standard latent class so the methods can be applied to data from other areas.
+
+A series of latent class models for 1 to 4 classes can be fitted using the commands
+<<>>=
+myocardial.lca1 <- randomLCA(myocardial[,1:4],
+	freq=myocardial$freq,nclass=1)
+myocardial.lca2 <- randomLCA(myocardial[,1:4],
+	freq=myocardial$freq,nclass=2)
+myocardial.lca3 <- randomLCA(myocardial[,1:4],
+	freq=myocardial$freq,nclass=3)
+@ 
+
+The BIC values may be extracted from the fitted objects and are shown in Table~\ref{tab:bic1}. 
+
+<<>>=
+bic.data <- data.frame(classes=1:3,bic=c(myocardial.lca1$bic,
+	myocardial.lca2$bic,myocardial.lca3$bic))
+@ 
+
+\SweaveOpts{echo=false}
+
+<<results=tex>>=
+print(xtable(bic.data, digits = c(0,0,1),caption="BIC by class.",
+	label="tab:bic1"),include.rownames=FALSE)
+@ 
+
+\SweaveOpts{echo=true}
+
+Using BIC as a selection method, this selects the 2 class model, indicating a nice beakdown into diseased and nondiseased, which it is assumed represent those with and without myocardial infarction. The true nature of classes is always debateable.
+
+The outcome probabilities can then be obtained, and are shown in Table~\ref{tab:outcomep1}.
+<<>>=
+outcomep.data <- myocardial.lca2$outcomep
+# I should do this in randomLCA
+rownames(outcomep.data) <- c("Class 1","Class 2")
+colnames(outcomep.data) <- names(myocardial)[1:4]
+@ 
+
+\SweaveOpts{echo=false}
+
+<<results=tex>>=
+print(xtable(outcomep.data, digits = c(0,3,3,3,3),caption="Outcome Probabilities.",
+	label="tab:outcomep1"))
+@ 
+\SweaveOpts{echo=true}
+
+This gives some interesting information. In Class 2, those without myocardial infarction, will have abscence of Q.wave but in those with myocardial infarction it will only be present in 76.7\% of those with myocardial infarction. The class probabilities can be obtained as \texttt{myocardial.lca2\$classp} of \Sexpr{round(myocardial.lca2$classp[1],2)} and \Sexpr{round(myocardial.lca2$classp[2],2)} for Class 1 and 2 respectively.
+
+
+One aspect of latent class is that no subject is uniquely allocated to a given class, although in some cases a subject may have an extremely high probability.
+
+The class probs can be obtained as
+
+<<>>=
+classprobs <- cbind(myocardial.lca2$patterns,myocardial.lca2$classprob)
+colnames(classprobs) <- c(names(myocardial)[1:4],"Class 1","Class 2")
+@ 
+
+with results shown in Table~\ref{tab:classprob1}. This shows subjects with 3 or 4 positive tests to be strongly classified as having myocardial infarction, and even some with 2, depending on which to to be well classified. Having only one positive test makes it unlikely that it is myocardial infarction.
+
+\SweaveOpts{echo=false}
+
+<<results=tex>>=
+print(xtable(classprobs, digits = c(0,0,0,0,0,3,3),caption="Class Probabilities.",
+	label="tab:classprob1"),include.rownames=FALSE)
+@ 
+\SweaveOpts{echo=true}
+
+Outcome probabilities are shown in Figure~\ref{fig:outcome2a}.
+
+\begin{figure}
+  \centering
+<<fig=TRUE,width=7,height=5>>=
+trellis.par.set(col.whitebg())
+print(plot(myocardial.lca2,type="l",xlab="Test",ylab="Outcome Probability",
+	scales=list(x=list(at=1:4,labels=names(myocardial)[1:4]))))
+@  
+  \caption{Outcome probabilities for 2 Class Latent Class model.}
+  \label{fig:outcome2a}
+\end{figure}
+
+\section{Example 2}
 
 This example shows the fitting of the dentistry data from Qu, Tan and Kutner (1996). The data consists of the results of five dentists evaluating x-rays for presence or absence of caries. As there is no gold standard, the latent class method is to assume two classes, diseased and non-diseased which are identified from the data.
 

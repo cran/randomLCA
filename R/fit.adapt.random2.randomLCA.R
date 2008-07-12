@@ -1,6 +1,11 @@
 fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initlambdacoef,initltaucoef,
     blocksize,calcSE=FALSE,gh,probit,verbose=FALSE) {
 
+#	print(initoutcomep)
+#	print(initclassp)
+#	print(initlambdacoef)
+#	print(initltaucoef)
+	
 # parameters
 #   outcomes matrix of outcomes 0 or 1
 #   freq vector of frequencies corresponding to each outcome combination
@@ -15,135 +20,46 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 #   probit use probit transform rather than logitic to obtain outcome probabilities
 #   verbose print information about algorithm    
     
-    nlevel1 <- blocksize
+ 	outcomes <- as.matrix(outcomes)
+	mode(outcomes) <- "double"
+
+   nlevel1 <- blocksize
     nlevel2 <- dim(outcomes)[2]/blocksize
     nlevel3 <- length(freq)
+      
+    calclikelihood <- function(classx,outcomex,lambdacoef,ltaucoef,momentdata,gh,
+    	updatemoments=FALSE,calcfitted=FALSE) {
 
-    # first rearrange the outcomes
-      myoutcomes <- t(matrix(t(outcomes),nrow=nlevel1))
-      mynoutcomes <- t(matrix(t(1-outcomes),nrow=nlevel1))
-      
-      myoutcomes <- ifelse(is.na(myoutcomes),0,myoutcomes)
-      mynoutcomes <- ifelse(is.na(mynoutcomes),0,mynoutcomes)
-      
-    calclikelihood <- function(classx,outcomex,lambdacoef,ltaucoef,momentdata,gh,updatemoments=FALSE) {
 
 		# turn classp into actual probabilities
 		classp2 <- c(0,classx)       
 		classp2 <- exp(classp2)/sum(exp(classp2))
-		# rearrage moment data to allow extraction by class
-		momentdata <- matrix(as.vector(momentdata),byrow=T,nrow=nclass)
-		classdata <- cbind(momentdata,outcomex)
-		# calculate the likelihood over all classes and level 3 units
-        ltotal <- NULL
-        ll <- matrix(rep(NA,nclass*nlevel3),ncol=nclass)
-        ll2 <- matrix(rep(NA,length(gh[,1])*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-        if (updatemoments) {
-        # temporary for calculating moments by level 3 quadrature
-            mye_2 <- matrix(rep(NA,length(gh[,1])*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-            mye2_2 <- matrix(rep(NA,length(gh[,1])*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-            mye23_2 <- matrix(rep(NA,length(gh[,1])*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-        # level 2 moments after integration
-            e_2 <- matrix(rep(NA,nclass*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-            e2_2 <- matrix(rep(NA,nclass*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-            e23_2 <- matrix(rep(NA,nclass*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-        # level 3 moments after integration
-            e <- matrix(rep(NA,nclass*nlevel3),nrow=nlevel3)
-            e2 <- matrix(rep(NA,nclass*nlevel3),nrow=nlevel3)
-        }
 
-        level2ll <- matrix(rep(NA,length(gh[,1])*nlevel3*nlevel2),nrow=nlevel3*nlevel2)
-        for (iclass in 1:nclass) {
-            x <- classdata[iclass,]
-            mymomentdata <- matrix(x[1:(nlevel3*(2+3*nlevel2))],nrow=nlevel3)
-            level2moments <- t(matrix(t(mymomentdata[,3:(2+3*nlevel2)]),nrow=3))
-            level3moments <- mymomentdata[,1:2]
-            
-            level3p <- level3moments[,1]+level3moments[,2] %o% gh[,1]
-            level3w <- log(sqrt(2*pi))+log(level3moments[,2])+
-                matrix(rep(gh[,1]^2/2+log(gh[,2]),each=nlevel3),nrow=nlevel3)+
-                matrix(dnorm(as.vector(level3p),log=TRUE),nrow=nlevel3)
-    # expand the level 3 quadrature points
-            level3mu <- rep(mymomentdata[,1],each=nlevel2)
-            rlevel3p <- matrix(rep(as.vector(level3p),each=nlevel2),nrow=nlevel2*nlevel3)
-            rlevel3w <- matrix(rep(as.vector(level3w),each=nlevel2),nrow=nlevel2*nlevel3)
-            # outcome data
-            myoutcomex <- 
-                t(matrix(rep(x[(nlevel3*(2+3*nlevel2)+1):(nlevel3*(2+3*nlevel2)+nlevel2*nlevel1)],nlevel3),
-                nrow=nlevel1))
-            # now start calculating for each level 3 quadrature point
-            for (i3 in 1:length(gh[,1])) {
-                # calculate location of level 2 quadrature points
-                level2p <- level2moments[,1]+level2moments[,2] %o% gh[,1]
-                level2p <- level2p-level2moments[,3]*(rlevel3p[,i3]-level3mu)
-                level2w <- 0.5*(log(2)+log(pi))+log(level2moments[,2])+
-                    matrix(rep(gh[,1]^2/2+log(gh[,2]),each=nlevel3*nlevel2),nrow=nlevel3*nlevel2)+
-                    matrix(dnorm(as.vector(level2p),log=TRUE),nrow=nlevel3*nlevel2)
-                # calculate for each level 2 quadrature point
-                for (i2 in 1:length(gh[,1])) {
-                    # calculate the outcome probabilities
-                    myoutcomex2 <- myoutcomex+ (rlevel3p[,i3]+level2p[,i2]*exp(ltaucoef)) %o% lambdacoef
-					if(probit) lmyoutcomep <- pnorm(myoutcomex2,log.p=TRUE)
-					else lmyoutcomep <- -log(1+exp(-myoutcomex2))
-					if(probit) nlmyoutcomep <- pnorm(-myoutcomex2,log.p=TRUE)
-					else nlmyoutcomep <- -log(1+exp(myoutcomex2))
-                    level2ll[,i2] <- rowSums(myoutcomes*lmyoutcomep+mynoutcomes*nlmyoutcomep)
-                }
-                # calculate the total likelihood and moments for each level 2 unit
-                ll2[,i3] <- log(rowSums(exp(level2w+level2ll)))
-                if (updatemoments) {
-                    mye_2[,i3] <- rowSums(level2p*exp(level2w+level2ll))/
-                        exp(ll2[,i3])
-                    mye2_2[,i3] <- rowSums(level2p^2*exp(level2w+level2ll))/
-                        exp(ll2[,i3])
-                    mye23_2[,i3] <- rowSums(rlevel3p[,i3]*level2p*exp(level2w+level2ll))/exp(ll2[,i3])
-                }
-            }
-            # level 3 likelihoods by quadrature points
-            ll3 <- matrix(colSums(matrix(as.vector(ll2),nrow=nlevel2)),nrow=nlevel3)
-            # final level 3 likelihoods
-            ll[,iclass] <- log(rowSums(exp(ll3+level3w)))
-            if (updatemoments) {
-                # calculate level 3 moments
-                e[,iclass] <- rowSums(level3p*exp(level3w+ll3))/
-                    exp(ll[,iclass])
-                e2[,iclass] <- rowSums((level3p-e[,iclass])^2*exp(level3w+ll3))/
-                    exp(ll[,iclass])
-                e2[,iclass] <- sqrt(e2[,iclass])
-                # integrate level 2 results over level 3
-                rll3 <- matrix(rep(as.vector(ll3),each=nlevel2),nrow=nlevel3*nlevel2)
-                e_2[,iclass] <- rowSums(mye_2*exp(rll3+rlevel3w))/
-                    exp(rep(ll[,iclass],each=nlevel2))
-                e2_2[,iclass] <- rowSums(mye2_2*exp(rll3+rlevel3w))/
-                    exp(rep(ll[,iclass],each=nlevel2))
-                e2_2[,iclass] <- sqrt(e2_2[,iclass]-e_2[,iclass]^2)
-                e23_2[,iclass] <- rowSums(mye23_2*exp(rll3+rlevel3w))/
-                    exp(rep(ll[,iclass],each=nlevel2))
-                e23_2[,iclass] <- -(e23_2[,iclass]-rep(e[,iclass],each=nlevel2)*e_2[,iclass])/
-                    (rep(e2[,iclass]^2,each=nlevel2))
-            }
-        }
-        # set up moments in correct form
-        ltotal <- NULL
-        if (updatemoments) {
-            for (iclass in 1:nclass) {
-                ltotal <- cbind(ltotal,e[,iclass],e2[,iclass])
-                temp <- rbind(matrix(e_2[,iclass],ncol=nlevel2,byrow=T),
-                                matrix(e2_2[,iclass],ncol=nlevel2,byrow=T),
-                                matrix(e23_2[,iclass],ncol=nlevel2,byrow=T))
-                temp <- matrix(temp,nrow=nlevel3)
-                ltotal <- cbind(ltotal,temp)
-            }
-        }
-        ill <- t(t(exp(ll))*classp2)
+#	print(outcomex)
+#	print(classp2)
+#	print(lambdacoef)
+#	print(exp(ltaucoef))
+
+		newmoments <- NULL
+		ill <- matrix(rep(NA,nclass*nlevel3),ncol=nclass)
+		for (iclass in 1:nclass) {
+			result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],lambdacoef,
+				ltaucoef,gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
+				probit,updatemoments)
+			ill[,iclass] <- exp(result[[1]])*classp2[iclass]
+			if (updatemoments) newmoments <- cbind(newmoments,result[[2]])
+		}
+		# browser()
         ill2 <- log(rowSums(ill))
         totalll <- sum(ill2*freq)
-        fitted <- exp(ill2)*sum(ifelse(apply(outcomes,1,function(x) any(is.na(x))),0,freq))*
-            ifelse(apply(outcomes,1,function(x) any(is.na(x))),NA,1)
-        classprob <- ill/exp(ill2)
-        return(list(logl=totalll,moments=ltotal,fitted=fitted,classprob=classprob))
+        if (calcfitted) {
+       		fitted <- exp(ill2)*sum(ifelse(apply(outcomes,1,function(x) 
+       			any(is.na(x))),0,freq))*
+            		ifelse(apply(outcomes,1,function(x) any(is.na(x))),NA,1)
+        	classprob <- ill/exp(ill2)
+        	return(list(logl=totalll,moments=newmoments,fitted=fitted,classprob=classprob))
+        } else return(list(logl=totalll,moments=newmoments))
     }  # end of calclikelihood
-
     
     adaptivefit <- function(classx,outcomex,lambdacoef,ltaucoef,momentdata,gh) {
     
@@ -285,7 +201,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 # add extra column to classp
         classp <- c(0,classp)       
     }       
-    outcomep <- matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate)-blocksize-1)],ncol=nlevel1*nlevel2)
+    outcomex <- matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate)-blocksize-1)],ncol=nlevel1*nlevel2)
 # transform using logistic to probabilities     
     classp <- exp(classp)/sum(exp(classp))
     if (probit) outcomep <- pnorm(outcomex)
@@ -337,7 +253,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
     				matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate)-blocksize-1)],ncol=nlevel1*nlevel2),
                     optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
                     optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass+nlevel1)],
-                    momentdata,gh,updatemoments=FALSE)    
+                    momentdata,gh,updatemoments=FALSE,calcfitted=TRUE)    
     fitted <- final$fitted
     classprob <- final$classprob
     

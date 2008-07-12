@@ -1,5 +1,5 @@
 `randomLCA` <-
-function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,verbose=FALSE) {
+function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,startseed=0,verbose=FALSE) {
     if (quadpoints > 75)
         stop("Maximum of 75 quadrature points due to limitation in statmod package\n")
 	cl <- match.call()

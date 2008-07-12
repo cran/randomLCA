@@ -2,17 +2,17 @@
 #include <Rinternals.h>
 #include <Rmath.h>
 
-SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP gh,
-	SEXP momentdata, SEXP probit)
+SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef, 
+	SEXP gh, SEXP momentdata, SEXP probit)
 {
 	SEXP ans,outcomep;
-	int irow, outcome, index, noutcomes, nrows, ipoint, npoints, blocksize, ilambda, isprobit;
+	int irow, outcome, index, noutcomes, nrows, ipoint, npoints, blocksize, ilambda, lprobit;
 	double *rpatterns = REAL(patterns), *routcomex = REAL(outcomex), *rans,
 		*routcomep,neww,newp, *rmomentdata=REAL(momentdata),
 		*rgh=REAL(gh),*rlambdacoef=REAL(lambdacoef);
 	double product, sum, myoutcomex, myoutcomep;
 	
-	isprobit = asLogical(probit);
+	lprobit = asLogical(probit);
 	
 	noutcomes = LENGTH(outcomex);
 	nrows = LENGTH(patterns)/noutcomes;
@@ -41,7 +41,7 @@ SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP gh,
 				/* calculate outcome probability for this outcome */
 				myoutcomex = routcomex[outcome]+
 					rlambdacoef[ilambda]*newp;
-				if (isprobit)
+				if (lprobit)
 					myoutcomep=pnorm(myoutcomex,0,1,TRUE,FALSE);
 				else
 					myoutcomep=exp(myoutcomex)/(1+exp(myoutcomex));
