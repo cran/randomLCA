@@ -1,3 +1,9 @@
+Changes in randomLCA version 0.5-2
+
+  o split summary to have separate print method
+
+  o in summary print names for loadings
+
 Changes in randomLCA version 0.5-1
 
   o added new example to vignette

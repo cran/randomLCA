@@ -52,12 +52,15 @@ print(xtable(bic.data, digits = c(0,0,1),caption="BIC by class.",
 
 Using BIC as a selection method, this selects the 2 class model, indicating a nice beakdown into diseased and nondiseased, which it is assumed represent those with and without myocardial infarction. The true nature of classes is always debateable.
 
-The outcome probabilities can then be obtained, and are shown in Table~\ref{tab:outcomep1}.
+Summary may be used to display the fitted results
+
 <<>>=
-outcomep.data <- myocardial.lca2$outcomep
-# I should do this in randomLCA
-rownames(outcomep.data) <- c("Class 1","Class 2")
-colnames(outcomep.data) <- names(myocardial)[1:4]
+summary(myocardial.lca2)
+@ 
+
+Individual results may be obtained from summary, for example the outcome probabilities shown in Table~\ref{tab:outcomep1}.
+<<>>=
+outcomep.data <- summary(myocardial.lca2)$outcomep
 @ 
 
 \SweaveOpts{echo=false}
@@ -68,7 +71,8 @@ print(xtable(outcomep.data, digits = c(0,3,3,3,3),caption="Outcome Probabilities
 @ 
 \SweaveOpts{echo=true}
 
-This gives some interesting information. In Class 2, those without myocardial infarction, will have abscence of Q.wave but in those with myocardial infarction it will only be present in 76.7\% of those with myocardial infarction. The class probabilities can be obtained as \texttt{myocardial.lca2\$classp} of \Sexpr{round(myocardial.lca2$classp[1],2)} and \Sexpr{round(myocardial.lca2$classp[2],2)} for Class 1 and 2 respectively.
+
+This gives some interesting information. In Class 2, those without myocardial infarction, will have abscence of Q.wave but in those with myocardial infarction it will only be present in 76.7\%. The class probabilities can be obtained as \texttt{myocardial.lca2\$classp} of \Sexpr{round(myocardial.lca2$classp[1],2)} and \Sexpr{round(myocardial.lca2$classp[2],2)} for Class 1 and 2 respectively.
 
 
 One aspect of latent class is that no subject is uniquely allocated to a given class, although in some cases a subject may have an extremely high probability.
