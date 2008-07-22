@@ -1,3 +1,11 @@
+Changes in randomLCA version 0.5-3
+
+  o added marginal outcome probabilities and link to summary
+
+  o added accessors for logLik, AIC, BIC
+
+  o changed log.Lik to logLik
+
 Changes in randomLCA version 0.5-2
 
   o split summary to have separate print method

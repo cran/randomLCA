@@ -227,10 +227,9 @@
 
 	
     np <- length(optim.fit$estimate)
-    aic <- 2*optim.fit$minimum+2*np
-    bic <- 2*optim.fit$minimum+log(sum(freq))*np
+    nobs <- sum(freq)
     deviance <- 2*sum(ifelse(freq==0,0,freq*log(freq/fitted)))
     list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,lambdacoef=lambdacoef,se=separ,
-    	aic=aic,bic=bic,np=np,log.Lik=-optim.fit$minimum,observed=freq,fitted=fitted,
+    	np=np,nobs=nobs,logLik=-optim.fit$minimum,observed=freq,fitted=fitted,
     	deviance=deviance,ranef=ranef,classprob=classprob)
 }

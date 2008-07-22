@@ -15,9 +15,19 @@ Summarises the fit of a randomLCA object.
 Not complete.
 }
 \value{
-  \item{log.Lik}{Log Likelihood}
+  \item{logLik}{Log Likelihood}
   \item{AIC}{AIC}
   \item{BIC}{BIC}
+  \item{nclass}{no of classes}
+  \item{probit}{link is probit}
+  \item{classp}{class probabilities}
+  \item{outcomep}{outcome probabilities (conditional)}
+  \item{margoutcomep}{outcome probabilities (marginal), if model contains random effects}
+  \item{random}{model includes random effects}
+  \item{level2}{model has 2 level hierarchy}
+  \item{byclass}{lambda and tau vary by class}
+  \item{lambdacoef}{lambda coefficients}
+  \item{taucoef}{tau coefficients}
 }
 \author{Ken Beath}
 \examples{

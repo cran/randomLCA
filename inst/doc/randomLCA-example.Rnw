@@ -37,8 +37,8 @@ myocardial.lca3 <- randomLCA(myocardial[,1:4],
 The BIC values may be extracted from the fitted objects and are shown in Table~\ref{tab:bic1}. 
 
 <<>>=
-bic.data <- data.frame(classes=1:3,bic=c(myocardial.lca1$bic,
-	myocardial.lca2$bic,myocardial.lca3$bic))
+bic.data <- data.frame(classes=1:3,bic=c(BIC(myocardial.lca1),
+	BIC(myocardial.lca2),BIC(myocardial.lca3)))
 @ 
 
 \SweaveOpts{echo=false}
@@ -128,8 +128,8 @@ dentistry.lca4 <- randomLCA(dentistry[,1:5],
 The BIC values may be extracted from the fitted objects and are shown in Table~\ref{tab:bic}. This indicates the presence of 3 classes. A possible interpretation is that there is a class of subjects with moderate disease, or the alternative of heterogeneous disease which will be covered in the next section. Outcome probabilities are shown in Figure~\ref{fig:outcome3}.
 
 <<>>=
-bic.data <- data.frame(classes=1:4,bic=c(dentistry.lca1$bic,
-	dentistry.lca2$bic,dentistry.lca3$bic,dentistry.lca4$bic))
+bic.data <- data.frame(classes=1:4,bic=c(BIC(dentistry.lca1),
+	BIC(dentistry.lca2),BIC(dentistry.lca3),BIC(dentistry.lca4)))
 @ 
 
 
@@ -163,14 +163,14 @@ dentistry.lca2random <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	initmodel=dentistry.lca2,nclass=2,random=TRUE,probit=TRUE)
 @ 
 
-The BIC is reduced to \Sexpr{round(dentistry.lca2random$bic,1)} showing an improvement over any of the latent class models. An alternative model is to allow the variance of the random effect to vary by outcome (dentist). This can be performed using the \texttt{blocksize} parameter. This allows the structure of the data to be set as a series of blocks, and within each block each outcome has a different loading.
+The BIC is reduced to \Sexpr{round(BIC(dentistry.lca2random),1)} showing an improvement over any of the latent class models. An alternative model is to allow the variance of the random effect to vary by outcome (dentist). This can be performed using the \texttt{blocksize} parameter. This allows the structure of the data to be set as a series of blocks, and within each block each outcome has a different loading.
 
 <<>>=
 dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,blocksize=5)
 @ 
 
-This increases the BIC to \Sexpr{round(dentistry.lca2random1$bic,1)}, and is the 2LCR model obtained by Qu, Tan and Kutner (1996). It appears that the simpler model is more appropriate.
+This increases the BIC to \Sexpr{round(BIC(dentistry.lca2random1),1)}, and is the 2LCR model obtained by Qu, Tan and Kutner (1996). It appears that the simpler model is more appropriate.
 
 A further extension is to allow the loading or random effect variance to vary by class.
 
@@ -180,7 +180,7 @@ dentistry.lca2random2 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	blocksize=5,byclass=TRUE,quadpoints=41)
 @ 
 
-The BIC increases to \Sexpr{round(dentistry.lca2random2$bic,1)}. It is not surprising that this model isn't an improvement, there are now 21 parameters fitted to 32 observations. This also may give problems with the fitting algorithm so the number of quadrature points is increase to 41.
+The BIC increases to \Sexpr{round(BIC(dentistry.lca2random2),1)}. It is not surprising that this model isn't an improvement, there are now 21 parameters fitted to 32 observations. This also may give problems with the fitting algorithm so the number of quadrature points is increase to 41.
 
 The observed and fitted values can be obtained and are shown in Table~\ref{tab:obs}. Differences from the Que et al paper result from different approximation methods.
 

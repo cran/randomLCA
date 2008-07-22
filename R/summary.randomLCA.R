@@ -3,9 +3,10 @@ function(object,...) {
     if (!inherits(object, "randomLCA"))
         stop("Use only with 'randomLCA' objects.\n")
     out <- list()
-	out$log.Lik <- object$log.Lik
-	out$AIC <- object$aic
-	out$BIC <- object$bic
+	out$probit <- object$probit
+	out$logLik <- logLik(object)
+	out$AIC <- AIC(object)
+	out$BIC <- BIC(object)
 	out$nclass <- object$nclass
 	out$classp <- object$classp
 	names(out$classp) <- paste("Class ",1:object$nclass)
@@ -36,6 +37,10 @@ function(object,...) {
 				names(out$taucoef) <-''
 			}
 		}
+		margp <- calc.marg.prob(object)
+		out$margoutcomep <- data.frame(t(matrix(margp$outcomep,ncol=object$nclass)))
+		row.names(out$margoutcomep) <- paste("Class ",1:object$nclass)
+		names(out$margoutcomep) <- names(object$patterns)
 	}
 	class(out) <- "summary.randomLCA"
 	out
@@ -44,14 +49,20 @@ function(object,...) {
 
 print.summary.randomLCA <- function(x, ...)
 {
-	print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
-		log.Lik = c(x$log.Lik),row.names = " ") )
+	if (x$probit) link <- "Probit"
+	else link <- "Logit"
+	if (x$random) print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
+		logLik = c(x$logLik),Link=link,row.names = " ") )
+	else print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
+		logLik = c(x$logLik),row.names = " ") )
     cat("Class probabilities","\n")
 	print(x$classp,digits=4)
 	if (x$random)  cat("Conditional outcome probabilities","\n")
     else cat("Outcome probabilities","\n")
 	print(x$outcomep,digits=4)
 	if (x$random) {
+		cat("Marginal Outcome Probabilities","\n")
+		print(x$margoutcomep,digits=4)
 		cat("Loadings","\n")
 		if (length(x$lambdacoef)==1) cat(sprintf("%g\n",x$lambdacoef))
 		else print(x$lambdacoef,digits=4)
@@ -59,7 +70,7 @@ print.summary.randomLCA <- function(x, ...)
 			cat("Tau","\n")
 			if (length(x$taucoef)==1) cat(sprintf("%g\n",x$taucoef))
 			else print(x$taucoef,digits=4)
-		}
+		}		
 	}
 	invisible(x)
 }

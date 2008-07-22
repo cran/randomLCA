@@ -119,11 +119,10 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 		print(outcomep)
     }
     np <- (nclass-1)+nclass*nlevel1
-    aic <- -2*ll+2*np
-    bic <- -2*ll+log(sum(freq))*np
+    nobs <- sum(freq)
     deviance <- 2*sum(ifelse(freq==0,0,freq*log(freq/fitted)))
     list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,se=separ,
-    	aic=aic,bic=bic,np=np,log.Lik=ll,observed=freq,fitted=fitted,
+    	np=np,nobs=nobs,logLik=ll,observed=freq,fitted=fitted,
     	deviance=deviance,classprob=classprob)
 }
 

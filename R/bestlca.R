@@ -6,17 +6,18 @@ function(patterns,freq,nclass,calcSE,notrials,verbose) {
 		seed <- runif(1)*24674
 		set.seed(seed)		
 		lca <- fit.fixed.randomLCA(patterns,freq,nclass=nclass,calcSE=FALSE,verbose=verbose)
-		bics[i] <- lca$bic
+		currbic <- -2*(lca$logLik)+log(lca$nobs)*lca$np
+		bics[i] <- currbic
 		if (i==1) {
-			maxbic <- lca$bic
+			maxbic <- currbic
 			maxlca <- lca
 		}
-		if (lca$bic < maxbic) {
-			maxbic <- lca$bic
+		if (currbic < maxbic) {
+			maxbic <- currbic
 			maxlca <- lca
 		}
 		if (verbose)
-			cat("iteration ",i,"BIC ",lca$bic,"\n")
+			cat("iteration ",i,"BIC ",BIC(lca),"\n")
 	}
 	if (calcSE) {
 		if (verbose) print("refitting to obtain SE")
