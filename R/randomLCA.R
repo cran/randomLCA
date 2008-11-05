@@ -26,7 +26,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 	}
 	if (missing(initmodel)) {
 		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-		calcSE=(calcSE & !random),notrials=notrials,verbose=verbose)
+		calcSE=(calcSE & !random),notrials=notrials,probit=probit,verbose=verbose)
 		initmodel$nclass <- nclass
 		initmodel$random <- FALSE
 		initmodel$level2 <- FALSE
@@ -46,7 +46,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 			if (initmodel$byclass & !byclass)
 				stop("Initial model by class and model to be fitted not.\n")
 		}
-		if (!random) initmodel <- fit.fixed.randomLCA(patterns,freq=freq,initoutcomep=initmodel$outcomep,initclassp=initmodel$classp,nclass=nclass,calcSE=calcSE,verbose=verbose)
+		if (!random) initmodel <- fit.fixed.randomLCA(patterns,freq=freq,initoutcomep=initmodel$outcomep,initclassp=initmodel$classp,nclass=nclass,calcSE=calcSE,probit=probit,verbose=verbose)
 	}
 	if (!random) fit <- initmodel
 	else {

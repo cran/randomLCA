@@ -1,5 +1,5 @@
 `fit.fixed.randomLCA` <-
-function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
+function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
 
 # parameters
 #   outcomes matrix of outcomes 0 or 1
@@ -30,7 +30,8 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 # calculate probabilities under each class
         for (i in 1:nclass) {
 # calculate the outcome probabilities for this class
-			outcomep <- 1/(1+exp(-outcomex[i,]))
+			if (probit) outcomep <- pnorm(outcomex[i,])
+			else outcomep <- 1/(1+exp(-outcomex[i,]))
 			ill[,i] <- .Call("bernoulliprob",patterns,outcomep)*classp[i]
 # multiply by class probabilities
         }
@@ -54,7 +55,8 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 # calculate probabilities under each class
         for (i in 1:nclass) {
 # calculate the outcome probabilities for this class
-			outcomep <- 1/(1+exp(-outcomex[i,]))
+			if (probit) outcomep <- pnorm(outcomex[i,])
+			else outcomep <- 1/(1+exp(-outcomex[i,]))
 			ill[,i] <- .Call("bernoulliprob",patterns,outcomep)*classp[i]
 # multiply by class probabilities
         }
@@ -81,7 +83,8 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 	outcomep <- x[[2]]
 	classp <- x[[3]]
 
-	outcomex <- log(outcomep/(1-outcomep))
+    if (probit) outcomex <- qnorm(outcomep)
+	else outcomex <- log(outcomep/(1-outcomep))
 	
 	if (nclass==1) classx <- NULL
 	else  {
@@ -107,7 +110,8 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,verbose) {
 	outcomep <- matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate))],ncol=nlevel1)
 # transform using logistic to probabilities     
 	classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
-	outcomep <- exp(outcomep)/(1+exp(outcomep))
+	if (probit) outcomep <- pnorm(outcomep)
+    else outcomep <- exp(outcomep)/(1+exp(outcomep))
 
 	final <- calcfitted(optim.fit$estimate)
 	fitted <- final$fitted

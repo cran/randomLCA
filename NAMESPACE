@@ -6,7 +6,7 @@ useDynLib(randomLCA)
 #export(randomLCA,calc.cond.prob,calc.marg.prob,plot.randomLCA,summary.randomLCA,
 #ranef.randomLCA,fitted.randomLCA)
 
-export(randomLCA,calc.cond.prob,calc.marg.prob,ranef.randomLCA)
+export(randomLCA,calc.cond.prob,calc.marg.prob,ranef.randomLCA,outcome.probs)
 
 # Imported functions
 importFrom(nlme, ranef)
@@ -19,6 +19,9 @@ S3method(summary, randomLCA)
 S3method(ranef, randomLCA)
 S3method(fitted, randomLCA)
 S3method(print, summary.randomLCA)
+
+S3method(outcome.probs, randomLCA)
+S3method(print,outcome.probs.randomLCA)
 
 S3method(logLik, randomLCA)
 S3method(AIC, logLik)

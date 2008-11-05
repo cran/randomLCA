@@ -29,7 +29,7 @@ A series of latent class models for 1 to 4 classes can be fitted using the comma
 myocardial.lca1 <- randomLCA(myocardial[,1:4],
 	freq=myocardial$freq,nclass=1)
 myocardial.lca2 <- randomLCA(myocardial[,1:4],
-	freq=myocardial$freq,nclass=2)
+	freq=myocardial$freq,nclass=2,calcSE=TRUE)
 myocardial.lca3 <- randomLCA(myocardial[,1:4],
 	freq=myocardial$freq,nclass=3)
 @ 
@@ -107,25 +107,26 @@ print(plot(myocardial.lca2,type="l",xlab="Test",ylab="Outcome Probability",
   \label{fig:outcome2a}
 \end{figure}
 
+
 \section{Example 2}
 
 This example shows the fitting of the dentistry data from Qu, Tan and Kutner (1996). The data consists of the results of five dentists evaluating x-rays for presence or absence of caries. As there is no gold standard, the latent class method is to assume two classes, diseased and non-diseased which are identified from the data.
 
-\section{Latent Class}
+\subsection{Latent Class}
 
 A series of latent class models for 1 to 4 classes can be fitted using the commands
 <<>>=
 dentistry.lca1 <- randomLCA(dentistry[,1:5],
 	freq=dentistry$freq,nclass=1)
 dentistry.lca2 <- randomLCA(dentistry[,1:5],
-	freq=dentistry$freq,nclass=2)
+	freq=dentistry$freq,nclass=2,calcSE=TRUE)
 dentistry.lca3 <- randomLCA(dentistry[,1:5],
 	freq=dentistry$freq,nclass=3)
 dentistry.lca4 <- randomLCA(dentistry[,1:5],
 	freq=dentistry$freq,nclass=4)
 @ 
 
-The BIC values may be extracted from the fitted objects and are shown in Table~\ref{tab:bic}. This indicates the presence of 3 classes. A possible interpretation is that there is a class of subjects with moderate disease, or the alternative of heterogeneous disease which will be covered in the next section. Outcome probabilities are shown in Figure~\ref{fig:outcome3}.
+The BIC values may be extracted from the fitted objects and are shown in Table~\ref{tab:bic}. This indicates the presence of 3 classes. A possible interpretation is that there is a class of subjects with moderate disease, or the alternative of heterogeneous disease which will be covered in the next section. Outcome probabilities are shown in Figure~\ref{fig:outcome3} and for the 2 class model in Figure~\ref{fig:outcome2b}.
 
 <<>>=
 bic.data <- data.frame(classes=1:4,bic=c(BIC(dentistry.lca1),
@@ -152,7 +153,58 @@ print(plot(dentistry.lca3,type="l",xlab="Dentist",ylab="Outcome Probability"))
   \label{fig:outcome3}
 \end{figure}
 
-\section{Latent Class with Random Effects}
+\begin{figure}
+  \centering
+<<fig=TRUE,width=7,height=5>>=
+trellis.par.set(col.whitebg())
+print(plot(dentistry.lca2,type="l",xlab="Dentist",ylab="Outcome Probability"))
+@  
+  \caption{Outcome probabilities for 2 Class Latent Class model.}
+  \label{fig:outcome2b}
+\end{figure}
+
+The 2 Class results can be interpreted as a diagnostic test. Important results for diagnostic testing are the sensitivity and specificity for each test. The sensitivity is the probability of the test correctly identifying the subject as diseased given that the subject is diseased. In classical diagnostic testing the "true" status of a subject is known through use of a "gold standard" which is assumed to, sometiems optimistically, correctly classify the subject. The latent class method constructs a hypothetical standard, which has the disadvantage that this is not known with certainty but it allows correctly for any uncertainty in the underlying disease state. The other measure is specificity which is the probability of correctly identifying a subject as not diseased.
+The sensitivities are then simply the outcome probabilities for the diseased class, Class 2 and the specificity one minus the outcome probabilities for the non-diseased class, Class 1. These can be obtained with 95\% confidence intervals (provided the model is fitted with calcSE=TRUE) using the outcome.probs function.
+
+<<>>=
+outcome.probs(dentistry.lca2)
+@ 
+
+The sensitivity and specificity are shown in Table~\ref{tab:outcomeconfint}. A reasonable conclusion is that the dentists are fairly good at identifying teeth that are not diseased (except for dentist 5), but not too good at identifying teeth that are diseased.
+
+\begin{table}[htdp]
+\begin{center}
+\begin{tabular}{lcc}
+&Sensitivity&Specificity\\
+V1&0.40 (0.36,0.45)&0.99 (0.98,0.99)\\
+V2&0.71 (0.67,0.75)&0.90 (0.88,0.91)\\
+V3&0.60 (0.55,0.64)&0.99 (0.98,0.99)\\
+V4&0.49 (0.45,0.53)&0.97 (0.96,0.98)\\
+V5&0.92 (0.89,0.94)&0.69 (0.68,0.71)\\
+\end{tabular}
+\end{center}
+\caption{Sensitivity and Specificity}
+  \label{tab:outcomeconfint}
+\end{table}
+
+The true and false positive rates can be plotted for each dentist, and are shown in Figure~\ref{fig:truefalse}. This gives a better explanation of what is happening. It appears that the difference between dentists is mainly related to the threshold for what they classify as diseased. Dentist 5 is more likely to correctly identify teeth as diseased but at the expense of being more likely to identify non-diseased teeth as diseased.
+
+<<>>=
+probs <- outcome.probs(dentistry.lca2)
+probs <- data.frame(tpr=probs[[2]][,1],fpr=probs[[1]][,1])
+@ 
+
+\begin{figure}
+  \centering
+<<fig=TRUE,width=7,height=5>>=
+trellis.par.set(col.whitebg())
+print(plot(tpr~fpr,type="p",xlab="False Positive Rate\n(1-Specificity)",ylab="True Positive Rate (Sensitivity)",data=probs))
+@  
+  \caption{True and False Positive Rates by Dentist.}
+  \label{fig:truefalse}
+\end{figure}
+
+\subsection{Latent Class with Random Effects}
 
 The method used in Qu, Tan and Kutner (1996) is to introduce a random effect to model heterogeneity within classes. In their model the probabilities are transformed to the probit scale and then a normal random effect introduced. In practice it usually makes little difference if a probit or logit transform is used.
 

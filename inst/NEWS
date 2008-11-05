@@ -1,3 +1,10 @@
+Changes in randomLCA version 0.6-1
+
+  o added an accessor for outcome probabilities with confidence intervals
+
+  o standard latent class now allows probit (this obviously wont affect the
+    outcome probabilities but will change the confidence intervals)
+
 Changes in randomLCA version 0.5-3
 
   o added marginal outcome probabilities and link to summary
