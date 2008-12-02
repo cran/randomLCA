@@ -20,7 +20,7 @@
   Qu, Tan and Kutner (1989)
   }
 \references{
-   Alvord, W.G., Drummond, J.E., Arthur, L.O., Goedert, J.J., Levine, P.H., Murphy, E.L., Weiss, S.H., and Blattner, W.A. (1988) A method for predicting individual {HIV} infection status in teh absence of clinical information. \emph{AIDS Research and Human Retroviruses}, \bold{4}, 295--304.
+   Alvord, W.G., Drummond, J.E., Arthur, L.O., Goedert, J.J., Levine, P.H., Murphy, E.L., Weiss, S.H., and Blattner, W.A. (1988) A method for predicting individual HIV infection status in teh absence of clinical information. \emph{AIDS Research and Human Retroviruses}, \bold{4}, 295--304.
 
   Qu, Y., Tan, M. and Kutner, M.H. (1996) Random effects models in latent
   class analysis for evaluating accuracy of diagnostic tests.

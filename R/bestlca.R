@@ -1,7 +1,10 @@
 `bestlca` <-
-function(patterns,freq,nclass,calcSE,notrials,probit,verbose) {
+function(patterns,freq,nclass,calcSE,notrials,probit,verbose,seed) {
 	bics <- rep(NA,notrials)
-	set.seed(24567)
+    if(!exists(".Random.seed", envir = .GlobalEnv))
+        runif(1)		     # initialize the RNG if necessary
+    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    set.seed(seed)
 	for (i in 1:notrials) {
 		seed <- runif(1)*24674
 		set.seed(seed)		
@@ -29,6 +32,7 @@ function(patterns,freq,nclass,calcSE,notrials,probit,verbose) {
 		print("bic for class")
 		print(bics)
 	}
+	assign(".Random.seed", RNGstate, envir = .GlobalEnv)
 	return(c(maxlca,list(bics=bics)))
 }
 

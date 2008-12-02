@@ -1,7 +1,13 @@
 `randomLCA` <-
-function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,startseed=0,verbose=FALSE) {
-    if (quadpoints > 75)
-        stop("Maximum of 75 quadrature points due to limitation in statmod package\n")
+function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,
+	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
+	verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
+    if(!exists(".Random.seed", envir = .GlobalEnv))
+        runif(1)		     # initialize the RNG if necessary
+    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    set.seed(seed)
+    if (quadpoints > 190)
+        stop("Maximum of 190 quadrature points\n")
 	cl <- match.call()
 	# check that patterns doesn't contain column which is all missing
 	if (any(apply(as.matrix(patterns),2,function(x) all(is.na(x)))))
@@ -26,7 +32,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 	}
 	if (missing(initmodel)) {
 		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-		calcSE=(calcSE & !random),notrials=notrials,probit=probit,verbose=verbose)
+		calcSE=(calcSE & !random),notrials=notrials,probit=probit,verbose=verbose,seed=seed)
 		initmodel$nclass <- nclass
 		initmodel$random <- FALSE
 		initmodel$level2 <- FALSE
@@ -104,6 +110,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 			}
 		}
 	}
+	assign(".Random.seed", RNGstate, envir = .GlobalEnv)
 	fit$call <- cl
 	fit$nclass <- nclass
 	fit$random <- random
@@ -113,6 +120,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 	fit$quadpoints <- quadpoints
 	fit$blocksize <- blocksize
 	fit$patterns <- patterns
+	fit$notrials <- notrials
 	fit$freq <- freq
 	class(fit) <- "randomLCA"
 	return(fit)

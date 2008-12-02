@@ -1,9 +1,21 @@
+Changes in randomLCA version 0.6-2
+
+  o increased speed of fitting for standard latent class models
+  
+  o added Gender Roles dataset
+
+  o updated vignette to allow for label switching
+
 Changes in randomLCA version 0.6-1
 
   o added an accessor for outcome probabilities with confidence intervals
 
   o standard latent class now allows probit (this obviously wont affect the
     outcome probabilities but will change the confidence intervals)
+
+  o allowable quadrature points increased to 190
+  
+  o changed handling of random seeds for random starting values  
 
 Changes in randomLCA version 0.5-3
 

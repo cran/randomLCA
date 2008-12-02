@@ -1,5 +1,6 @@
 #include <R.h>
 #include <Rinternals.h>
+#include <Rmath.h>
 
 SEXP bernoulliprob(SEXP patterns, SEXP outcomep)
 {

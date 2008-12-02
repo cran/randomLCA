@@ -5,7 +5,9 @@
 Fit latent class models, which may include a random effect.
 }
 \usage{
-randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,startseed=0,verbose=FALSE)
+randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,
+	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
+	verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,7 +23,7 @@ randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrial
   \item{quadpoints}{Number of quadrature points for adaptive quadrature}
   \item{level2}{Fit 2 level random effects model (further details to follow)}
   \item{probit}{Probit model for random effect}
-  \item{startseed}{Initial random seed for generating starting values}
+  \item{seed}{Initial random seed for generating starting values}
   \item{verbose}{Prints verbose of fit progress}
 }
 \details{

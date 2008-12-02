@@ -20,7 +20,6 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
         else {
             classx <- params[1:(nclass-1)]
 # add extra column to classx
-        	classx <- ifelse(abs(classx)>10,sign(classx)*10,classx)
              classx <- c(0,classx)
 # transform using logistic to probabilities		
        		classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
@@ -45,7 +44,6 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
         else {
             classx <- params[1:(nclass-1)]
 # add extra column to classx
-        	classx <- ifelse(abs(classx)>10,sign(classx)*10,classx)
              classx <- c(0,classx)
 # transform using logistic to probabilities		
        		classp <- exp(classx)/apply(matrix(exp(classx),nrow=1),1,sum)
@@ -91,9 +89,16 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
 		classx <- rep(NA,nclass-1)
 		for (i in 2:nclass) classx[i-1] <- log(classp[i]/classp[1])
 	}
- 
-	  optim.fit <- nlm(loglik,c(as.vector(classx),as.vector(outcomex)),hessian=calcSE,print.level=ifelse(verbose,2,0),
-		gradtol=1.0e-6,iterlim=1000)
+
+ 	  optim.fit <- .Call("fixednlm",c(as.vector(classx),as.vector(outcomex)),
+ 	  	list(as.numeric(patterns),as.numeric(freq),as.integer(nclass),as.integer(dim(patterns)[1]),
+ 	  	as.integer(dim(patterns)[2]),probit,
+ 	  	rep(0,2*nclass+nclass*dim(patterns)[2]+dim(patterns)[1]),
+ 	  	rep(0,dim(patterns)[2])),
+ 	  	hessian=calcSE,print.level=as.integer(ifelse(verbose,2,0)),
+		gradtl=1.0e-6,itnlim=as.integer(1000))
+	names(optim.fit) <- c("estimate","minimum","gradient","hessian","code","iterations")
+	
 	if (optim.fit$code >= 3)
 		warning("nlm exited with code ",optim.fit$code," .\n")
 	if (calcSE) {

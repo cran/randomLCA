@@ -72,7 +72,7 @@ print(xtable(outcomep.data, digits = c(0,3,3,3,3),caption="Outcome Probabilities
 \SweaveOpts{echo=true}
 
 
-This gives some interesting information. In Class 2, those without myocardial infarction, will have abscence of Q.wave but in those with myocardial infarction it will only be present in 76.7\%. The class probabilities can be obtained as \texttt{myocardial.lca2\$classp} of \Sexpr{round(myocardial.lca2$classp[1],2)} and \Sexpr{round(myocardial.lca2$classp[2],2)} for Class 1 and 2 respectively.
+This gives some interesting information. In Class \Sexpr{round(ifelse(myocardial.lca2$classp[2]>myocardial.lca2$classp[1],2,1))}, those without myocardial infarction, will have abscence of Q.wave but in those with myocardial infarction it will only be present in 76.7\%. The class probabilities can be obtained as \texttt{myocardial.lca2\$classp} of \Sexpr{round(myocardial.lca2$classp[1],2)} and \Sexpr{round(myocardial.lca2$classp[2],2)} for Class 1 and 2 respectively.
 
 
 One aspect of latent class is that no subject is uniquely allocated to a given class, although in some cases a subject may have an extremely high probability.
@@ -164,7 +164,7 @@ print(plot(dentistry.lca2,type="l",xlab="Dentist",ylab="Outcome Probability"))
 \end{figure}
 
 The 2 Class results can be interpreted as a diagnostic test. Important results for diagnostic testing are the sensitivity and specificity for each test. The sensitivity is the probability of the test correctly identifying the subject as diseased given that the subject is diseased. In classical diagnostic testing the "true" status of a subject is known through use of a "gold standard" which is assumed to, sometiems optimistically, correctly classify the subject. The latent class method constructs a hypothetical standard, which has the disadvantage that this is not known with certainty but it allows correctly for any uncertainty in the underlying disease state. The other measure is specificity which is the probability of correctly identifying a subject as not diseased.
-The sensitivities are then simply the outcome probabilities for the diseased class, Class 2 and the specificity one minus the outcome probabilities for the non-diseased class, Class 1. These can be obtained with 95\% confidence intervals (provided the model is fitted with calcSE=TRUE) using the outcome.probs function.
+The sensitivities are then simply the outcome probabilities for the diseased class, Class \Sexpr{round(ifelse(dentistry.lca2$classp[2]>dentistry.lca2$classp[1],1,2))} and the specificity one minus the outcome probabilities for the non-diseased class, Class \Sexpr{round(ifelse(dentistry.lca2$classp[2]>dentistry.lca2$classp[1],2,1))}. These can be obtained with 95\% confidence intervals (provided the model is fitted with calcSE=TRUE) using the outcome.probs function.
 
 <<>>=
 outcome.probs(dentistry.lca2)
@@ -172,26 +172,51 @@ outcome.probs(dentistry.lca2)
 
 The sensitivity and specificity are shown in Table~\ref{tab:outcomeconfint}. A reasonable conclusion is that the dentists are fairly good at identifying teeth that are not diseased (except for dentist 5), but not too good at identifying teeth that are diseased.
 
-\begin{table}[htdp]
-\begin{center}
-\begin{tabular}{lcc}
-&Sensitivity&Specificity\\
-V1&0.40 (0.36,0.45)&0.99 (0.98,0.99)\\
-V2&0.71 (0.67,0.75)&0.90 (0.88,0.91)\\
-V3&0.60 (0.55,0.64)&0.99 (0.98,0.99)\\
-V4&0.49 (0.45,0.53)&0.97 (0.96,0.98)\\
-V5&0.92 (0.89,0.94)&0.69 (0.68,0.71)\\
-\end{tabular}
-\end{center}
-\caption{Sensitivity and Specificity}
-  \label{tab:outcomeconfint}
-\end{table}
+<<>>=
+probs <- outcome.probs(dentistry.lca2)
+# this swaps around the probabilities based on the knowledge that the undiseased class is more common
+order <- ifelse(dentistry.lca2$classp[2]>dentistry.lca2$classp[1],1,2)
+
+spec <- NULL
+sens <- NULL
+for (i in 1:5) {
+	sens <- c(sens,sprintf("%3.2f (%3.2f,%3.2f)",probs[[order]]$Outcome[i],probs[[order]]$"2.5 %"[i],probs[[order]]$"97.5 %"[i]))
+	spec <- c(spec,sprintf("%3.2f (%3.2f,%3.2f)",1-probs[[3-order]]$Outcome[i],1-probs[[3-order]]$"2.5 %"[i],1-probs[[3-order]]$"97.5 %"[i]))
+}
+stable <- data.frame(sens,spec)
+names(stable) <- c("Sensitivity","Specificity")
+row.names(stable) <- paste("V",1:5,sep="")
+@
+
+<<results=tex>>=
+print(xtable(stable, digits = c(0,2,2),caption="Sensitivity and Specificity",
+	label="tab:outcomeconfint"),include.rownames=TRUE)
+@ 
+\SweaveOpts{echo=true}
+
+
+%\begin{table}[htdp]
+%\begin{center}
+%\begin{tabular}{lcc}
+%&Sensitivity&Specificity\\
+%V1&0.40 (0.36,0.45)&0.99 (0.98,0.99)\\
+%V2&0.71 (0.67,0.75)&0.90 (0.88,0.91)\\
+%V3&0.60 (0.55,0.64)&0.99 (0.98,0.99)\\
+%V4&0.49 (0.45,0.53)&0.97 (0.96,0.98)\\
+%V5&0.92 (0.89,0.94)&0.69 (0.68,0.71)\\
+%\end{tabular}
+%\end{center}
+%\caption{Sensitivity and Specificity}
+%  \label{tab:outcomeconfint}
+%\end{table}
 
 The true and false positive rates can be plotted for each dentist, and are shown in Figure~\ref{fig:truefalse}. This gives a better explanation of what is happening. It appears that the difference between dentists is mainly related to the threshold for what they classify as diseased. Dentist 5 is more likely to correctly identify teeth as diseased but at the expense of being more likely to identify non-diseased teeth as diseased.
 
 <<>>=
+itpr <- ifelse(dentistry.lca2$classp[2]>dentistry.lca2$classp[1],1,2)
+ifpr <- 3-itpr
 probs <- outcome.probs(dentistry.lca2)
-probs <- data.frame(tpr=probs[[2]][,1],fpr=probs[[1]][,1])
+probs <- data.frame(tpr=probs[[itpr]][,1],fpr=probs[[ifpr]][,1])
 @ 
 
 \begin{figure}
