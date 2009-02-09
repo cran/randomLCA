@@ -40,6 +40,8 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 #	print(lambdacoef)
 #	print(exp(ltaucoef))
 
+#		browser()
+		
 		newmoments <- NULL
 		ill <- matrix(rep(NA,nclass*nlevel3),ncol=nclass)
 		for (iclass in 1:nclass) {
@@ -49,9 +51,10 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 			ill[,iclass] <- exp(result[[1]])*classp2[iclass]
 			if (updatemoments) newmoments <- cbind(newmoments,result[[2]])
 		}
-		# browser()
+#		browser()
         ill2 <- log(rowSums(ill))
         totalll <- sum(ill2*freq)
+		if (is.nan(totalll) || is.infinite(totalll)) totalll <- -1.0*.Machine$double.xmax
         if (calcfitted) {
        		fitted <- exp(ill2)*sum(ifelse(apply(outcomes,1,function(x) 
        			any(is.na(x))),0,freq))*
@@ -104,6 +107,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
                 
 		adaptive <- TRUE
 		prevll <- -Inf
+		nadaptive <- 0
         while(adaptive) {
             # need to do an optimisation on the other parameters
             fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
@@ -131,6 +135,8 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
         	adaptive <- (abs((currll-optll)/currll)>1.0e-7) ||
         		(abs((currll-prevll)/currll)>1.0e-7)
         	if ((prevll-currll)/abs(currll) > 1.0e-4) stop("divergence - increase quadrature points")
+        	nadaptive <- nadaptive+1
+        	if (nadaptive > 200) stop("too many adaptive iterations - increase quadrature points")
         	prevll <- currll
        }
         fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
@@ -230,6 +236,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 						}
 					
 					ll <- -(sum(log(allprob))+sum(dnorm(beta,mean=0,sd=1,log=TRUE)))
+				if (is.nan(ll) || is.infinite(ll)) ll <- 1.0*.Machine$double.xmax
 				  return(ll)
 				}
 			  beta <- rep(0,1+nlevel2)

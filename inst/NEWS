@@ -1,3 +1,15 @@
+Changes in randomLCA version 0.7-1
+
+  o added simulate method to produce random data from fitted models
+
+  o changed default calculation of standard errors to true
+  
+  o added bootstrap estimation of confidence intervals for outcome probabilities  
+
+  o removed most of the warnings about generated NaN during fitting  
+
+  o checked for excessive number of adaptive iterations 
+
 Changes in randomLCA version 0.6-2
 
   o increased speed of fitting for standard latent class models

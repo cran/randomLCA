@@ -1,10 +1,7 @@
 `randomLCA` <-
-function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,
+function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=20,
 	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
 	verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
-    if(!exists(".Random.seed", envir = .GlobalEnv))
-        runif(1)		     # initialize the RNG if necessary
-    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
     set.seed(seed)
     if (quadpoints > 190)
         stop("Maximum of 190 quadrature points\n")
@@ -20,7 +17,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 		tpats <- table(pats)
 		freq <- as.numeric(tpats)
 		newpatterns <- unlist(strsplit(names(tpats),split=""))
-		newpatterns <- ifelse(newpatterns=="N","NA",newpatterns)
+		newpatterns <- ifelse(newpatterns=="N",NA_character_,newpatterns)
 		newpatterns <- as.data.frame(matrix(as.numeric(newpatterns),byrow=TRUE,ncol=dim(patterns)[2]))
 		if (is.null(names(patterns))) names(newpatterns) <- paste("X",1:dim(patterns)[2],sep="")
 		else names(newpatterns) <- names(patterns)
@@ -32,7 +29,7 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 	}
 	if (missing(initmodel)) {
 		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-		calcSE=(calcSE & !random),notrials=notrials,probit=probit,verbose=verbose,seed=seed)
+		calcSE=(calcSE & !random),notrials=notrials,probit=probit,verbose=verbose)
 		initmodel$nclass <- nclass
 		initmodel$random <- FALSE
 		initmodel$level2 <- FALSE
@@ -110,7 +107,6 @@ function(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials
 			}
 		}
 	}
-	assign(".Random.seed", RNGstate, envir = .GlobalEnv)
 	fit$call <- cl
 	fit$nclass <- nclass
 	fit$random <- random

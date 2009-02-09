@@ -1,13 +1,7 @@
 `bestlca` <-
-function(patterns,freq,nclass,calcSE,notrials,probit,verbose,seed) {
+function(patterns,freq,nclass,calcSE,notrials,probit,verbose) {
 	bics <- rep(NA,notrials)
-    if(!exists(".Random.seed", envir = .GlobalEnv))
-        runif(1)		     # initialize the RNG if necessary
-    RNGstate <- get(".Random.seed", envir = .GlobalEnv)
-    set.seed(seed)
 	for (i in 1:notrials) {
-		seed <- runif(1)*24674
-		set.seed(seed)		
 		lca <- fit.fixed.randomLCA(patterns,freq,nclass=nclass,calcSE=FALSE,probit=probit,verbose=verbose)
 		currbic <- -2*(lca$logLik)+log(lca$nobs)*lca$np
 		bics[i] <- currbic
@@ -32,7 +26,6 @@ function(patterns,freq,nclass,calcSE,notrials,probit,verbose,seed) {
 		print("bic for class")
 		print(bics)
 	}
-	assign(".Random.seed", RNGstate, envir = .GlobalEnv)
 	return(c(maxlca,list(bics=bics)))
 }
 

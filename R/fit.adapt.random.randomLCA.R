@@ -35,6 +35,7 @@
 			}
 			ill2 <- rowSums(ill,na.rm=TRUE)
 			ll <- sum(log(ill2)*freq,na.rm=TRUE)
+			if (is.nan(ll) || is.infinite(ll)) ll <- -1.0*.Machine$double.xmax
 			#print(ll)
 			if (calcfitted) {
 				fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*
@@ -64,6 +65,7 @@
 						}
 					
 					ll <- -(sum(log(allprob))+dnorm(beta,mean=0,sd=1,log=TRUE))
+					if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
 				  return(ll)
 				}
 			  optim.fit <- nlm(loglik,x[length(x)],print.level=0,iterlim=1000,hessian=TRUE,outcomes=x[1:(length(x)-1)],gradtol=1.0e-7)
@@ -85,6 +87,7 @@
 					params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)],
 					momentdata,gh,patterns)
 				ll <- -oneiteration$logl
+				if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
 				ll
 			}
 			
@@ -110,6 +113,7 @@
 		
 		adaptive <- TRUE
 		prevll <- -Inf
+		nadaptive <- 0
         while(adaptive) {
 			# need to do an optimisation on the other parameters
 			fitresults <- fitparams(classx,outcomex,lambdacoef,momentdata,FALSE,gh,patterns)
@@ -127,6 +131,8 @@
 			currll <- oneiteration$logl
 			if (verbose) cat("current ll",currll,"\n")
         	if ((prevll-currll)/abs(currll) > 1.0e-4) stop("divergence - increase quadrature points")
+        	nadaptive <- nadaptive+1
+        	if (nadaptive > 200) stop("too many adaptive iterations - increase quadrature points")
         	prevll <- currll
 		}
 		fitresults <- fitparams(classx,outcomex,lambdacoef,momentdata,calcSE,gh,patterns,noiterations=500)

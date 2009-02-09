@@ -36,6 +36,7 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
         }
 		ill2 <- rowSums(ill)
         ll <- -sum(log(ill2)*freq)
+		if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
  	  return(ll)
     }
 	

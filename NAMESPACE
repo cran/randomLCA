@@ -12,6 +12,7 @@ export(randomLCA,calc.cond.prob,calc.marg.prob,ranef.randomLCA,outcome.probs)
 importFrom(nlme, ranef)
 importFrom(graphics, plot)
 importFrom(nlme,BIC)
+importFrom(stats,simulate)
 
 # S3 methods
 S3method(plot, randomLCA)
@@ -22,6 +23,7 @@ S3method(print, summary.randomLCA)
 
 S3method(outcome.probs, randomLCA)
 S3method(print,outcome.probs.randomLCA)
+S3method(simulate, randomLCA)
 
 S3method(logLik, randomLCA)
 S3method(AIC, logLik)

@@ -5,7 +5,7 @@
 Fit latent class models, which may include a random effect.
 }
 \usage{
-randomLCA(patterns,freq,nclass=2,calcSE=FALSE,initmodel=NULL,blocksize=1,notrials=20,
+randomLCA(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=20,
 	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
 	verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max)))
 }

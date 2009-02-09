@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\documentclass[a4paper,12pt]{article}
 
 %\VignetteIndexEntry{randomLCA Example}
 
@@ -13,6 +13,9 @@ library(lattice)
 library(xtable)
 library(randomLCA)
 data(dentistry)
+load("dentistry.lca2.outcomes.boot.RData")
+load("dentistry.lca2random.outcomes.boot.RData")
+set.seed(12345)
 options(width=60)
 @ 
 
@@ -181,7 +184,7 @@ spec <- NULL
 sens <- NULL
 for (i in 1:5) {
 	sens <- c(sens,sprintf("%3.2f (%3.2f,%3.2f)",probs[[order]]$Outcome[i],probs[[order]]$"2.5 %"[i],probs[[order]]$"97.5 %"[i]))
-	spec <- c(spec,sprintf("%3.2f (%3.2f,%3.2f)",1-probs[[3-order]]$Outcome[i],1-probs[[3-order]]$"2.5 %"[i],1-probs[[3-order]]$"97.5 %"[i]))
+	spec <- c(spec,sprintf("%3.2f (%3.2f,%3.2f)",1-probs[[3-order]]$Outcome[i],1-probs[[3-order]]$"97.5 %"[i],1-probs[[3-order]]$"2.5 %"[i]))
 }
 stable <- data.frame(sens,spec)
 names(stable) <- c("Sensitivity","Specificity")
@@ -194,21 +197,35 @@ print(xtable(stable, digits = c(0,2,2),caption="Sensitivity and Specificity",
 @ 
 \SweaveOpts{echo=true}
 
+The confidence intervals for the outcome probabilities can be calculated using the parametric bootstrap.
+\begin{verbatim}
+>dentistry.lca2.outcomes.boot <- outcome.probs(dentistry.lca2,boot=TRUE)
+\end{verbatim}
 
-%\begin{table}[htdp]
-%\begin{center}
-%\begin{tabular}{lcc}
-%&Sensitivity&Specificity\\
-%V1&0.40 (0.36,0.45)&0.99 (0.98,0.99)\\
-%V2&0.71 (0.67,0.75)&0.90 (0.88,0.91)\\
-%V3&0.60 (0.55,0.64)&0.99 (0.98,0.99)\\
-%V4&0.49 (0.45,0.53)&0.97 (0.96,0.98)\\
-%V5&0.92 (0.89,0.94)&0.69 (0.68,0.71)\\
-%\end{tabular}
-%\end{center}
-%\caption{Sensitivity and Specificity}
-%  \label{tab:outcomeconfint}
-%\end{table}
+These are shown in Table~\ref{tab:outcomeconfintboot} and are in agreement with those from the standard errors.
+
+\SweaveOpts{echo=false}
+<<>>=
+probs <- dentistry.lca2.outcomes.boot
+# this swaps around the probabilities based on the knowledge that outcome probabilities are higher in the diseased class
+order <- ifelse(probs[[1]]$Outcome[1]>probs[[2]]$Outcome[1],1,2)
+
+spec <- NULL
+sens <- NULL
+for (i in 1:5) {
+	sens <- c(sens,sprintf("%3.2f (%3.2f,%3.2f)",probs[[order]]$Outcome[i],probs[[order]]$"2.5 %"[i],probs[[order]]$"97.5 %"[i]))
+	spec <- c(spec,sprintf("%3.2f (%3.2f,%3.2f)",1-probs[[3-order]]$Outcome[i],1-probs[[3-order]]$"97.5 %"[i],1-probs[[3-order]]$"2.5 %"[i]))
+}
+stable <- data.frame(sens,spec)
+names(stable) <- c("Sensitivity","Specificity")
+row.names(stable) <- paste("V",1:5,sep="")
+@
+
+<<results=tex>>=
+print(xtable(stable, digits = c(0,2,2),caption="Sensitivity and Specificity",
+	label="tab:outcomeconfintboot"),include.rownames=TRUE)
+@ 
+\SweaveOpts{echo=true}
 
 The true and false positive rates can be plotted for each dentist, and are shown in Figure~\ref{fig:truefalse}. This gives a better explanation of what is happening. It appears that the difference between dentists is mainly related to the threshold for what they classify as diseased. Dentist 5 is more likely to correctly identify teeth as diseased but at the expense of being more likely to identify non-diseased teeth as diseased.
 
@@ -237,14 +254,15 @@ The method used in Qu, Tan and Kutner (1996) is to introduce a random effect to 
 
 <<>>=
 dentistry.lca2random <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	initmodel=dentistry.lca2,nclass=2,random=TRUE,probit=TRUE)
+	initmodel=dentistry.lca2,nclass=2,random=TRUE,quadpoints=31,probit=TRUE)
 @ 
 
 The BIC is reduced to \Sexpr{round(BIC(dentistry.lca2random),1)} showing an improvement over any of the latent class models. An alternative model is to allow the variance of the random effect to vary by outcome (dentist). This can be performed using the \texttt{blocksize} parameter. This allows the structure of the data to be set as a series of blocks, and within each block each outcome has a different loading.
 
 <<>>=
 dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,blocksize=5)
+	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,
+	quadpoints=31,blocksize=5)
 @ 
 
 This increases the BIC to \Sexpr{round(BIC(dentistry.lca2random1),1)}, and is the 2LCR model obtained by Qu, Tan and Kutner (1996). It appears that the simpler model is more appropriate.
@@ -258,6 +276,51 @@ dentistry.lca2random2 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 @ 
 
 The BIC increases to \Sexpr{round(BIC(dentistry.lca2random2),1)}. It is not surprising that this model isn't an improvement, there are now 21 parameters fitted to 32 observations. This also may give problems with the fitting algorithm so the number of quadrature points is increase to 41.
+
+The marginal outcome probabilities, obtained by integrating over the random effect can be plotted, as in Figure~\ref{fig:outcome2}.
+
+\SweaveOpts{echo=true}
+
+\begin{figure}
+  \centering
+<<fig=TRUE,width=7,height=5>>=
+trellis.par.set(col.whitebg())
+print(plot(dentistry.lca2random1,graphtype="marginal",type="l",xlab="Dentist",ylab="Marginal Outcome Probability"))
+@  
+  \caption{Marginal Outcome Probabilities for 2 Class Latent Class with Random Effect (2LCR) model.}
+  \label{fig:outcome2}
+\end{figure}
+
+Outcome probabilities with confidence intervals may be calculated for models with random effects only using the parametric bootstrap.
+
+\begin{verbatim}
+dentistry.lca2random.outcomes.boot <- outcome.probs(dentistry.lca2random,boot=TRUE)
+\end{verbatim}
+
+These are shown in Table~\ref{tab:outcomeconfintboot2}.
+
+\SweaveOpts{echo=false}
+<<>>=
+probs <-dentistry.lca2random.outcomes.boot
+# this swaps around the probabilities based on the knowledge that outcome probabilities are higher in the diseased class
+order <- ifelse(probs[[1]]$Outcome[1]>probs[[2]]$Outcome[1],1,2)
+
+spec <- NULL
+sens <- NULL
+for (i in 1:5) {
+	sens <- c(sens,sprintf("%3.2f (%3.2f,%3.2f)",probs[[order]]$Outcome[i],probs[[order]]$"2.5 %"[i],probs[[order]]$"97.5 %"[i]))
+	spec <- c(spec,sprintf("%3.2f (%3.2f,%3.2f)",1-probs[[3-order]]$Outcome[i],1-probs[[3-order]]$"97.5 %"[i],1-probs[[3-order]]$"2.5 %"[i]))
+}
+stable <- data.frame(sens,spec)
+names(stable) <- c("Sensitivity","Specificity")
+row.names(stable) <- paste("V",1:5,sep="")
+@
+\SweaveOpts{echo=true}
+
+<<results=tex>>=
+print(xtable(stable, digits = c(0,2,2),caption="Sensitivity and Specificity",
+	label="tab:outcomeconfintboot2"),include.rownames=TRUE)
+@ 
 
 The observed and fitted values can be obtained and are shown in Table~\ref{tab:obs}. Differences from the Que et al paper result from different approximation methods.
 
@@ -274,18 +337,5 @@ print(xtable(obs.data, caption="Observed and expected frequencies",
 	digits = c(0,rep(0,5),0,1,1),label="tab:obs"),include.rownames=FALSE)
 @ 
 
-The marginal outcome probabilities, obtained by integrating over the random effect can be plotted, as in Figure~\ref{fig:outcome2}.
-
-\SweaveOpts{echo=true}
-
-\begin{figure}
-  \centering
-<<fig=TRUE,width=7,height=5>>=
-trellis.par.set(col.whitebg())
-print(plot(dentistry.lca2random1,graphtype="marginal",type="l",xlab="Dentist",ylab="Marginal Outcome Probability"))
-@  
-  \caption{Marginal Outcome Probabilities for 2 Class Latent Class with Random Effect (2LCR) model.}
-  \label{fig:outcome2}
-\end{figure}
 
 \end{document}
