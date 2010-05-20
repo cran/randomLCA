@@ -45,8 +45,11 @@
 data(symptoms)
 \dontrun{
 symptoms.lca2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=2)
-symptoms.lca2random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,initmodel=symptoms.lca2,random=TRUE,nclass=2,blocksize=4)
-symptoms.lca2random2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,initmodel=symptoms.lca2random,random=TRUE,level2=TRUE,nclass=2,blocksize=4)
+symptoms.lca2random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+	initmodel=symptoms.lca2,random=TRUE,nclass=2,blocksize=4)
+symptoms.lca2random2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+	initmodel=symptoms.lca2random,random=TRUE,level2=TRUE,nclass=2,
+	blocksize=4)
 }
 }
 \keyword{datasets}

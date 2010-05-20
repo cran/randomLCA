@@ -223,7 +223,8 @@
 	if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
 	else {
 		s <- svd(optim.fit$hessian)
-		separ <- sqrt(diag(s$v %*% diag(ifelse(s$d==0,NA,1/s$d)) %*% t(s$u)))
+		separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
+		separ[!is.finite(separ)] <- NA
 	}
 
 # determine random effects

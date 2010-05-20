@@ -1,3 +1,7 @@
+Changes in randomLCA version 0.7-2
+
+  o changes to documentation to improve readability
+
 Changes in randomLCA version 0.7-1
 
   o added simulate method to produce random data from fitted models

@@ -32,13 +32,17 @@
 }
 \examples{
 data(uterinecarcinoma)
-uterinecarcinoma.lca2 <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq)
+uterinecarcinoma.lca2 <- randomLCA(uterinecarcinoma[,1:7],
+	freq=uterinecarcinoma$freq)
 
-uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq,
-	initmodel=uterinecarcinoma.lca2,random=TRUE,probit=TRUE,quadpoints=41)
-# LCR1 model of Que et al. This is fairly unstable and requires starting values from the simpler model without loadings by class
+uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[,1:7],
+	freq=uterinecarcinoma$freq,initmodel=uterinecarcinoma.lca2,
+	random=TRUE,probit=TRUE,quadpoints=41)
+# LCR1 model of Que et al. This is fairly unstable and requires
+#	starting values from the simpler model without loadings by class
 # it is also slow and doesn't improve the model fit
 \dontrun{uterinecarcinoma.lcarandom2by <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq,
-	initmodel=uterinecarcinoma.lcarandom2,byclass=TRUE,random=TRUE,probit=TRUE,quadpoints=61)}
+	initmodel=uterinecarcinoma.lcarandom2,byclass=TRUE,
+	random=TRUE,probit=TRUE,quadpoints=61)}
 	}
 \keyword{datasets}

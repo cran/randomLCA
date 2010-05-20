@@ -5,9 +5,10 @@
 Fit latent class models, which may include a random effect.
 }
 \usage{
-randomLCA(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=20,
-	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
-	verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max)))
+randomLCA(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,
+	blocksize=1,notrials=20,random=FALSE,byclass=FALSE,
+	quadpoints=21,level2=FALSE,probit=FALSE,verbose=FALSE,
+	seed = as.integer(runif(1, 0, .Machine$integer.max)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -53,6 +54,7 @@ dentistry.lca2random <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 # allow loading to vary by dentist
 # this is the 2LCR model from Qu et al (1996)
 dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,blocksize=5)
+	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,
+	blocksize=5)
 }
 \keyword{multivariate}

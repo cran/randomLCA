@@ -104,7 +104,8 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
 		warning("nlm exited with code ",optim.fit$code," .\n")
 	if (calcSE) {
 		s <- svd(optim.fit$hessian)
-		separ <- sqrt(diag(s$v %*% diag(ifelse(s$d==0,NA,1/s$d)) %*% t(s$u)))
+		separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
+		separ[!is.finite(separ)] <- NA
 	} else separ <- rep(NA,length(c(as.vector(classp),as.vector(outcomep))));
 # calculate the probabilities
 	if (nclass==1) classx <- 0

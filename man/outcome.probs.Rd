@@ -6,7 +6,8 @@
 Extract outcome probabilities and confidence intervals for a randomLCA object.
 }
 \usage{
-\method{outcome.probs}{randomLCA}(object, level = 0.95, boot=FALSE, type="perc", R=ifelse(type=="perc",999,200),\ldots)
+\method{outcome.probs}{randomLCA}(object, level = 0.95, boot=FALSE, type="perc",
+	R=ifelse(type=="perc",999,200),\ldots)
 }
 \arguments{
   \item{object}{randomLCA object}

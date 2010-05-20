@@ -34,12 +34,16 @@ genderrole.lca1 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=1)
 genderrole.lca2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq)
 genderrole.lca3 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=3)
 # repeat with random effect
-genderrole.lca1random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=1,random=TRUE)
-genderrole.lca2random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,random=TRUE)
-genderrole.lca3random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=3,random=TRUE)
+genderrole.lca1random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
+	nclass=1,random=TRUE)
+genderrole.lca2random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
+	random=TRUE)
+genderrole.lca3random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
+	nclass=3,random=TRUE)
 # improved BIC for 1 class random
 print(c(BIC(genderrole.lca1),BIC(genderrole.lca2),BIC(genderrole.lca3)))
-print(c(BIC(genderrole.lca1random),BIC(genderrole.lca2random),BIC(genderrole.lca3random)))
+print(c(BIC(genderrole.lca1random),BIC(genderrole.lca2random),
+	BIC(genderrole.lca3random)))
 # can also repeat fits with blocksize=5 to give mixture of IRT models
 }
 \keyword{datasets}

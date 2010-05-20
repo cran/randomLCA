@@ -181,7 +181,8 @@ fit.adapt.random2byclass.randomLCA <- function(outcomes,freq,nclass=2,initoutcom
     if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
     else {
 		s <- svd(optim.fit$hessian)
-		separ <- sqrt(diag(s$v %*% diag(ifelse(s$d==0,NA,1/s$d)) %*% t(s$u)))
+		separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
+		separ[!is.finite(separ)] <- NA
     }
 # calculate the probabilities
     if (nclass==1) classp <- 1
