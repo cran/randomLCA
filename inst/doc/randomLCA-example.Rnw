@@ -1,6 +1,8 @@
 \documentclass[a4paper,12pt]{article}
 
 %\VignetteIndexEntry{randomLCA Example}
+\usepackage[authoryear,round]{natbib}
+\bibliographystyle{plainnat}
 
 \title{randomLCA Examples}
 \author{Ken Beath}
@@ -25,7 +27,7 @@ Following are two examples of using randomLCA for latent class analysis. Some as
 
 \section{Example 1}
 
-This example demonstrates the fitting of data from Rindskopf and Rindskopf (1986), where latent class analysis is used to determine diagnostic classifications based on medical tests. Although this example is for medical data, the model is simply standard latent class so the methods can be applied to data from other areas.
+This example demonstrates the fitting of data from \citet{rindskopf:1986}, where latent class analysis is used to determine diagnostic classifications based on medical tests. Although this example is for medical data, the model is simply standard latent class so the methods can be applied to data from other areas.
 
 A series of latent class models for 1 to 4 classes can be fitted using the commands
 <<>>=
@@ -113,7 +115,7 @@ print(plot(myocardial.lca2,type="l",xlab="Test",ylab="Outcome Probability",
 
 \section{Example 2}
 
-This example shows the fitting of the dentistry data from Qu, Tan and Kutner (1996). The data consists of the results of five dentists evaluating x-rays for presence or absence of caries. As there is no gold standard, the latent class method is to assume two classes, diseased and non-diseased which are identified from the data.
+This example shows the fitting of the dentistry data from \citet{qu:1996}. The data consists of the results of five dentists evaluating x-rays for presence or absence of caries. As there is no gold standard, the latent class method is to assume two classes, diseased and non-diseased which are identified from the data.
 
 \subsection{Latent Class}
 
@@ -192,14 +194,16 @@ row.names(stable) <- paste("V",1:5,sep="")
 @
 
 <<results=tex>>=
-print(xtable(stable, digits = c(0,2,2),caption="Sensitivity and Specificity",
+print(xtable(stable, digits = c(0,2,2),
+	caption="Sensitivity and Specificity",
 	label="tab:outcomeconfint"),include.rownames=TRUE)
 @ 
 \SweaveOpts{echo=true}
 
 The confidence intervals for the outcome probabilities can be calculated using the parametric bootstrap.
 \begin{verbatim}
->dentistry.lca2.outcomes.boot <- outcome.probs(dentistry.lca2,boot=TRUE)
+>dentistry.lca2.outcomes.boot
+	<- outcome.probs(dentistry.lca2,boot=TRUE)
 \end{verbatim}
 
 These are shown in Table~\ref{tab:outcomeconfintboot} and are in agreement with those from the standard errors.
@@ -222,7 +226,8 @@ row.names(stable) <- paste("V",1:5,sep="")
 @
 
 <<results=tex>>=
-print(xtable(stable, digits = c(0,2,2),caption="Sensitivity and Specificity",
+print(xtable(stable, digits = c(0,2,2),
+	caption="Sensitivity and Specificity",
 	label="tab:outcomeconfintboot"),include.rownames=TRUE)
 @ 
 \SweaveOpts{echo=true}
@@ -240,7 +245,9 @@ probs <- data.frame(tpr=probs[[itpr]][,1],fpr=probs[[ifpr]][,1])
   \centering
 <<fig=TRUE,width=7,height=5>>=
 trellis.par.set(col.whitebg())
-print(plot(tpr~fpr,type="p",xlab="False Positive Rate\n(1-Specificity)",ylab="True Positive Rate (Sensitivity)",data=probs))
+print(plot(tpr~fpr,type="p",
+	xlab="False Positive Rate\n(1-Specificity)",
+	ylab="True Positive Rate (Sensitivity)",data=probs))
 @  
   \caption{True and False Positive Rates by Dentist.}
   \label{fig:truefalse}
@@ -248,7 +255,7 @@ print(plot(tpr~fpr,type="p",xlab="False Positive Rate\n(1-Specificity)",ylab="Tr
 
 \subsection{Latent Class with Random Effects}
 
-The method used in Qu, Tan and Kutner (1996) is to introduce a random effect to model heterogeneity within classes. In their model the probabilities are transformed to the probit scale and then a normal random effect introduced. In practice it usually makes little difference if a probit or logit transform is used.
+The method used in \citet{qu:1996} is to introduce a random effect to model heterogeneity within classes. In their model the probabilities are transformed to the probit scale and then a normal random effect introduced. In practice it usually makes little difference if a probit or logit transform is used.
 
 \SweaveOpts{echo=true}
 
@@ -265,7 +272,7 @@ dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	quadpoints=31,blocksize=5)
 @ 
 
-This increases the BIC to \Sexpr{round(BIC(dentistry.lca2random1),1)}, and is the 2LCR model obtained by Qu, Tan and Kutner (1996). It appears that the simpler model is more appropriate.
+This increases the BIC to \Sexpr{round(BIC(dentistry.lca2random1),1)}, and is the 2LCR model obtained by \citet{qu:1996}. It appears that the simpler model is more appropriate.
 
 A further extension is to allow the loading or random effect variance to vary by class.
 
@@ -294,7 +301,8 @@ print(plot(dentistry.lca2random1,graphtype="marginal",type="l",xlab="Dentist",yl
 Outcome probabilities with confidence intervals may be calculated for models with random effects only using the parametric bootstrap.
 
 \begin{verbatim}
-dentistry.lca2random.outcomes.boot <- outcome.probs(dentistry.lca2random,boot=TRUE)
+dentistry.lca2random.outcomes.boot
+	<- outcome.probs(dentistry.lca2random,boot=TRUE)
 \end{verbatim}
 
 These are shown in Table~\ref{tab:outcomeconfintboot2}.
@@ -318,11 +326,12 @@ row.names(stable) <- paste("V",1:5,sep="")
 \SweaveOpts{echo=true}
 
 <<results=tex>>=
-print(xtable(stable, digits = c(0,2,2),caption="Sensitivity and Specificity",
+print(xtable(stable, digits = c(0,2,2),
+	caption="Sensitivity and Specificity",
 	label="tab:outcomeconfintboot2"),include.rownames=TRUE)
 @ 
 
-The observed and fitted values can be obtained and are shown in Table~\ref{tab:obs}. Differences from the Que et al paper result from different approximation methods.
+The observed and fitted values can be obtained and are shown in Table~\ref{tab:obs}. Differences from the Qu et al paper result from different approximation methods.
 
 <<>>=
 obs.data <- data.frame(dentistry.lca2random1$patterns,dentistry.lca2random1$observed,
@@ -337,5 +346,6 @@ print(xtable(obs.data, caption="Observed and expected frequencies",
 	digits = c(0,rep(0,5),0,1,1),label="tab:obs"),include.rownames=FALSE)
 @ 
 
+\bibliography{randomLCA}
 
 \end{document}

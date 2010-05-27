@@ -1,3 +1,11 @@
+Changes in randomLCA version 0.7-3
+
+  o added bibliography to vignette
+
+  o changes to documentation to improve readability
+  
+  o added check for valid patterns must be 0 or 1 
+
 Changes in randomLCA version 0.7-2
 
   o changes to documentation to improve readability

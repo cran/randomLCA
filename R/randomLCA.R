@@ -6,9 +6,17 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
     if (quadpoints > 190)
         stop("Maximum of 190 quadrature points\n")
 	cl <- match.call()
+    # check that patterns are either 0 or 1
+	if (any(apply(as.matrix(patterns),2,function(x) any((x!=0)&(x!=1)&!is.na(x)))))
+		stop("patterns must consist of either 0 or 1")    
 	# check that patterns doesn't contain column which is all missing
 	if (any(apply(as.matrix(patterns),2,function(x) all(is.na(x)))))
 		stop("patterns cannot contain columns consisting entirely of missing")
+	# check that freq are all >= 0
+	if (!missing(freq)) {
+		if (any(freq<0))
+			stop("frequencies must be greater than or equal to zero")
+	}
 	if (random & ((dim(patterns)[2] %% blocksize)!=0))
 		stop("outcomes must be a multiple of blocksize")
 	# if no frequencies given, then assume that the data needs to be summaried
