@@ -1,18 +1,20 @@
 useDynLib(randomLCA)
-# Exported functions
-#export(randomLCA,calc.cond.prob,calc.marg.prob,plot,summary,
-#ranef,fitted)
-
-#export(randomLCA,calc.cond.prob,calc.marg.prob,plot.randomLCA,summary.randomLCA,
-#ranef.randomLCA,fitted.randomLCA)
 
 export(randomLCA,calc.cond.prob,calc.marg.prob,ranef.randomLCA,outcome.probs)
+
 
 # Imported functions
 importFrom(nlme, ranef)
 importFrom(graphics, plot)
-importFrom(nlme,BIC)
 importFrom(stats,simulate)
+
+if (!exists("BIC", envir=asNamespace("stats"),inherits=FALSE)) {
+   importFrom(nlme, BIC)
+} else {
+   importFrom(stats, BIC)
+}
+importFrom(stats, AIC)
+importFrom(stats, logLik)
 
 # S3 methods
 S3method(plot, randomLCA)
@@ -26,7 +28,6 @@ S3method(print,outcome.probs.randomLCA)
 S3method(simulate, randomLCA)
 
 S3method(logLik, randomLCA)
-S3method(AIC, logLik)
-S3method(BIC, logLik)
 S3method(AIC, randomLCA)
 S3method(BIC, randomLCA)
+
