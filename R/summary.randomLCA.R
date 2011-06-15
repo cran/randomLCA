@@ -56,20 +56,20 @@ print.summary.randomLCA <- function(x, ...)
 	else print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
 		logLik = c(x$logLik),row.names = " ") )
     cat("Class probabilities","\n")
-	print(x$classp,digits=4)
+	print(round(x$classp,4))
 	if (x$random)  cat("Conditional outcome probabilities","\n")
     else cat("Outcome probabilities","\n")
-	print(x$outcomep,digits=4)
+	print(round(x$outcomep,4))
 	if (x$random) {
 		cat("Marginal Outcome Probabilities","\n")
-		print(x$margoutcomep,digits=4)
+		print(round(x$margoutcomep,4))
 		cat("Loadings","\n")
 		if (length(x$lambdacoef)==1) cat(sprintf("%g\n",x$lambdacoef))
-		else print(x$lambdacoef,digits=4)
+		else print(round(x$lambdacoef,4))
 		if (x$level2) {
 			cat("Tau","\n")
-			if (length(x$taucoef)==1) cat(sprintf("%g\n",x$taucoef))
-			else print(x$taucoef,digits=4)
+			if (length(x$taucoef)==1) cat(sprintf("%g\n",round(x$taucoef,4)))
+			else print(round(x$taucoef,4))
 		}		
 	}
 	invisible(x)

@@ -25,7 +25,28 @@ options(width=60)
 
 Following are two examples of using randomLCA for latent class analysis. Some aspects will certainly change but most code should still work. Two things that will change are the use of accessor functions and better labelling of results.
 
-\section{Example 1}
+\section{Latent Class}
+
+\subsection{Model}
+
+The basis of latent class analysis is that each subject belongs to one of a finite number of classes, with each class described by a set of parameters that define the distribution of outcomes or manifest variables for a subject, a form of finite mixture model. For binary outcomes, the model for each class is
+\begin{eqnarray*}
+P\left(y_{i1},y_{i2},...,y_{ik}\right|c)&=&\prod_{j=1}^k \pi_{cj}^{y_{ij}} \left(1-\pi_{cj}\right)^{1-y_{ij}}
+\end{eqnarray*}
+where
+\begin{eqnarray*}
+y_{ij}&=&\mbox{$j$th binary outcome for subject $i$}\\
+\pi_{cj}&=&\mbox{probability of $j$th outcome equal to 1 for subject in class $c$}\\
+k&=&\mbox{number of outcomes.}
+\end{eqnarray*}
+
+An additional parameter that is required to be estimated is $\eta_c$, the probability of a subjects in class $c$.
+
+A requirement for the estimates of the probabilities $\pi_{cj}$ is that they be restricted to the interval zero to one, and $\eta_c$ sum to one. This can be obtained using the following relations $\pi_{cj}=\frac{e^{a_{cj}}}{1+e^{a_{cj}}}$ and $\eta_c=\frac{e^{\theta_c}}{\sum_{\ell=1}^C e^{\theta_\ell}}$. Hence we estimate the $\pi_{cj}$ and $\theta_c$.
+
+
+\subsection{Example 1}
+
 
 This example demonstrates the fitting of data from \citet{rindskopf:1986}, where latent class analysis is used to determine diagnostic classifications based on medical tests. Although this example is for medical data, the model is simply standard latent class so the methods can be applied to data from other areas.
 
@@ -113,11 +134,9 @@ print(plot(myocardial.lca2,type="l",xlab="Test",ylab="Outcome Probability",
 \end{figure}
 
 
-\section{Example 2}
+\subsection{Example 2}
 
 This example shows the fitting of the dentistry data from \citet{qu:1996}. The data consists of the results of five dentists evaluating x-rays for presence or absence of caries. As there is no gold standard, the latent class method is to assume two classes, diseased and non-diseased which are identified from the data.
-
-\subsection{Latent Class}
 
 A series of latent class models for 1 to 4 classes can be fitted using the commands
 <<>>=
@@ -253,9 +272,28 @@ print(plot(tpr~fpr,type="p",
   \label{fig:truefalse}
 \end{figure}
 
-\subsection{Latent Class with Random Effects}
+\section{Latent Class with Random Effects}
+
+\subsection{Model}
 
 The method used in \citet{qu:1996} is to introduce a random effect to model heterogeneity within classes. In their model the probabilities are transformed to the probit scale and then a normal random effect introduced. In practice it usually makes little difference if a probit or logit transform is used.
+
+The probability for each observation remains the same, except that it is now conditional on both class $c$ and random effect $\lambda$.
+
+\begin{eqnarray*}
+P\left(y_{i1},y_{i2},...,y_{ik}|c,u\right)&=&\prod_{j=1}^k \pi_{cj}^{y_{ij}} \left(1-\pi_{cj}\right)^{1-y_j}\\
+\end{eqnarray*}
+Where
+\begin{eqnarray*}
+\pi_{cj}&=&\frac{e^{a_{cj}+b_ju}}{1+e^{a_{cj}+b_ju}},u\sim N(0,1)\\
+\end{eqnarray*}
+$b_j$ scales the random effect - models may have either a common or independent scale for each outcome, these are the \texttt{lambdacoef}. They may also be chosen to be different for each class, the default is for them to be the same for each class. \\
+
+One way of visualising the model is that each class is now an Item Response Theory (IRT) model when the scaling is independent. When the scaling is common, the loadings are the same for each outcome and each class is then a Rasch model.
+
+\subsection{Example 2 Continued}
+
+We now continue the analysis of the dentistry data, allowing for random effects. This has a simple interpretation. For each subject there will be a different level of disease, and as a result a dentist will be more or less likely to classify the subject as having disease.
 
 \SweaveOpts{echo=true}
 

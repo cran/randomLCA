@@ -33,6 +33,6 @@ hivtests.lca <- randomLCA(hivtests[,1:4],freq=hivtests$freq)
 # fit model with random effect
 # this is different to teh Qu paper which only applies the RE to tests 2 and 3
 hivtests.lcarandom <- randomLCA(hivtests[,1:4],freq=hivtests$freq,
-	initmodel=hivtests.lca,random=TRUE,blocksize=1,probit=TRUE)
+	initmodel=hivtests.lca,random=TRUE,blocksize=1,quadpoints=41,probit=TRUE)
 }
 \keyword{datasets}
