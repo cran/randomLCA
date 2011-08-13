@@ -7,7 +7,8 @@ Fit latent class models, which may include a random effect.
 \usage{
 randomLCA(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,
 	blocksize=1,notrials=20,random=FALSE,byclass=FALSE,
-	quadpoints=21,level2=FALSE,probit=FALSE,verbose=FALSE,
+	quadpoints=21,level2=FALSE,probit=FALSE,qniterations=5,
+	verbose=FALSE,
 	seed = as.integer(runif(1, 0, .Machine$integer.max)))
 }
 %- maybe also 'usage' for other objects documented here.
@@ -24,8 +25,9 @@ randomLCA(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,
   \item{quadpoints}{Number of quadrature points for adaptive quadrature}
   \item{level2}{Fit 2 level random effects model (further details to follow)}
   \item{probit}{Probit model for random effect}
-  \item{seed}{Initial random seed for generating starting values}
+  \item{qniterations}{Number of Quasi-Newton iterations within each adaptive cycle. Decrease if there is a failure to converge}
   \item{verbose}{Prints verbose of fit progress}
+  \item{seed}{Initial random seed for generating starting values}
 }
 \details{
 The structure of the patterns is assumed to be a number of blocks of different outcomes each of blocksize, allowing outcomes to be repeated. Each outcome is assumed to have it's own loading.

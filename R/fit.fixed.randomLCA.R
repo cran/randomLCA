@@ -36,6 +36,11 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
         }
 		ill2 <- rowSums(ill)
         ll <- -sum(log(ill2)*freq)
+# penalise extreme outcome probabilities
+		outcomep <- as.vector(1/(1+exp(abs(outcomex))))
+		pen <- dbeta(outcomep,1+1.0e-4,1+1.0e-4,log=TRUE)
+#		print(sum(pen))
+		ll <- ll-sum(pen)
 		if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
  	  return(ll)
     }
@@ -60,10 +65,10 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
 # multiply by class probabilities
         }
 		ill2 <- rowSums(ill)
-        ll <- -sum(log(ill2)*freq)
+        ll <- sum(log(ill2)*freq)
 		fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
 		classprob <- ill/ill2
-	  	return(list(fitted=fitted,classprob=classprob))
+	  	return(list(fitted=fitted,classprob=classprob,loglik=ll))
     }
 
 	if (missing(initclassp))  initclassp <- runif(nclass)
@@ -84,6 +89,10 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
 
     if (probit) outcomex <- qnorm(outcomep)
 	else outcomex <- log(outcomep/(1-outcomep))
+
+	outcomex <- as.vector(outcomex)
+	outcomex <- ifelse(abs(outcomex)>10,sign(outcomex)*10,outcomex)	
+	outcomex <- matrix(outcomex,nrow=nclass)
 	
 	if (nclass==1) classx <- NULL
 	else  {
@@ -91,21 +100,25 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
 		for (i in 2:nclass) classx[i-1] <- log(classp[i]/classp[1])
 	}
 
- 	  optim.fit <- .Call("fixednlm",c(as.vector(classx),as.vector(outcomex)),
- 	  	list(as.numeric(patterns),as.numeric(freq),as.integer(nclass),as.integer(dim(patterns)[1]),
- 	  	as.integer(dim(patterns)[2]),probit,
- 	  	rep(0,2*nclass+nclass*dim(patterns)[2]+dim(patterns)[1]),
- 	  	rep(0,dim(patterns)[2])),
- 	  	hessian=calcSE,print.level=as.integer(ifelse(verbose,2,0)),
-		gradtl=1.0e-6,itnlim=as.integer(1000))
-	names(optim.fit) <- c("estimate","minimum","gradient","hessian","code","iterations")
+	#optim.fit <- nlm(loglik,c(as.vector(classx),as.vector(outcomex)),hessian=calcSE,print.level=ifelse(verbose,2,0),
+	#		gradtol=1.0e-6,iterlim=1000)
+	# browser()
+	#print(c(as.vector(classx),as.vector(outcomex)))
+	optim.fit <- nlm(loglik,c(as.vector(classx),as.vector(outcomex)),hessian=calcSE,print.level=ifelse(verbose,2,0),
+			gradtol=1.0e-6,iterlim=1000)
 	
 	if (optim.fit$code >= 3)
 		warning("nlm exited with code ",optim.fit$code," .\n")
 	if (calcSE) {
-		s <- svd(optim.fit$hessian)
-		separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
-		separ[!is.finite(separ)] <- NA
+		if (!all(is.finite(optim.fit$hessian))) {
+			warning("Cannot calculate standard errors - Hessian not finite")
+			separ <- rep(NA,length(c(as.vector(classp),as.vector(outcomep))))
+		}
+		else {
+			s <- svd(optim.fit$hessian)
+			separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
+			separ[!is.finite(separ)] <- NA
+		}
 	} else separ <- rep(NA,length(c(as.vector(classp),as.vector(outcomep))));
 # calculate the probabilities
 	if (nclass==1) classx <- 0
@@ -123,7 +136,7 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
 	final <- calcfitted(optim.fit$estimate)
 	fitted <- final$fitted
 	classprob <- final$classprob
-	ll <- -optim.fit$minimum
+	ll <- final$loglik
 	if (verbose) {
 		print("results")
 		print(classp)
@@ -132,8 +145,10 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,probit,verbose) {
     np <- (nclass-1)+nclass*nlevel1
     nobs <- sum(freq)
     deviance <- 2*sum(ifelse(freq==0,0,freq*log(freq/fitted)))
-    list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,se=separ,
+    fit <- list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,se=separ,
     	np=np,nobs=nobs,logLik=ll,observed=freq,fitted=fitted,
     	deviance=deviance,classprob=classprob)
+	class(fit) <- "randomLCA"
+	return(fit)
 }
 

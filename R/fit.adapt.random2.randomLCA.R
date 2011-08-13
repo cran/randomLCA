@@ -1,5 +1,5 @@
 fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initlambdacoef,initltaucoef,
-    blocksize,calcSE=FALSE,gh,probit,verbose=FALSE) {
+    blocksize,calcSE=FALSE,gh,probit,byclass,qniterations,verbose=FALSE) {
 
 #	print(initoutcomep)
 #	print(initclassp)
@@ -45,8 +45,10 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 		newmoments <- NULL
 		ill <- matrix(rep(NA,nclass*nlevel3),ncol=nclass)
 		for (iclass in 1:nclass) {
-			result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],lambdacoef,
-				ltaucoef,gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
+			result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],
+				if (byclass) lambdacoef[iclass,]  else lambdacoef,
+				if (byclass) ltaucoef[iclass] else ltaucoef,
+				gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
 				probit,updatemoments)
 			ill[,iclass] <- exp(result[[1]])*classp2[iclass]
 			if (updatemoments) newmoments <- cbind(newmoments,result[[2]])
@@ -54,6 +56,10 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 #		browser()
         ill2 <- log(rowSums(ill))
         totalll <- sum(ill2*freq)
+# penalise extreme outcome probabilities
+		outcomep <- as.vector(1/(1+exp(abs(outcomex))))
+		pen <- dbeta(outcomep,1+1.0e-4,1+1.0e-4,log=TRUE)
+		totalll <- totalll+sum(pen)
 		if (is.nan(totalll) || is.infinite(totalll)) totalll <- -1.0*.Machine$double.xmax
         if (calcfitted) {
        		fitted <- exp(ill2)*sum(ifelse(apply(outcomes,1,function(x) 
@@ -67,13 +73,13 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
     adaptivefit <- function(classx,outcomex,lambdacoef,ltaucoef,momentdata,gh) {
     
         fitparams <- function(classx,outcomex,lambdacoef,ltaucoef,
-            momentdata,gh,calcSE,noiterations=10) {
+            momentdata,gh,calcSE,noiterations=qniterations) {
                     
             calcllfornlm <- function(params,momentdata,gh) {  
                 oneiteration <- calclikelihood(if (nclass==1) NULL else params[1:(nclass-1)],
                 	matrix(params[nclass:(nclass+nlevel1*nlevel2*nclass-1)],nrow=nclass),
-                    params[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
-                    params[(nlevel1*nlevel2*nclass+nclass+nlevel1)],
+                    if (byclass) matrix(params[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1-1)],nrow=nclass) else params[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
+                    if (byclass) params[(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1+nclass-1)] else params[(nlevel1*nlevel2*nclass+nclass+nlevel1)],
                     momentdata,gh)
                 return(-oneiteration$logl)
             }
@@ -85,8 +91,8 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
             return(list(logl=-nlm1$minimum,
             	classx=if (nclass==1) NULL else nlm1$estimate[1:(nclass-1)],
             	outcomex=matrix(nlm1$estimate[nclass:(nclass+nlevel1*nlevel2*nclass-1)],nrow=nclass),
-                lambdacoef=nlm1$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
-                ltaucoef=nlm1$estimate[(nlevel1*nlevel2*nclass+nclass+nlevel1)],nlm=nlm1)) 
+                lambdacoef= if (byclass) matrix(nlm1$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1-1)],nrow=nclass) else nlm1$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
+                ltaucoef=if (byclass) nlm1$estimate[(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1+nclass-1)] else nlm1$estimate[(nlevel1*nlevel2*nclass+nclass+nlevel1)],nlm=nlm1)) 
         }
     
 
@@ -134,7 +140,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
             }
         	adaptive <- (abs((currll-optll)/currll)>1.0e-7) ||
         		(abs((currll-prevll)/currll)>1.0e-7)
-        	if ((prevll-currll)/abs(currll) > 1.0e-4) stop("divergence - increase quadrature points")
+        	if ((prevll-currll)/abs(currll) > 1.0e-3) stop("divergence - increase quadrature points")
         	nadaptive <- nadaptive+1
         	if (nadaptive > 200) stop("too many adaptive iterations - increase quadrature points")
         	prevll <- currll
@@ -165,8 +171,10 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
     if (probit) outcomex <- qnorm(initoutcomep)
     else outcomex <- log(initoutcomep/(1-initoutcomep))
 
-    if (missing(initlambdacoef)) lambdacoef <- rep(0,blocksize)
-    else lambdacoef <- initlambdacoef
+    if (missing(initlambdacoef) || is.null(initlambdacoef)) {
+    	if (byclass) lambdacoef <- matrix(rep(0,blocksize*nclass),nrow=nclass)
+    	else lambdacoef <- rep(0,blocksize)
+    } else lambdacoef <- initlambdacoef
 
 # choose among possible lambdacoef
  	if (missing(initltaucoef) || is.null(initltaucoef)) {
@@ -175,6 +183,9 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
  		maxll <- -Inf
  		repeat {
 			if (verbose) cat('trying ltaucoef ',testltaucoef,"\n")
+			if (byclass) theltaucoef <- rep(testltaucoef,nclass)
+			else theltaucoef <- testltaucoef
+			# browser()
 			onelikelihood <- calclikelihood(classx,outcomex,lambdacoef,testltaucoef,momentdata,gh)
 			currll <- onelikelihood$logl
 			if (verbose) cat("ll",currll,"\n")		
@@ -184,8 +195,9 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 			maxltau <- testltaucoef
 			testltaucoef <- testltaucoef+0.1
 		}
-		if (verbose) cat('using ltaucoef ',testltaucoef,"\n")
-		ltaucoef <- maxltau
+		if (verbose) cat('using ltaucoef ',maxltau,"\n")
+		if (byclass) ltaucoef <- rep(maxltau,nclass)
+		else ltaucoef <- maxltau
  	}
  	else ltaucoef <- initltaucoef
         
@@ -195,8 +207,8 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
     momentdata <- myfit$momentdata
     
 # extract the se
-    if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
-    else {
+   if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
+	else {
 		s <- svd(optim.fit$hessian)
 		separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
 		separ[!is.finite(separ)] <- NA
@@ -208,13 +220,19 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 # add extra column to classp
         classp <- c(0,classp)       
     }       
-    outcomex <- matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate)-blocksize-1)],ncol=nlevel1*nlevel2)
+    if (byclass) outcomex <- matrix(optim.fit$estimate[nclass:(nclass+nlevel1*nlevel2*nclass-1)],nrow=nclass)
+	else outcomex <- matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate)-blocksize-1)],ncol=nlevel1*nlevel2)
 # transform using logistic to probabilities     
     classp <- exp(classp)/sum(exp(classp))
     if (probit) outcomep <- pnorm(outcomex)
     else outcomep <- exp(outcomex)/(1+exp(outcomex))
-    lambdacoef <- optim.fit$estimate[(length(optim.fit$estimate)-blocksize):(length(optim.fit$estimate)-1)]
-    ltaucoef <- optim.fit$estimate[length(optim.fit$estimate)]
+    if (byclass) {
+		lambdacoef <- matrix(optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1-1)],nrow=nclass)
+    	ltaucoef <- optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1+nclass-1)]
+    } else {
+    	lambdacoef <- optim.fit$estimate[(length(optim.fit$estimate)-blocksize):(length(optim.fit$estimate)-1)]
+    	ltaucoef <- optim.fit$estimate[length(optim.fit$estimate)]
+    }
 
 	calcrandom <- function() {
 	
@@ -226,10 +244,18 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 			# calculate probabilities under each class
 						for (i in 1:nclass) {
 			# calculate the outcome probabilities for this class and current random
-							if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef,nlevel2)*
-							(beta[1]+exp(ltaucoef)*rep(beta[2:(1+nlevel2)],each=nlevel1)))
-							else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef,nlevel2)*
-							(beta[1]+exp(ltaucoef)*rep(beta[2:(1+nlevel2)],each=nlevel1))))
+							if (byclass) {
+								if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef[i,],nlevel2)*
+								(beta[1]+exp(ltaucoef[i])*rep(beta[2:(1+nlevel2)],each=nlevel1)))
+								else  outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef[i,],nlevel2)*
+								(beta[1]+exp(ltaucoef[i])*rep(beta[2:(1+nlevel2)],each=nlevel1))))
+							} else
+							{
+								if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef,nlevel2)*
+								(beta[1]+exp(ltaucoef)*rep(beta[2:(1+nlevel2)],each=nlevel1)))
+								else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef,nlevel2)*
+								(beta[1]+exp(ltaucoef)*rep(beta[2:(1+nlevel2)],each=nlevel1))))
+							}
 							oneprob <- t(apply(t(x)*outcomep+t(1-x)*(1-outcomep),2,prod,na.rm=TRUE))
 			# multiply by class probabilities
 							if (i==1) allprob <- oneprob*classp[i]
@@ -257,7 +283,12 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 
     ranef <- calcrandom()
 
-    final <- calclikelihood(if (nclass==1) NULL else optim.fit$estimate[1:(nclass-1)],
+	if (byclass) final <- calclikelihood(if (nclass==1) NULL else optim.fit$estimate[1:(nclass-1)],
+    				matrix(optim.fit$estimate[nclass:(nclass+nlevel1*nlevel2*nclass-1)],nrow=nclass),
+                    matrix(optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1-1)],nrow=nclass),
+                    optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1+nclass-1)],
+                    momentdata,gh,updatemoments=FALSE)    
+	else final <- calclikelihood(if (nclass==1) NULL else optim.fit$estimate[1:(nclass-1)],
     				matrix(optim.fit$estimate[nclass:(length(optim.fit$estimate)-blocksize-1)],ncol=nlevel1*nlevel2),
                     optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
                     optim.fit$estimate[(nlevel1*nlevel2*nclass+nclass+nlevel1)],
@@ -268,7 +299,11 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
     np <- length(optim.fit$estimate)
     nobs <- sum(freq)
     deviance <- 2*sum(ifelse(freq==0,0,freq*log(freq/fitted)))
-    list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,lambdacoef=lambdacoef,taucoef=exp(ltaucoef),se=separ,
-       np=np,nobs=nobs,logLik=-optim.fit$minimum,freq=freq,fitted=fitted,ranef=ranef
+ 
+ # check that results are sensible
+ if (any(abs(as.vector(outcomex))>20)) warning("Problem in solution, probably unstable")
+ 
+ list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,lambdacoef=lambdacoef,taucoef=exp(ltaucoef),se=separ,
+       np=np,nobs=nobs,logLik=final$logl,freq=freq,fitted=fitted,ranef=ranef
     ,classprob=classprob,deviance=deviance)
 }

@@ -189,7 +189,7 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 	}
 	SET_VECTOR_ELT(ans, 0, ill);
 	if (lupdatemoments) SET_VECTOR_ELT(ans, 1, newmomentdata);
-	/* ????? how many */
+	/* how many */
 	if (lupdatemoments) UNPROTECT(9);
 	else UNPROTECT(2);
 	return ans;

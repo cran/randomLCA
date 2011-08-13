@@ -1,3 +1,13 @@
+Changes in randomLCA version 0.8-1
+
+  o simplified code
+
+  o fixed bug which caused stop when using verbose=TRUE
+  
+  o added parameter to control the number of quasi-Newton steps between each adaptive step, and reduced the default to 5
+
+  o restricted the outcome probabilities using a penalty, to prevent numerical problems
+  
 Changes in randomLCA version 0.7-5
 
   o improved output formatting in summary

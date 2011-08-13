@@ -1,7 +1,7 @@
 `randomLCA` <-
 function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=20,
 	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
-	verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
+	qniterations=5,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
     set.seed(seed)
     if (quadpoints > 190)
         stop("Maximum of 190 quadrature points\n")
@@ -38,6 +38,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 	if (missing(initmodel)) {
 		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
 		calcSE=(calcSE & !random),notrials=notrials,probit=probit,verbose=verbose)
+		#browser()
 		initmodel$nclass <- nclass
 		initmodel$random <- FALSE
 		initmodel$level2 <- FALSE
@@ -61,6 +62,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 	}
 	if (!random) fit <- initmodel
 	else {
+		# browser()
 		# sort out the initial lambdacoef
 		if (!is.null(initmodel$lambdacoef)) {
 			initlambdacoef <- as.vector(initmodel$lambdacoef)
@@ -84,36 +86,21 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 			}
 			else initltaucoef <- NULL
 		}
-		if (!byclass) {
 			if (level2) fit <- 	fit.adapt.random2.randomLCA(patterns,freq=freq,
 					nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
 					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
 					initltaucoef=initltaucoef,
 					gh=norm.gauss.hermite(quadpoints),blocksize=blocksize,
-					probit=probit,verbose=verbose)
+					probit=probit,byclass=byclass,qniterations=qniterations,
+					verbose=verbose)
    			else {
-				fit <- fit.adapt.random.randomLCA(patterns,freq=freq,nclass=nclass,
-					calcSE=calcSE,initoutcomep=initmodel$outcomep,
-					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
-					gh=norm.gauss.hermite(quadpoints),
-					blocksize=blocksize,probit=probit,verbose=verbose)
-				}
-			}
-		else {
-			if (level2) fit <- 	fit.adapt.random2byclass.randomLCA(patterns,freq=freq,
-					nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
-					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
-					initltaucoef=initltaucoef,
-					gh=norm.gauss.hermite(quadpoints),blocksize=blocksize,
-					probit=probit,verbose=verbose)
-   			else {
-				fit <- fit.adapt.randombyclass.randomLCA(patterns,freq=freq,
+				fit <- fit.adapt.random.randomLCA(patterns,freq=freq,
 					nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
 					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
 					gh=norm.gauss.hermite(quadpoints),
-					blocksize=blocksize,probit=probit,verbose=verbose)
+					blocksize=blocksize,probit=probit,byclass=byclass,qniterations=qniterations,
+					verbose=verbose)
 			}
-		}
 	}
 	fit$call <- cl
 	fit$nclass <- nclass
@@ -126,6 +113,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 	fit$patterns <- patterns
 	fit$notrials <- notrials
 	fit$freq <- freq
+	fit$qniterations <- qniterations
 	class(fit) <- "randomLCA"
 	return(fit)
 }

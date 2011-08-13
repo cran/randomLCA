@@ -1,4 +1,4 @@
-`fit.adapt.random.randomLCA` <- function(patterns,freq,nclass,calcSE,initoutcomep,initclassp,initlambdacoef,gh,blocksize,probit,verbose) {
+`fit.adapt.random.randomLCA` <- function(patterns,freq,nclass,calcSE,initoutcomep,initclassp,initlambdacoef,gh,blocksize,probit,byclass,qniterations,verbose) {
 
 # parameters
 #   outcomes matrix of outcomes 0 or 1
@@ -13,6 +13,8 @@
 #   probit use probit transform rather than logitic to obtain outcome probabilities
 #   verbose print information about algorithm    
 
+	#browser()
+	
 	patterns <- as.matrix(patterns)
 	mode(patterns) <- "double"
 
@@ -29,14 +31,23 @@
 			classp2 <- exp(classp2)/sum(exp(classp2))
 			ill <- matrix(rep(NA,nclass*length(freq)),ncol=nclass)
 			for (iclass in 1:nclass) {
-				ill[,iclass] <- .Call("bernoulliprobrandom",patterns,outcomex[iclass,],lambdacoef,
-					gh,momentdata,probit)*classp2[iclass]
-				#browser()
+				if (byclass) {
+					#browser()
+					ill[,iclass] <- .Call("bernoulliprobrandom",patterns,outcomex[iclass,],lambdacoef[iclass,],
+						gh,momentdata,probit)*classp2[iclass]				} else {
+					ill[,iclass] <- .Call("bernoulliprobrandom",patterns,outcomex[iclass,],lambdacoef,
+						gh,momentdata,probit)*classp2[iclass]
+				}
+				##browser()
 			}
 			ill2 <- rowSums(ill,na.rm=TRUE)
 			ll <- sum(log(ill2)*freq,na.rm=TRUE)
+# penalise extreme outcome probabilities
+			outcomep <- as.vector(1/(1+exp(abs(outcomex))))
+			pen <- dbeta(outcomep,1+1.0e-4,1+1.0e-4,log=TRUE)
+#			print(c(ll,sum(pen)))
+			ll <- ll+sum(pen)
 			if (is.nan(ll) || is.infinite(ll)) ll <- -1.0*.Machine$double.xmax
-			#print(ll)
 			if (calcfitted) {
 				fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*
 					ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
@@ -56,14 +67,18 @@
 			# calculate probabilities under each class
 						for (i in 1:nclass) {
 			# calculate the outcome probabilities for this class and current random
-							if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef,nrepeats)*beta)
-							else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef,nrepeats)*beta))
+							if (byclass) {
+								if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef[i,],nrepeats)*beta)
+								else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef[i,],nrepeats)*beta))				
+							} else {
+								if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef,nrepeats)*beta)
+								else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef,nrepeats)*beta))
+							}
 							oneprob <- exp(sum(outcomes*log(outcomep)+(1-outcomes)*log(1-outcomep),na.rm=TRUE))
 			# multiply by class probabilities
 							if (i==1) allprob <- oneprob*classp[i]
 							else allprob <- allprob+oneprob*classp[i]
 						}
-					
 					ll <- -(sum(log(allprob))+dnorm(beta,mean=0,sd=1,log=TRUE))
 					if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
 				  return(ll)
@@ -80,11 +95,12 @@
 	
 	
 		fitparams <- function(classx,outcomex,lambdacoef,
-			momentdata,calcSE,gh,patterns,noiterations=10) {
+			momentdata,calcSE,gh,patterns,noiterations=qniterations) {
 			calcllfornlm <- function(params,momentdata,gh,patterns) {
 				oneiteration <- calclikelihood(if (nclass==1) NULL else params[1:(nclass-1)],
 					matrix(params[nclass:(nclass+nlevel1*nclass-1)],nrow=nclass),
-					params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)],
+					if (byclass) matrix(params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
+					else params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)],
 					momentdata,gh,patterns)
 				ll <- -oneiteration$logl
 				if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
@@ -97,7 +113,8 @@
 			return(list(logl=-nlm1$minimum,
 				classx=(if (nclass==1) NULL else nlm1$estimate[1:(nclass-1)]),
 				outcomex=matrix(nlm1$estimate[nclass:(nclass+nlevel1*nclass-1)],nrow=nclass),
-				lambdacoef=nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)],
+				 lambdacoef=(if (byclass) matrix(nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
+				else lambdacoef=nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)]),
 				nlm=nlm1))	
 		}
 	
@@ -121,18 +138,28 @@
 			outcomex <- fitresults$outcomex
 			classx <- fitresults$classx
 			lambdacoef <- fitresults$lambdacoef
-			if (verbose) cat("current ll from optimisation",currll,"\n")		
+			if (verbose) cat("current ll from optimisation",currll,"\n")
+			optll <- currll
+			#browser()
 			# shift the quadrature points again
-			momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
-			oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
-			# check if moving quadrature points has changed likelihood
-        	adaptive <- (abs((oneiteration$logl-currll)/oneiteration$logl)>1.0e-7) ||
-        		(abs((oneiteration$logl-prevll)/oneiteration$logl)>1.0e-7)
-			currll <- oneiteration$logl
-			if (verbose) cat("current ll",currll,"\n")
-        	if ((prevll-currll)/abs(currll) > 1.0e-4) stop("divergence - increase quadrature points")
+			nshift <- 0
+			repeat {
+				momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
+				oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
+				# check if moving quadrature points has changed likelihood
+				if (verbose) cat("current ll",oneiteration$logl,"\n")
+				if (abs((oneiteration$logl-currll)/oneiteration$logl) < 1.0e-6) {
+					currll <- oneiteration$logl
+					break()
+				}
+				currll <- oneiteration$logl
+				nshift <- nshift+1
+       			if (nshift > 200) stop("too many shift iterations - increase quadrature points")
+			}
+        	adaptive <-	(abs((currll-prevll)/currll)>1.0e-7) || (abs((currll-optll)/currll)>1.0e-7)
+        	if ((prevll-currll)/abs(currll) > 1.0e-3) stop("divergence - increase quadrature points")
         	nadaptive <- nadaptive+1
-        	if (nadaptive > 200) stop("too many adaptive iterations - increase quadrature points")
+        	if (nadaptive > 500) stop("too many adaptive iterations - increase quadrature points")
         	prevll <- currll
 		}
 		fitresults <- fitparams(classx,outcomex,lambdacoef,momentdata,calcSE,gh,patterns,noiterations=500)
@@ -160,6 +187,7 @@
 
 	momentdata <- matrix(rep(c(0,1),each=nlevel2),nrow=nlevel2)
 
+	#browser()
 # choose among possible lambdacoef
  	if (missing(initlambdacoef) || is.null(initlambdacoef)) {
 		lastmomentdata <- momentdata
@@ -188,15 +216,20 @@
 			maxlambda <- testlambdacoef
 			lastmomentdata <- momentdata
 			testlambdacoef <- testlambdacoef+0.1
+			if (testlambdacoef >= 3.0) break()
 		}
 		if (verbose) cat('using lambdacoef ',maxlambda,"\n")
-		lambdacoef <- rep(maxlambda,blocksize)
+		if (byclass) lambdacoef <- matrix(rep(maxlambda,nclass*blocksize),nrow=nclass)
+		else lambdacoef <- rep(maxlambda,blocksize)
 		momentdata <- lastmomentdata
  	}
  	else lambdacoef <- initlambdacoef
-  	   
+
+	#browser()  	   
  	myfit <- adaptivefit(classx,outcomex,lambdacoef,calcSE,momentdata,gh,patterns)
 
+	#browser()
+	
 	optim.fit <- myfit$nlm
 	momentdata <- myfit$momentdata
 
@@ -204,7 +237,8 @@
 	if (nclass>1) classx <- optim.fit$estimate[1:(nclass-1)]
 	outcomex <- matrix(optim.fit$estimate[nclass:(nclass+nclass*nlevel1-1)],ncol=dim(patterns)[2])
 # transform using logistic to probabilities     
-    lambdacoef <- optim.fit$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)]
+       if (byclass) lambdacoef <- matrix(optim.fit$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
+       else lambdacoef <- optim.fit$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)]
 	
 	final <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=TRUE)
 			
