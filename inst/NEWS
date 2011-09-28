@@ -1,3 +1,7 @@
+Changes in randomLCA version 0.8-2
+
+  o output both standard an penalised log likelihood and added penalty parameter
+
 Changes in randomLCA version 0.8-1
 
   o simplified code

@@ -1,4 +1,4 @@
-`fit.adapt.random.randomLCA` <- function(patterns,freq,nclass,calcSE,initoutcomep,initclassp,initlambdacoef,gh,blocksize,probit,byclass,qniterations,verbose) {
+`fit.adapt.random.randomLCA` <- function(patterns,freq,nclass,calcSE,initoutcomep,initclassp,initlambdacoef,gh,blocksize,probit,byclass,qniterations,penalty,verbose) {
 
 # parameters
 #   outcomes matrix of outcomes 0 or 1
@@ -44,16 +44,16 @@
 			ll <- sum(log(ill2)*freq,na.rm=TRUE)
 # penalise extreme outcome probabilities
 			outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-			pen <- dbeta(outcomep,1+1.0e-4,1+1.0e-4,log=TRUE)
+			pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
 #			print(c(ll,sum(pen)))
-			ll <- ll+sum(pen)
+			pen11 <- ll+sum(pen)
 			if (is.nan(ll) || is.infinite(ll)) ll <- -1.0*.Machine$double.xmax
 			if (calcfitted) {
 				fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*
 					ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
 				classprob <- ill/ill2
-				return(list(logl=ll,fitted=fitted,classprob=classprob))
-			} else return(list(logl=ll))
+				return(list(logLik=ll,penlogLik=pen11,fitted=fitted,classprob=classprob))
+			} else return(list(logLik=ll,penlogLik=pen11))
 		}  # end of calclikelihood
 
 	calcrandom <- function(classx,outcomex,lambdacoef,momentdata) {
@@ -102,7 +102,7 @@
 					if (byclass) matrix(params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
 					else params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)],
 					momentdata,gh,patterns)
-				ll <- -oneiteration$logl
+				ll <- -oneiteration$penlogLik
 				if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
 				ll
 			}
@@ -110,7 +110,7 @@
 			nlm1 <- nlm(calcllfornlm, c(classx, as.vector(outcomex), lambdacoef), iterlim = noiterations,
 				print.level=ifelse(verbose,2,0),hessian=calcSE,
 				check.analyticals = FALSE,momentdata=momentdata,gh=gh,patterns=patterns)
-			return(list(logl=-nlm1$minimum,
+			return(list(penlogLik=-nlm1$minimum,
 				classx=(if (nclass==1) NULL else nlm1$estimate[1:(nclass-1)]),
 				outcomex=matrix(nlm1$estimate[nclass:(nclass+nlevel1*nclass-1)],nrow=nclass),
 				 lambdacoef=(if (byclass) matrix(nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
@@ -120,12 +120,12 @@
 	
 
 		oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
-		currll <- oneiteration$logl
+		currll <- oneiteration$penlogLik
 		if (verbose) cat('Initial ll',currll,"\n")
 	# shift the quadrature points for the first time
 		momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
 		oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
-		currll <- oneiteration$logl
+		currll <- oneiteration$penlogLik
 		if (verbose) cat("current ll",currll,"\n")		
 		
 		adaptive <- TRUE
@@ -134,7 +134,7 @@
         while(adaptive) {
 			# need to do an optimisation on the other parameters
 			fitresults <- fitparams(classx,outcomex,lambdacoef,momentdata,FALSE,gh,patterns)
-			currll <- fitresults$logl
+			currll <- fitresults$penlogLik
 			outcomex <- fitresults$outcomex
 			classx <- fitresults$classx
 			lambdacoef <- fitresults$lambdacoef
@@ -147,12 +147,12 @@
 				momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
 				oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
 				# check if moving quadrature points has changed likelihood
-				if (verbose) cat("current ll",oneiteration$logl,"\n")
-				if (abs((oneiteration$logl-currll)/oneiteration$logl) < 1.0e-6) {
-					currll <- oneiteration$logl
+				if (verbose) cat("current ll",oneiteration$penlogLik,"\n")
+				if (abs((oneiteration$penlogLik-currll)/oneiteration$penlogLik) < 1.0e-6) {
+					currll <- oneiteration$penlogLik
 					break()
 				}
-				currll <- oneiteration$logl
+				currll <- oneiteration$penlogLik
 				nshift <- nshift+1
        			if (nshift > 200) stop("too many shift iterations - increase quadrature points")
 			}
@@ -198,7 +198,7 @@
 			if (verbose) cat('trying lambdacoef ',testlambdacoef,"\n")
 			lambdacoef <- rep(testlambdacoef,blocksize)
 			oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
-			currll <- oneiteration$logl
+			currll <- oneiteration$penlogLik
 			if (verbose) cat('Initial ll',currll,"\n")
 			lastll <- 2*currll
 		# shift the quadrature points for the first time
@@ -206,7 +206,7 @@
 				lastll <- currll
 				momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
 				oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
-				currll <- oneiteration$logl
+				currll <- oneiteration$penlogLik
 				if (verbose) cat("current ll",currll,"\n")		
 			}
 			momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
@@ -242,8 +242,6 @@
 	
 	final <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=TRUE)
 			
-	fitted <- final$fitted
-	classprob <- final$classprob
 
 # calculate the probabilities
 # add extra column to classx
@@ -264,13 +262,11 @@
 # determine random effects
 
 	ranef <- calcrandom(classx,outcomex,lambdacoef,momentdata)
-
-
 	
     np <- length(optim.fit$estimate)
     nobs <- sum(freq)
-    deviance <- 2*sum(ifelse(freq==0,0,freq*log(freq/fitted)))
+    deviance <- 2*sum(ifelse(freq==0,0,freq*log(freq/final$fitted)))
     list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,lambdacoef=lambdacoef,se=separ,
-    	np=np,nobs=nobs,logLik=-optim.fit$minimum,observed=freq,fitted=fitted,
-    	deviance=deviance,ranef=ranef,classprob=classprob)
+    	np=np,nobs=nobs,logLik=final$logLik,penlogLik=final$penlogLik,observed=freq,fitted=final$fitted,
+    	deviance=deviance,ranef=ranef,classprob=final$classprob)
 }

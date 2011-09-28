@@ -1,5 +1,5 @@
 fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initlambdacoef,initltaucoef,
-    blocksize,calcSE=FALSE,gh,probit,byclass,qniterations,verbose=FALSE) {
+    blocksize,calcSE=FALSE,gh,probit,byclass,qniterations,penalty,verbose=FALSE) {
 
 #	print(initoutcomep)
 #	print(initclassp)
@@ -55,19 +55,19 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 		}
 #		browser()
         ill2 <- log(rowSums(ill))
-        totalll <- sum(ill2*freq)
+        ll <- sum(ill2*freq)
 # penalise extreme outcome probabilities
 		outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-		pen <- dbeta(outcomep,1+1.0e-4,1+1.0e-4,log=TRUE)
-		totalll <- totalll+sum(pen)
-		if (is.nan(totalll) || is.infinite(totalll)) totalll <- -1.0*.Machine$double.xmax
+		pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
+		penll <- ll+sum(pen)
+		if (is.nan(penll) || is.infinite(penll)) penll <- -1.0*.Machine$double.xmax
         if (calcfitted) {
        		fitted <- exp(ill2)*sum(ifelse(apply(outcomes,1,function(x) 
        			any(is.na(x))),0,freq))*
             		ifelse(apply(outcomes,1,function(x) any(is.na(x))),NA,1)
         	classprob <- ill/exp(ill2)
-        	return(list(logl=totalll,moments=newmoments,fitted=fitted,classprob=classprob))
-        } else return(list(logl=totalll,moments=newmoments))
+        	return(list(logLik=ll,penlogLik=penll,moments=newmoments,fitted=fitted,classprob=classprob))
+        } else return(list(logLik=ll,penlogLik=penll,moments=newmoments))
     }  # end of calclikelihood
     
     adaptivefit <- function(classx,outcomex,lambdacoef,ltaucoef,momentdata,gh) {
@@ -81,14 +81,14 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
                     if (byclass) matrix(params[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1-1)],nrow=nclass) else params[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
                     if (byclass) params[(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1+nclass-1)] else params[(nlevel1*nlevel2*nclass+nclass+nlevel1)],
                     momentdata,gh)
-                return(-oneiteration$logl)
+                return(-oneiteration$penlogLik)
             }
                         
             nlm1 <- nlm(calcllfornlm, c(classx,as.vector(outcomex),lambdacoef,ltaucoef),
             	iterlim = noiterations,
                 print.level=ifelse(verbose,2,0),
                 check.analyticals = FALSE,hessian=calcSE,momentdata=momentdata,gh=gh)
-            return(list(logl=-nlm1$minimum,
+            return(list(penlogLik=-nlm1$minimum,
             	classx=if (nclass==1) NULL else nlm1$estimate[1:(nclass-1)],
             	outcomex=matrix(nlm1$estimate[nclass:(nclass+nlevel1*nlevel2*nclass-1)],nrow=nclass),
                 lambdacoef= if (byclass) matrix(nlm1$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nclass*nlevel1-1)],nrow=nclass) else nlm1$estimate[(nlevel1*nlevel2*nclass+nclass):(nlevel1*nlevel2*nclass+nclass+nlevel1-1)],
@@ -98,7 +98,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 
         oneiteration <- calclikelihood(classx, outcomex, lambdacoef,ltaucoef,
             momentdata,gh,updatemoments=TRUE)
-        currll <- oneiteration$logl
+        currll <- oneiteration$penlogLik
         if (verbose) cat('Initial ll',currll,"\n")
         lastll <- 2*currll
     # shift the quadrature points for the first time
@@ -107,7 +107,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
             momentdata <- oneiteration$moments
             oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
             momentdata,gh,updatemoments=TRUE)
-            currll <- oneiteration$logl
+            currll <- oneiteration$penlogLik
             if (verbose) cat("current ll",currll,"\n")       
         }
                 
@@ -118,7 +118,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
             # need to do an optimisation on the other parameters
             fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
                 momentdata,gh,calcSE=FALSE)
-            currll <- fitresults$logl
+            currll <- fitresults$penlogLik
             outcomex <- fitresults$outcomex
             classx <- fitresults$classx
             lambdacoef <- fitresults$lambdacoef
@@ -128,14 +128,14 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
             # shift the quadrature points again
             oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
                 momentdata,gh,updatemoments=TRUE)
-            currll <- oneiteration$logl
+            currll <- oneiteration$penlogLik
             lastll <- 2*currll
             while(abs((lastll-currll)/lastll)>1.0e-7) {
                 lastll <- currll
                 momentdata <- oneiteration$moments
                 oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
                 momentdata,gh,updatemoments=TRUE)
-                currll <- oneiteration$logl
+                currll <- oneiteration$penlogLik
             if (verbose) cat("current ll",currll,"\n")       
             }
         	adaptive <- (abs((currll-optll)/currll)>1.0e-7) ||
@@ -144,6 +144,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
         	nadaptive <- nadaptive+1
         	if (nadaptive > 200) stop("too many adaptive iterations - increase quadrature points")
         	prevll <- currll
+        	# if (is.na(adaptive)) browser()
        }
         fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
                 momentdata,gh,calcSE=calcSE,noiterations=500)
@@ -187,7 +188,7 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
 			else theltaucoef <- testltaucoef
 			# browser()
 			onelikelihood <- calclikelihood(classx,outcomex,lambdacoef,testltaucoef,momentdata,gh)
-			currll <- onelikelihood$logl
+			currll <- onelikelihood$penlogLik
 			if (verbose) cat("ll",currll,"\n")		
 			# when the ll starts decreasing, give up
 			if (currll < maxll) break()
@@ -304,6 +305,6 @@ fit.adapt.random2.randomLCA <- function(outcomes,freq,nclass=2,initoutcomep,init
  if (any(abs(as.vector(outcomex))>20)) warning("Problem in solution, probably unstable")
  
  list(fit=optim.fit,nclass=nclass,classp=classp,outcomep=outcomep,lambdacoef=lambdacoef,taucoef=exp(ltaucoef),se=separ,
-       np=np,nobs=nobs,logLik=final$logl,freq=freq,fitted=fitted,ranef=ranef
+       np=np,nobs=nobs,logLik=final$logLik,penlogLik=final$penlogLik,freq=freq,fitted=fitted,ranef=ranef
     ,classprob=classprob,deviance=deviance)
 }

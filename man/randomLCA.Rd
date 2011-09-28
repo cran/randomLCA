@@ -8,6 +8,7 @@ Fit latent class models, which may include a random effect.
 randomLCA(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,
 	blocksize=1,notrials=20,random=FALSE,byclass=FALSE,
 	quadpoints=21,level2=FALSE,probit=FALSE,qniterations=5,
+	penalty=0.0001,
 	verbose=FALSE,
 	seed = as.integer(runif(1, 0, .Machine$integer.max)))
 }
@@ -26,6 +27,7 @@ randomLCA(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,
   \item{level2}{Fit 2 level random effects model (further details to follow)}
   \item{probit}{Probit model for random effect}
   \item{qniterations}{Number of Quasi-Newton iterations within each adaptive cycle. Decrease if there is a failure to converge}
+  \item{penalty}{penalty applied to likelihood for outcome probabilities. Shrinks outcome probabilities in slightly and can prevent extreme values. Setting penalty to 0 will produce an unpenalised fit.}
   \item{verbose}{Prints verbose of fit progress}
   \item{seed}{Initial random seed for generating starting values}
 }

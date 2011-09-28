@@ -7,6 +7,7 @@ function(object,...) {
 	out$logLik <- logLik(object)
 	out$AIC <- AIC(object)
 	out$BIC <- BIC(object)
+	out$penlogLik <- object$penlogLik
 	out$nclass <- object$nclass
 	out$classp <- object$classp
 	names(out$classp) <- paste("Class ",1:object$nclass)
@@ -52,9 +53,9 @@ print.summary.randomLCA <- function(x, ...)
 	if (x$probit) link <- "Probit"
 	else link <- "Logit"
 	if (x$random) print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
-		logLik = c(x$logLik),Link=link,row.names = " ") )
+		logLik = c(x$logLik),penlogLik = c(x$penlogLik),Link=link,row.names = " ") )
 	else print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
-		logLik = c(x$logLik),row.names = " ") )
+		logLik = c(x$logLik),penlogLik = c(x$penlogLik),row.names = " ") )
     cat("Class probabilities","\n")
 	print(round(x$classp,4))
 	if (x$random)  cat("Conditional outcome probabilities","\n")

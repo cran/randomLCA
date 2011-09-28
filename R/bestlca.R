@@ -1,8 +1,9 @@
 `bestlca` <-
-function(patterns,freq,nclass,calcSE,notrials,probit,verbose) {
+function(patterns,freq,nclass,calcSE,notrials,probit,penalty,verbose) {
 	bics <- rep(NA,notrials)
 	for (i in 1:notrials) {
-		lca <- fit.fixed.randomLCA(patterns,freq,nclass=nclass,calcSE=FALSE,probit=probit,verbose=verbose)
+		lca <- fit.fixed.randomLCA(patterns,freq,nclass=nclass,calcSE=FALSE,probit=probit,penalty=penalty,verbose=verbose)
+		#browser()
 		currbic <- -2*(lca$logLik)+log(lca$nobs)*lca$np
 		bics[i] <- currbic
 		if (i==1) {
@@ -19,7 +20,7 @@ function(patterns,freq,nclass,calcSE,notrials,probit,verbose) {
 	if (calcSE) {
 		if (verbose) print("refitting to obtain SE")
 		maxlca <- fit.fixed.randomLCA(patterns,freq,nclass=nclass,initoutcomep=maxlca$outcomep,
-			initclassp=maxlca$classp,calcSE=TRUE,probit=probit,verbose=verbose)
+			initclassp=maxlca$classp,calcSE=TRUE,probit=probit,penalty=penalty,verbose=verbose)
 	}
 	if (verbose) {
 		print(maxlca)

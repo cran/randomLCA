@@ -1,7 +1,7 @@
 `randomLCA` <-
 function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=20,
 	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
-	qniterations=5,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
+	qniterations=5,penalty=0.0001,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
     set.seed(seed)
     if (quadpoints > 190)
         stop("Maximum of 190 quadrature points\n")
@@ -37,7 +37,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 	}
 	if (missing(initmodel)) {
 		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-		calcSE=(calcSE & !random),notrials=notrials,probit=probit,verbose=verbose)
+		calcSE=(calcSE & !random),notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
 		#browser()
 		initmodel$nclass <- nclass
 		initmodel$random <- FALSE
@@ -58,7 +58,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 			if (initmodel$byclass & !byclass)
 				stop("Initial model by class and model to be fitted not.\n")
 		}
-		if (!random) initmodel <- fit.fixed.randomLCA(patterns,freq=freq,initoutcomep=initmodel$outcomep,initclassp=initmodel$classp,nclass=nclass,calcSE=calcSE,probit=probit,verbose=verbose)
+		if (!random) initmodel <- fit.fixed.randomLCA(patterns,freq=freq,initoutcomep=initmodel$outcomep,initclassp=initmodel$classp,nclass=nclass,calcSE=calcSE,probit=probit,penalty=penalty,verbose=verbose)
 	}
 	if (!random) fit <- initmodel
 	else {
@@ -91,7 +91,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
 					initltaucoef=initltaucoef,
 					gh=norm.gauss.hermite(quadpoints),blocksize=blocksize,
-					probit=probit,byclass=byclass,qniterations=qniterations,
+					probit=probit,byclass=byclass,qniterations=qniterations,penalty=penalty,
 					verbose=verbose)
    			else {
 				fit <- fit.adapt.random.randomLCA(patterns,freq=freq,
@@ -99,7 +99,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
 					gh=norm.gauss.hermite(quadpoints),
 					blocksize=blocksize,probit=probit,byclass=byclass,qniterations=qniterations,
-					verbose=verbose)
+					penalty=penalty,verbose=verbose)
 			}
 	}
 	fit$call <- cl
@@ -114,6 +114,7 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 	fit$notrials <- notrials
 	fit$freq <- freq
 	fit$qniterations <- qniterations
+	fit$penalty <- penalty
 	class(fit) <- "randomLCA"
 	return(fit)
 }
