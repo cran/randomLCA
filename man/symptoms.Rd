@@ -3,11 +3,11 @@
 \docType{data}
 \title{Symptoms data}
 \description{
+  This is the data for Beath and Heller (2009).
+  
   Allergy and respiratory symptoms for infants 0 to 2 years in six month periods. Outcome is presence or absence of symptom in the six months. Original data was collected at Visits 1-7 over the 2 year period which were summarised to six month periods.
-  
-  This is data relating to a paper which will hopefully be published shortly. I will be updating this entry then.
-  
-  Note that these models can be slow to fit, with the "symptoms.lca2random2" model taking about 3 hours. I have a couple more possibilities to speed things up. These are to code the algorithms completely in C (they are currently a mix of C and R), use a Bayesian methodology to prevent the estimates moving towards the boundaries (this can also be described as penalized likelihood) and to look at other optimisation functions.
+   
+  Note that these models can be slow to fit, with the "symptoms.lca2random2" model taking about 1-2 hours. 
   
   Thanks to the investigators of the CAPS study for making the data available.
 }
@@ -39,7 +39,7 @@
   }
 \references{
    Mihrshahi, S.,  Peat, J.K., Webb, K., Tovey, R.E., Marks, G.B., Mellis, C.M. and Leeder S.R. (2001) The Childhood Asthma Prevention Study (CAPS): Design and research protocol of a randomized trial for the primary prevention of asthma. Control led Clinical Trials, \bold{22}:333--354.
-
+   Beath, K.J. and Heller, G.Z. (2009) Latent trajectory modelling of multivariate binary data. Statistical Modelling, \bold{9(3)}:199--213.
 }
 \examples{
 data(symptoms)

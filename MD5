@@ -1,4 +1,4 @@
-50281036b6de4ca86f0b6215ee6e2f35 *DESCRIPTION
+fadc48a48009d334c586dac71a479ce6 *DESCRIPTION
 348f16a5c14f13681f34027db52de532 *NAMESPACE
 fdb194d39de0f780cb341f9f9d25fe67 *R/bestlca.R
 31cb6fb9324a7a843776b6371c73de5a *R/calc.cond.prob.R
@@ -12,7 +12,7 @@ c3271f751f5cef2cddc7d7e065491a81 *R/misc.randomLCA.R
 d1dc67c075fbbdd831e2324d9d902362 *R/norm.gauss.hermite.R
 0f2b1ad846ab008a109db12066064b7f *R/outcome.probs.randomLCA.R
 f2f8f0ddc6556ea79b173af31ed2c67e *R/plot.randomLCA.R
-7234cded2995b32b1d10c98c16c3204b *R/randomLCA.R
+78d4df9b603123fabdfd217226c9446b *R/randomLCA.R
 36162412e4c53d19402c237bcd8d610a *R/ranef.randomLCA.R
 54af8d11341c1ed82aa799fbb87cd6e2 *R/simulate.randomLCA.R
 2499194639ca5958609ea6db0e5bd13e *R/summary.randomLCA.R
@@ -22,11 +22,11 @@ f2f8f0ddc6556ea79b173af31ed2c67e *R/plot.randomLCA.R
 31c00c49804e0c51592d1e1bd534977c *data/myocardial.rda
 55a0c34453eb0605616ac6f7dc28bf34 *data/symptoms.RData
 40524198ab57f576f45eaa83f3a2d5a4 *data/uterinecarcinoma.rda
-0a454fa61bf965b3cae4450f32d48a96 *inst/NEWS
+b6f2d08a2cfbe1468c963b5488d06aec *inst/NEWS
 e00b97b7948239e013f88c53a76cd49d *inst/doc/dentistry.lca2.outcomes.boot.RData
 08c1a86776ae1ffaa4e608339571de72 *inst/doc/dentistry.lca2random.outcomes.boot.RData
 b7c4ccef57f1ca8491cd603d0c3dd7a9 *inst/doc/randomLCA-example.Rnw
-757db414fc6f1fa6fa17d64d21dd496f *inst/doc/randomLCA-example.pdf
+5f2bee78aeb1ae4cad7d95c42461063b *inst/doc/randomLCA-example.pdf
 8ca20a3474960dc0c4f9c38694314881 *inst/doc/randomLCA.bib
 828c7144fd323638bcc3a8e99259b783 *man/AIC.Rd
 0c04f745230ae481960dfd10fab244a7 *man/BIC.Rd
@@ -41,11 +41,11 @@ e09eaf61f326101b55cd07368df88463 *man/hivtests.Rd
 a56e5f4a8e30df263513e5e3c0f11fa1 *man/myocardial.Rd
 d92c3d57d0bcad069444c4292cf43e09 *man/outcome.probs.Rd
 3b0a3972ba7527a94c0d4d3cfd3515c4 *man/plot.Rd
-33663ba593e61a1e1fdba639cfbdffd3 *man/randomLCA.Rd
+7adf76f067f1050e87c79334d462ab06 *man/randomLCA.Rd
 1ad111e9575f346cff9367634e36b1df *man/ranef.Rd
 696ac89661a71f7100ea81a0585a0f11 *man/simulate.Rd
 f9acb7f60dad8a3fbffaa30604840f7b *man/summary.Rd
-6bdd0a9099543fb60972c8a85cafee9a *man/symptoms.Rd
+21665fa1e0f5952a84db32e5d4c209e0 *man/symptoms.Rd
 f2c795c8d91b6c62989c54a256b2dfd9 *man/uterinecarcinoma.Rd
 2d27ae9d944109cdbdfa91dcc3db121f *src/bernoulliprob.c
 3b0be0544476901d62038aebd578eaab *src/bernoulliprobrandom.c

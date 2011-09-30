@@ -34,6 +34,9 @@ function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=
 	else {
 	# check that freq doesn't contain missing
 		if (any(is.na(freq))) stop("freq cannot contain missing values")
+	# remove any observations with frequency of zero
+		patterns <- patterns[freq!=0,]
+		freq <- freq[freq!=0]
 	}
 	if (missing(initmodel)) {
 		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,

@@ -37,7 +37,7 @@ An example is the width of the patterns is n and the blocksize is n, resulting i
 
 The algorithm used is EM for the standard latent class and adaptive (in the sense of moving the location of teh quadrature points) Gauss-Hermite quadrature for the random effects models. The number of quadrature points defaults to 21.
 
-There are some improvements that will be made to improve the speed. The first of these will be to allow Bayesian estimation or penalised likelihood using a Dirichlet prior for the outcome probabilities. This should allow a considerable improvement in convergence. The second will be to recode the major part of the likelihood calculations in C. Switching to a GEM algorithm to improve convergence may also be a possibility.
+NOTE: in the returned object there a fields for patterns and frequencies. If frequecncies are not supplied then the patterns and frequencies are constructed. If frequencies are supplied then zero rows are removed. When frequenciues are supplied it is assumed that the data has been simplified. The returned class probabilities etc, all correspond to the simplified patterns, not to the original data.
 }
 \value{
   randomLCA object
