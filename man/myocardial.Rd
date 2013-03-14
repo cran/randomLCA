@@ -25,8 +25,10 @@
   Rindskopf, D. and Rindskopf, W. (1986) The Value of Latent Class Analysis in Medical Diagnosis. \emph{Statistics in Medicine}, \bold{5}, 21--27.
 }
 \examples{
+\dontrun{
 data(myocardial)
 # fit 2 class model from Rindskopf and Rindskopf (1986)
 myocardial.lca2 <- randomLCA(myocardial[,1:4],freq=myocardial$freq)
+}
 }
 \keyword{datasets}

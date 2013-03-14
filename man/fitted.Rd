@@ -16,6 +16,4 @@ Vector of fitteded values corresponding to the observed frequencies.
 }
 \author{Ken Beath \email{ken@kjbeath.com.au}
 }
-\examples{
-}
 \keyword{methods}

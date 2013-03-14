@@ -13,10 +13,10 @@ Simulate data from a fitted randomLCA model}
   \item{\ldots}{additional optional arguments.}
 }
 \details{
+Generates random data from the supplied object.
 }
 \value{
+A simulated data frame.
 }
 \author{Ken Beath}
-\examples{
-}
 \keyword{methods}

@@ -32,6 +32,7 @@
   Albert P.S. and Dodd, L.E. (2004) A cautionary note on the robustness of Latent Class Models for estimating diagnostic error without a gold standard. \emph{Biometrics}, \bold{60}, 427--435.
 }
 \examples{
+\dontrun{
 data(dentistry)
 # fit LCR model from Qu et al (1996)
 dentistry.lca <- randomLCA(dentistry[,1:5],freq=dentistry$freq,blocksize=5)
@@ -39,5 +40,6 @@ dentistry.lcarandom <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	initmodel=dentistry.lca,random=TRUE,blocksize=1,probit=TRUE)
 dentistry.lcarandomunequal <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	initmodel=dentistry.lcarandom,random=TRUE,blocksize=5,probit=TRUE)
+}
 }
 \keyword{datasets}

@@ -1,6 +1,10 @@
 useDynLib(randomLCA)
 
-export(randomLCA,calc.cond.prob,calc.marg.prob,ranef.randomLCA,outcome.probs)
+export(randomLCA)
+export(calc.cond.prob)
+export(calc.marg.prob)
+export(ranef.randomLCA)
+export(outcome.probs)
 
 
 # Imported functions

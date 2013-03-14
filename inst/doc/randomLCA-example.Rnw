@@ -143,11 +143,11 @@ A series of latent class models for 1 to 4 classes can be fitted using the comma
 dentistry.lca1 <- randomLCA(dentistry[,1:5],
 	freq=dentistry$freq,nclass=1)
 dentistry.lca2 <- randomLCA(dentistry[,1:5],
-	freq=dentistry$freq,nclass=2,calcSE=TRUE)
+	freq=dentistry$freq,nclass=2)
 dentistry.lca3 <- randomLCA(dentistry[,1:5],
-	freq=dentistry$freq,nclass=3)
+	freq=dentistry$freq,nclass=3,quadpoints=31)
 dentistry.lca4 <- randomLCA(dentistry[,1:5],
-	freq=dentistry$freq,nclass=4)
+	freq=dentistry$freq,nclass=4,quadpoints=41)
 @ 
 
 The BIC values may be extracted from the fitted objects and are shown in Table~\ref{tab:bic}. This indicates the presence of 3 classes. A possible interpretation is that there is a class of subjects with moderate disease, or the alternative of heterogeneous disease which will be covered in the next section. Outcome probabilities are shown in Figure~\ref{fig:outcome3} and for the 2 class model in Figure~\ref{fig:outcome2b}.
@@ -299,7 +299,7 @@ We now continue the analysis of the dentistry data, allowing for random effects.
 
 <<>>=
 dentistry.lca2random <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	initmodel=dentistry.lca2,nclass=2,random=TRUE,quadpoints=31,probit=TRUE)
+	initmodel=dentistry.lca2,nclass=2,random=TRUE,quadpoints=41,probit=TRUE)
 @ 
 
 The BIC is reduced to \Sexpr{round(BIC(dentistry.lca2random),1)} showing an improvement over any of the latent class models. An alternative model is to allow the variance of the random effect to vary by outcome (dentist). This can be performed using the \texttt{blocksize} parameter. This allows the structure of the data to be set as a series of blocks, and within each block each outcome has a different loading.
@@ -307,7 +307,7 @@ The BIC is reduced to \Sexpr{round(BIC(dentistry.lca2random),1)} showing an impr
 <<>>=
 dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,
-	quadpoints=31,blocksize=5)
+	quadpoints=41,blocksize=5)
 @ 
 
 This increases the BIC to \Sexpr{round(BIC(dentistry.lca2random1),1)}, and is the 2LCR model obtained by \citet{qu:1996}. It appears that the simpler model is more appropriate.

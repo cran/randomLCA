@@ -21,6 +21,7 @@ Extract outcome probabilities and confidence intervals for a randomLCA object.
 Confidence intervals are calculated based on asymptotic normality of the estimates transformed by either the inverse of the probit or logistic, or using parametric bootstrap. The asymptotic confidence intervals are currently only available for models without random effects.
 }
 \value{
+Data frame consisting of outcome probabilities and confidence intervals. One for each class.
 }
 \author{Ken Beath}
 \examples{

@@ -37,9 +37,10 @@ genderrole.lca3 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=3)
 genderrole.lca1random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
 	nclass=1,initmodel=genderrole.lca1,random=TRUE)
 genderrole.lca2random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	random=TRUE,initmodel=genderrole.lca2,quadpoints=31)
+	random=TRUE,initmodel=genderrole.lca2,quadpoints=41)
+\dontrun{
 genderrole.lca3random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=3,random=TRUE,initmodel=genderrole.lca3,quadpoints=31)
+	nclass=3,random=TRUE,initmodel=genderrole.lca3,quadpoints=51)
 # improved BIC for 1 class random
 print(c(BIC(genderrole.lca1),BIC(genderrole.lca2),BIC(genderrole.lca3)))
 print(c(BIC(genderrole.lca1random),BIC(genderrole.lca2random),
@@ -48,11 +49,12 @@ print(c(BIC(genderrole.lca1random),BIC(genderrole.lca2random),
 genderrole.lca1random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
 	nclass=1,initmodel=genderrole.lca1,random=TRUE,blocksize=5)
 genderrole.lca2random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	random=TRUE,initmodel=genderrole.lca2,blocksize=5,quadpoints=31)
+	random=TRUE,initmodel=genderrole.lca2,blocksize=5,quadpoints=41)
 genderrole.lca3random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=3,random=TRUE,initmodel=genderrole.lca3,blocksize=5,quadpoints=31)
+	nclass=3,random=TRUE,initmodel=genderrole.lca3,blocksize=5,quadpoints=51)
 	# no improvement in fit
 print(c(BIC(genderrole.lca1random2),BIC(genderrole.lca2random2),
 	BIC(genderrole.lca3random2)))
+}
 }
 \keyword{datasets}

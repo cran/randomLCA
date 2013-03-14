@@ -15,8 +15,7 @@ Returns AIC for a randomLCA object.
 Not complete.
 }
 \value{
+AIC.
 }
 \author{Ken Beath}
-\examples{
-}
 \keyword{methods}

@@ -15,8 +15,7 @@ Returns log Likelihood for a randomLCA object.
 Not complete.
 }
 \value{
+The loglikelihood.
 }
 \author{Ken Beath}
-\examples{
-}
 \keyword{methods}

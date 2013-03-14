@@ -15,8 +15,7 @@ Returns BIC for a randomLCA object.
 Not complete.
 }
 \value{
+BIC
 }
 \author{Ken Beath}
-\examples{
-}
 \keyword{methods}

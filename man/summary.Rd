@@ -30,6 +30,4 @@ Not complete.
   \item{taucoef}{tau coefficients}
 }
 \author{Ken Beath}
-\examples{
-}
 \keyword{methods}

@@ -48,6 +48,7 @@ NOTE: in the returned object there a fields for patterns and frequencies. If fre
 }
 \author{Ken Beath}
 \examples{
+\dontrun{
 # dentist data
 data(dentistry)
 # standard latent class with 2 classes
@@ -60,5 +61,6 @@ dentistry.lca2random <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	initmodel=dentistry.lca2random,nclass=2,random=TRUE,probit=TRUE,
 	blocksize=5)
+}
 }
 \keyword{multivariate}

@@ -42,8 +42,8 @@
    Beath, K.J. and Heller, G.Z. (2009) Latent trajectory modelling of multivariate binary data. Statistical Modelling, \bold{9(3)}:199--213.
 }
 \examples{
-data(symptoms)
 \dontrun{
+data(symptoms)
 symptoms.lca2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=2)
 symptoms.lca2random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
 	initmodel=symptoms.lca2,random=TRUE,nclass=2,blocksize=4)
