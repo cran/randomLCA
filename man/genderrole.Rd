@@ -28,6 +28,7 @@
    Heinen, T. (1996) Latent Class and Discrete Latent Trait Models: Similarities and Differences. 
 }
 \examples{
+\dontrun{
 data(genderrole)
 # standard latent class
 genderrole.lca1 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=1)
@@ -38,7 +39,6 @@ genderrole.lca1random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
 	nclass=1,initmodel=genderrole.lca1,random=TRUE)
 genderrole.lca2random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
 	random=TRUE,initmodel=genderrole.lca2,quadpoints=41)
-\dontrun{
 genderrole.lca3random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
 	nclass=3,random=TRUE,initmodel=genderrole.lca3,quadpoints=51)
 # improved BIC for 1 class random

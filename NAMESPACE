@@ -11,6 +11,8 @@ export(outcome.probs)
 importFrom(nlme, ranef)
 importFrom(graphics, plot)
 importFrom(stats,simulate)
+importFrom(lattice,xyplot)
+importFrom(boot,boot)
 
 if (!exists("BIC", envir=asNamespace("stats"),inherits=FALSE)) {
    importFrom(nlme, BIC)

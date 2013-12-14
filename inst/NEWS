@@ -1,3 +1,9 @@
+Changes in randomLCA version 0.8-7
+
+  o moved vignettes to correct folder
+
+  o added imports from lattice and boot to fix error message in check
+  
 Changes in randomLCA version 0.8-6
 
   o passes all CRAN tests

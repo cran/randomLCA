@@ -1,5 +1,5 @@
-4d5089c9ecc7f09e9c60c12b09226751 *DESCRIPTION
-a7204c3e8e0ff79b9120deadc5001029 *NAMESPACE
+b7a3fd534a50730871c59adc72b9de0c *DESCRIPTION
+1f95aa1b5b3912a084fdd3be84c64891 *NAMESPACE
 fdb194d39de0f780cb341f9f9d25fe67 *R/bestlca.R
 31cb6fb9324a7a843776b6371c73de5a *R/calc.cond.prob.R
 a46b8cd734df6f8f0d9c6f76b9d187a1 *R/calc.cond2.prob.R
@@ -17,18 +17,17 @@ f2f8f0ddc6556ea79b173af31ed2c67e *R/plot.randomLCA.R
 36162412e4c53d19402c237bcd8d610a *R/ranef.randomLCA.R
 54af8d11341c1ed82aa799fbb87cd6e2 *R/simulate.randomLCA.R
 2499194639ca5958609ea6db0e5bd13e *R/summary.randomLCA.R
+14cc23b934a239fcd3db245aee8112f2 *build/vignette.rds
 32464514a5b449cbe3e82bc66015d13d *data/dentistry.rda
 1e20f00b74fb6ff271b212a0c600624f *data/genderrole.rda
 0f1c37f72dec894cbe66d1ce50306a7a *data/hivtests.rda
 31c00c49804e0c51592d1e1bd534977c *data/myocardial.rda
 55a0c34453eb0605616ac6f7dc28bf34 *data/symptoms.RData
 40524198ab57f576f45eaa83f3a2d5a4 *data/uterinecarcinoma.rda
-a3ab7a770560b0853d957d1954e62e1b *inst/NEWS
-e00b97b7948239e013f88c53a76cd49d *inst/doc/dentistry.lca2.outcomes.boot.RData
-08c1a86776ae1ffaa4e608339571de72 *inst/doc/dentistry.lca2random.outcomes.boot.RData
+53d4728eec0f97b0fae16fc044503431 *inst/NEWS
+73867f5e448c09160659008f42c5f840 *inst/doc/randomLCA-example.R
 ec7e576f7b88b058d4edc28bfc9c130c *inst/doc/randomLCA-example.Rnw
-042c01881815a15b91cdcfb429af91fb *inst/doc/randomLCA-example.pdf
-8ca20a3474960dc0c4f9c38694314881 *inst/doc/randomLCA.bib
+cba73ea86cb25b488693e15736c81260 *inst/doc/randomLCA-example.pdf
 c38b902cb5fe07adb5f03023cd46ce0d *man/AIC.Rd
 67346630396b03a7028257ea9cd6700f *man/BIC.Rd
 0e932d6c79b01cc1f5c9a94f3349e6e3 *man/calc.cond.prob.Rd
@@ -36,7 +35,7 @@ fa06e6c2d84651237adbd80f6db25e69 *man/calc.cond2.prob.Rd
 ba6a63bf04c41dc1bacbfc0549f0cdad *man/calc.marg.prob.Rd
 fcbd94993c7c71218c34c10d2fabb508 *man/dentistry.Rd
 2dbb01371818cfe9c32a7e4c2a6785d6 *man/fitted.Rd
-d5ef7e8e7c8d296cb453b2a2dcc1547a *man/genderrole.Rd
+d4e0cbb7b625c9430364c8f9ec8ac281 *man/genderrole.Rd
 e09eaf61f326101b55cd07368df88463 *man/hivtests.Rd
 54bc0fe28e7499a7c82f8353a2cb3538 *man/logLik.Rd
 e00f0a622d7ab34e96a8fe44c010e743 *man/myocardial.Rd
@@ -52,3 +51,7 @@ a7a5dcb79dbd1e208c1e99abc9e40120 *man/simulate.Rd
 3b0be0544476901d62038aebd578eaab *src/bernoulliprobrandom.c
 2154b288415c21d87a5baa1f852c0e6f *src/bernoulliprobrandom2.c
 3399eb9a68e933227602df3621e5d9e0 *src/lcemalgorith.c
+e00b97b7948239e013f88c53a76cd49d *vignettes/dentistry.lca2.outcomes.boot.RData
+08c1a86776ae1ffaa4e608339571de72 *vignettes/dentistry.lca2random.outcomes.boot.RData
+ec7e576f7b88b058d4edc28bfc9c130c *vignettes/randomLCA-example.Rnw
+8ca20a3474960dc0c4f9c38694314881 *vignettes/randomLCA.bib
