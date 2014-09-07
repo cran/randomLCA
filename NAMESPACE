@@ -1,39 +1,45 @@
 useDynLib(randomLCA)
 
+export(.onAttach)
 export(randomLCA)
 export(calc.cond.prob)
 export(calc.marg.prob)
 export(ranef.randomLCA)
 export(outcome.probs)
+export(refit)
+export(summary.randomLCA)
+export(class.probs)
+export(post.class.probs)
 
 
 # Imported functions
-importFrom(nlme, ranef)
 importFrom(graphics, plot)
 importFrom(stats,simulate)
 importFrom(lattice,xyplot)
 importFrom(boot,boot)
+importFrom(boot,boot.ci)
 
-if (!exists("BIC", envir=asNamespace("stats"),inherits=FALSE)) {
-   importFrom(nlme, BIC)
-} else {
-   importFrom(stats, BIC)
-}
+importFrom(stats, BIC)
 importFrom(stats, AIC)
 importFrom(stats, logLik)
+
+importFrom(fastGHQuad, "gaussHermiteData")
 
 # S3 methods
 S3method(plot, randomLCA)
 S3method(summary, randomLCA)
 S3method(ranef, randomLCA)
 S3method(fitted, randomLCA)
-S3method(print, summary.randomLCA)
-
+S3method(refit, randomLCA)
+S3method(class.probs,randomLCA)
+S3method(post.class.probs,randomLCA)
 S3method(outcome.probs, randomLCA)
-S3method(print,outcome.probs.randomLCA)
 S3method(simulate, randomLCA)
-
 S3method(logLik, randomLCA)
 S3method(AIC, randomLCA)
 S3method(BIC, randomLCA)
+
+S3method(print,outcome.probs.randomLCA)
+S3method(print, summary.randomLCA)
+
 

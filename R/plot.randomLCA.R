@@ -24,6 +24,7 @@ function(x,...,graphtype=c("conditional","marginal","conditional2","both"),condi
     	conddata$graphtype <- "Conditional2"
     	graphdata <- rbind(graphdata,conddata)
     }
+    
 # set up the x axis labels    
 #	thenames <- names(object$patterns)[1:object$blocksize]
 #		names2 <- strsplit(names2,"\\.")
@@ -32,11 +33,13 @@ function(x,...,graphtype=c("conditional","marginal","conditional2","both"),condi
 #			x <- c(x,names2[[i]][1])
 #		}
 #		names2 <- x
-
+#  ???? need to do something with blocksize
 	graphdata$graphtype <- factor(graphdata$graphtype)
-    # first decide if there are multiple blocks, otherwise plot all classes on one graph
-    if ((x$blocksize==1) | (x$blocksize==dim(x$patterns)[2])) {
-    	if (x$blocksize==1) {
+  if (x$level2) blocksize <- x$level2size
+  else blocksize <- x$blocksize
+# first decide if there are multiple blocks, otherwise plot all classes on one graph
+    if ((blocksize==1) | (blocksize==dim(x$patterns)[2])) {
+    	if (blocksize==1) {
 			if (graphtype=="both")
 				print(xyplot(outcomep~block|graphtype,group=class,data=graphdata,...))
 			if (graphtype=="marginal")

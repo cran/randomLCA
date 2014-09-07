@@ -16,19 +16,27 @@ function(object,...) {
 	names(out$outcomep) <- names(object$patterns)
 	out$random <- object$random
 	out$level2 <- object$level2
+	  if (object$constload) blocksize <-  1
+	  else {
+		if (object$level2) blocksize <- object$level2size
+		else blocksize <- object$blocksize
+	  }  
 	if (object$random) {
 		out$lambdacoef <- object$lambdacoef
 		if (!object$byclass) out$lambdacoef <- t(out$lambdacoef)
 		if (object$byclass) names1 <- paste("Class ",1:object$nclass)
 		else names1 <- ''
-		names2 <- names(object$patterns)[1:object$blocksize]
+    #browser()
+		names2 <- names(object$patterns)[1:blocksize]
 		names2 <- strsplit(names2,"\\.")
 		x <- NULL
-		for (i in 1:object$blocksize) {
+    #browser()
+		for (i in 1:blocksize) {
 			x <- c(x,names2[[i]][1])
 		}
-		if (object$blocksize==1) names2 <- ""
+		if (blocksize==1) names2 <- ""
 		else names2 <- x
+    #browser()
 		dimnames(out$lambdacoef) <- list(names1,names2)
 		if (object$level2) {
 			out$taucoef <- object$taucoef

@@ -34,24 +34,24 @@ data(genderrole)
 genderrole.lca1 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=1)
 genderrole.lca2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq)
 genderrole.lca3 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=3)
-# repeat with random effect
+# repeat with random effect with constant loading
 genderrole.lca1random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=1,initmodel=genderrole.lca1,random=TRUE)
+	nclass=1,random=TRUE)
 genderrole.lca2random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	random=TRUE,initmodel=genderrole.lca2,quadpoints=41)
+	random=TRUE,quadpoints=41)
 genderrole.lca3random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=3,random=TRUE,initmodel=genderrole.lca3,quadpoints=51)
+	nclass=3,random=TRUE,quadpoints=51)
 # improved BIC for 1 class random
 print(c(BIC(genderrole.lca1),BIC(genderrole.lca2),BIC(genderrole.lca3)))
 print(c(BIC(genderrole.lca1random),BIC(genderrole.lca2random),
 	BIC(genderrole.lca3random)))
-# can also repeat fits with blocksize=5 to give mixture of IRT models
+# can also repeat fits without constant loading to give mixture of IRT models
 genderrole.lca1random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=1,initmodel=genderrole.lca1,random=TRUE,blocksize=5)
+	nclass=1,random=TRUE,constload=FALSE)
 genderrole.lca2random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	random=TRUE,initmodel=genderrole.lca2,blocksize=5,quadpoints=41)
+	random=TRUE,constload=FALSE,quadpoints=41)
 genderrole.lca3random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=3,random=TRUE,initmodel=genderrole.lca3,blocksize=5,quadpoints=51)
+	nclass=3,random=TRUE,constload=FALSE,quadpoints=51)
 	# no improvement in fit
 print(c(BIC(genderrole.lca1random2),BIC(genderrole.lca2random2),
 	BIC(genderrole.lca3random2)))

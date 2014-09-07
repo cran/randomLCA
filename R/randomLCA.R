@@ -1,124 +1,151 @@
+.onAttach <-
+  function (libname, pkgname) 
+  {
+    loadmsg <- "\nNote that there are changes to the parameters for the randomLCA and class.probs functions in version 9.0. See NEWS.\n"
+    packageStartupMessage(loadmsg, domain = NULL, appendLF = TRUE)
+  }
+
 `randomLCA` <-
-function(patterns,freq,nclass=2,calcSE=TRUE,initmodel=NULL,blocksize=1,notrials=20,
-	random=FALSE,byclass=FALSE,quadpoints=21,level2=FALSE,probit=FALSE,
-	qniterations=5,penalty=0.0001,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
+  function(patterns,freq,nclass=2,calcSE=TRUE,notrials=20,
+           random=FALSE,byclass=FALSE,quadpoints=21,constload=TRUE,blocksize=dim(patterns)[2],
+           level2=FALSE,probit=FALSE,level2size=blocksize,
+           qniterations=5,penalty=0.0001,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
     set.seed(seed)
     if (quadpoints > 190)
-        stop("Maximum of 190 quadrature points\n")
-	cl <- match.call()
+      stop("Maximum of 190 quadrature points\n")
+    cl <- match.call()
     # check that patterns are either 0 or 1
-	if (any(apply(as.matrix(patterns),2,function(x) any((x!=0)&(x!=1)&!is.na(x)))))
-		stop("patterns must consist of either 0 or 1")    
-	# check that patterns doesn't contain column which is all missing
-	if (any(apply(as.matrix(patterns),2,function(x) all(is.na(x)))))
-		stop("patterns cannot contain columns consisting entirely of missing")
-	# check that freq are all >= 0
-	if (!missing(freq)) {
-		if (any(freq<0))
-			stop("frequencies must be greater than or equal to zero")
-	}
-	if (random & ((dim(patterns)[2] %% blocksize)!=0))
-		stop("outcomes must be a multiple of blocksize")
-	# if no frequencies given, then assume that the data needs to be summaried
-	if (missing(freq)) {
-		pats <- apply(patterns, 1, function(x) {paste(ifelse(is.na(x),"N",x),collapse="")})
-		tpats <- table(pats)
-		freq <- as.numeric(tpats)
-		newpatterns <- unlist(strsplit(names(tpats),split=""))
-		newpatterns <- ifelse(newpatterns=="N",NA_character_,newpatterns)
-		newpatterns <- as.data.frame(matrix(as.numeric(newpatterns),byrow=TRUE,ncol=dim(patterns)[2]))
-		if (is.null(names(patterns))) names(newpatterns) <- paste("X",1:dim(patterns)[2],sep="")
-		else names(newpatterns) <- names(patterns)
-		patterns <- newpatterns
-	}
-	else {
-	# check that freq doesn't contain missing
-		if (any(is.na(freq))) stop("freq cannot contain missing values")
-	# remove any observations with frequency of zero
-		patterns <- patterns[freq!=0,]
-		freq <- freq[freq!=0]
-	}
-	if (missing(initmodel)) {
-		initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-		calcSE=(calcSE & !random),notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
-		#browser()
-		initmodel$nclass <- nclass
-		initmodel$random <- FALSE
-		initmodel$level2 <- FALSE
-		initmodel$byclass <- FALSE
-		initmodel$blocksize <- 1
-	}
-	else {
-		if (initmodel$nclass != nclass)
-			stop("Initial model must have same number of classes.\n")
-		if (dim(initmodel$patterns)[2] != dim(patterns)[2])
-			stop("Initial model must have same number of outcomes.\n")
-		if (initmodel$random & !random)
-			stop("Initial model random and model to be fitted not.\n")
-		if (initmodel$random) {
-			if ((initmodel$blocksize!=1) & (initmodel$blocksize!=blocksize))
-				stop("Initial model must have same number or 1 for blocksize.\n")
-			if (initmodel$byclass & !byclass)
-				stop("Initial model by class and model to be fitted not.\n")
-		}
-		if (!random) initmodel <- fit.fixed.randomLCA(patterns,freq=freq,initoutcomep=initmodel$outcomep,initclassp=initmodel$classp,nclass=nclass,calcSE=calcSE,probit=probit,penalty=penalty,verbose=verbose)
-	}
-	if (!random) fit <- initmodel
-	else {
-		# browser()
-		# sort out the initial lambdacoef
-		if (!is.null(initmodel$lambdacoef)) {
-			initlambdacoef <- as.vector(initmodel$lambdacoef)
-			if (initmodel$blocksize != blocksize) initlambdacoef <- rep(initlambdacoef,each=blocksize)
-			if (byclass) {
-				if (!initmodel$byclass) {
-					initlambdacoef <- rep(initlambdacoef,each=nclass)
-				}
-				initlambdacoef <- matrix(initlambdacoef,ncol=blocksize)
-			}			
-		}
-		else {
-			initlambdacoef <- NULL
-		}
-		if (level2) {
-			if (!is.null(initmodel$taucoef)) {
-				initltaucoef <- log(initmodel$taucoef)
-				if (byclass) {
-					if (initmodel$byclass != byclass) initltaucoef <- rep(initltaucoef,each=nclass)
-				}
-			}
-			else initltaucoef <- NULL
-		}
-			if (level2) fit <- 	fit.adapt.random2.randomLCA(patterns,freq=freq,
-					nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
-					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
-					initltaucoef=initltaucoef,
-					gh=norm.gauss.hermite(quadpoints),blocksize=blocksize,
-					probit=probit,byclass=byclass,qniterations=qniterations,penalty=penalty,
-					verbose=verbose)
-   			else {
-				fit <- fit.adapt.random.randomLCA(patterns,freq=freq,
-					nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
-					initclassp=initmodel$classp,initlambdacoef=initlambdacoef,
-					gh=norm.gauss.hermite(quadpoints),
-					blocksize=blocksize,probit=probit,byclass=byclass,qniterations=qniterations,
-					penalty=penalty,verbose=verbose)
-			}
-	}
-	fit$call <- cl
-	fit$nclass <- nclass
-	fit$random <- random
-	fit$level2 <- level2
-	fit$byclass <- byclass
-	fit$probit <- probit
-	fit$quadpoints <- quadpoints
-	fit$blocksize <- blocksize
-	fit$patterns <- patterns
-	fit$notrials <- notrials
-	fit$freq <- freq
-	fit$qniterations <- qniterations
-	fit$penalty <- penalty
-	class(fit) <- "randomLCA"
-	return(fit)
-}
+    if (any(apply(as.matrix(patterns),2,function(x) any((x!=0)&(x!=1)&!is.na(x)))))
+      stop("patterns must consist of either 0 or 1")    
+    # check that patterns doesn't contain column which is all missing
+    if (any(apply(as.matrix(patterns),2,function(x) all(is.na(x)))))
+      stop("patterns cannot contain columns consisting entirely of missing")
+    # check that freq are all >= 0
+    if (!missing(freq)) {
+      if (any(freq<0))
+        stop("frequencies must be greater than or equal to zero")
+    }
+    if (random & ((dim(patterns)[2] %% blocksize)!=0))
+      stop("number of outcomes must be a multiple of blocksize")
+    # if no frequencies given, then assume that the data needs to be summaried
+    if (missing(freq)) {
+      pats <- apply(patterns, 1, function(x) {paste(ifelse(is.na(x),"N",x),collapse="")})
+      tpats <- table(pats)
+      freq <- as.numeric(tpats)
+      newpatterns <- unlist(strsplit(names(tpats),split=""))
+      newpatterns <- ifelse(newpatterns=="N",NA_character_,newpatterns)
+      newpatterns <- as.data.frame(matrix(as.numeric(newpatterns),byrow=TRUE,ncol=dim(patterns)[2]))
+      if (is.null(names(patterns))) names(newpatterns) <- paste("X",1:dim(patterns)[2],sep="")
+      else names(newpatterns) <- names(patterns)
+      patterns <- newpatterns
+    }
+    else {
+      # check that freq doesn't contain missing
+      if (any(is.na(freq))) stop("freq cannot contain missing values")
+      # remove any observations with frequency of zero
+      patterns <- patterns[freq!=0,]
+      freq <- freq[freq!=0]
+    }
+    if (!random) initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
+                                      calcSE=(calcSE & !random),notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
+    else {
+      if (!level2) {
+        initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
+                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
+        # work out how many lambda coefs there are
+        if (constload) nlambda <- 1
+        else nlambda <- min(dim(patterns)[2],blocksize)
+        # now fit the simplest random efefcts model ie with constant loading
+        initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+                                                nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                initclassp=initmodel$classp,initlambdacoef=1.0,
+                                                gh=norm.gauss.hermite(quadpoints),
+                                                constload=TRUE,probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                penalty=penalty,verbose=verbose)
+        # fit with variable loading if required
+        if (!constload)  initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+                                                nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                initclassp=initmodel$classp,
+                                                 initlambdacoef=rep(initmodel$lambdacoef,nlambda),
+                                                 gh=norm.gauss.hermite(quadpoints),
+                                                  constload=constload,blocksize=blocksize,
+                                                 probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                  penalty=penalty,verbose=verbose)
+        if (byclass)  {
+          initlambdacoef <- matrix(rep(initmodel$lambdacoef,nclass),nrow=nclass,byrow=TRUE)
+          initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+                                                  nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                  initclassp=initmodel$classp,
+                                                  initlambdacoef=initlambdacoef,
+                                                  gh=norm.gauss.hermite(quadpoints),
+                                                  constload=constload,blocksize=blocksize,
+                                                  probit=probit,byclass=byclass,qniterations=qniterations,
+                                                  penalty=penalty,verbose=verbose)
+        }
+      } else {
+        # 2 level models
+        initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
+                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
+        # work out how many lambda coefs there are
+        if (constload) nlambda <- 1
+        else nlambda <- min(dim(patterns)[2],blocksize)
+        # now fit the simplest random efefcts model
+        initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+                                                nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                initclassp=initmodel$classp,initlambdacoef=NULL,
+                                                gh=norm.gauss.hermite(quadpoints),
+                                                constload=TRUE,probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                penalty=penalty,verbose=verbose)
+        # fit with variable loading if required
+        if (!constload)  initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+                                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                                 initclassp=initmodel$classp,
+                                                                 initlambdacoef=rep(initmodel$lambdacoef,nlambda),
+                                                                 gh=norm.gauss.hermite(quadpoints),
+                                                                 constload=constload,blocksize=level2size,
+                                                                 probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                                 penalty=penalty,verbose=verbose)
+        if (byclass)  {
+          initlambdacoef <- matrix(rep(initmodel$lambdacoef,nclass),nrow=nclass,byrow=TRUE)
+          initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+                                                  nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                  initclassp=initmodel$classp,
+                                                  initlambdacoef=initlambdacoef,
+                                                  gh=norm.gauss.hermite(quadpoints),
+                                                  constload=constload,blocksize=level2size,
+                                                  probit=probit,byclass=byclass,qniterations=qniterations,
+                                                  penalty=penalty,verbose=verbose)
+        }
+        # now fit the level 2
+        initmodel <- fit.adapt.random2.randomLCA(patterns,freq=freq,
+                                                nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                initclassp=initmodel$classp,
+                                                initlambdacoef=initmodel$lambdacoef,
+                                                 initltaucoef=NULL,
+                                                gh=norm.gauss.hermite(quadpoints),
+                                                constload=constload,level2size=level2size,
+                                                probit=probit,byclass=byclass,qniterations=qniterations,
+                                                penalty=penalty,verbose=verbose)
+      }
+    }
+    
+    fit <- initmodel
+    fit$call <- cl
+    fit$nclass <- nclass
+    fit$random <- random
+    fit$constload <- constload
+    fit$level2 <- level2
+    fit$level2size <- level2size
+    fit$byclass <- byclass
+    fit$probit <- probit
+    fit$quadpoints <- quadpoints
+    fit$blocksize <- blocksize
+     fit$patterns <- patterns
+    fit$notrials <- notrials
+    fit$freq <- freq
+    fit$qniterations <- qniterations
+    fit$penalty <- penalty
+    class(fit) <- "randomLCA"
+    return(fit)
+  }
 

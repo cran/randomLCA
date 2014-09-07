@@ -7,7 +7,10 @@ function(object) {
         stop("Object must be random effects model.\n")
 	if (object$probit) outcomex <- qnorm(object$outcomep)
 	else outcomex <- log(object$outcomep/(1-object$outcomep))
-    nblocks <- dim(object$outcomep)[2]/object$blocksize
+	if (object$level2) blocksize <- object$level2size
+	else blocksize <- object$blocksize
+	nblocks <- dim(object$outcomep)[2]/blocksize
+  #browser()
     if (object$level2) {
     	outcomep <- NULL
     	for (i in 1:object$nclass) { 
@@ -19,8 +22,8 @@ function(object) {
 			# 1 and 2 are the points
 			# 3 and 4 are the weights
 			
-			points <- cbind(expand.grid(norm.gauss.hermite(21)[,1],norm.gauss.hermite(21)[,1]),
-				expand.grid(norm.gauss.hermite(21)[,2],norm.gauss.hermite(21)[,2]))
+			points <- cbind(expand.grid(norm.gauss.hermite(51)[,1],norm.gauss.hermite(51)[,1]),
+				expand.grid(norm.gauss.hermite(51)[,2],norm.gauss.hermite(51)[,2]))
 				
 			if (object$probit) {
 				wprobs <- t(apply(points,1, function(x) {
@@ -33,27 +36,29 @@ function(object) {
 			}			
 			outcomep <- c(outcomep,apply(wprobs,2,sum))	
 		}
-		outcome <- factor(rep(1:object$blocksize,times=nblocks))
-		class <- factor(rep(1:object$nclass,each=object$blocksize*nblocks))
-		block <- factor(rep(1:nblocks,each=object$blocksize,times=object$nclass))
+		outcome <- factor(rep(1:blocksize,times=nblocks))
+		class <- factor(rep(1:object$nclass,each=blocksize*nblocks))
+		block <- factor(rep(1:nblocks,each=blocksize,times=object$nclass))
     } else
     {
     	outcomep <- NULL
     	for (i in 1:object$nclass) { 
     		if (object$byclass) lambdacoef <- rep(as.vector(object$lambdacoef[i,]),
-				times=dim(object$outcomep)[2]/object$blocksize)
+				times=dim(object$outcomep)[2]/blocksize)
 			else lambdacoef <- rep(as.vector(object$lambdacoef),
-				times=dim(object$outcomep)[2]/object$blocksize)
-			if (object$probit) probs <- apply(as.matrix(norm.gauss.hermite(21)[,1]),1,function(x)
+				times=dim(object$outcomep)[2]/blocksize)
+			if (object$probit) probs <- apply(as.matrix(norm.gauss.hermite(51)[,1]),1,function(x)
 				pnorm(outcomex[i,]+x*lambdacoef))
-			else probs <- apply(as.matrix(norm.gauss.hermite(21)[,1]),1,function(x)
+			else probs <- apply(as.matrix(norm.gauss.hermite(51)[,1]),1,function(x)
 				1/(1+exp(-outcomex[i,]-x*lambdacoef)))
-			outcomep <- c(outcomep,apply(t(t(probs)*norm.gauss.hermite(21)[,2]),1,sum))
+			outcomep <- c(outcomep,apply(t(t(probs)*norm.gauss.hermite(51)[,2]),1,sum))
 		}
-		outcome <- factor(rep(1:object$blocksize,times=nblocks))
-		class <- factor(rep(1:object$nclass,each=object$blocksize*nblocks))
-		block <- factor(rep(1:nblocks,each=object$blocksize,times=object$nclass))
+		outcome <- factor(rep(1:blocksize,times=nblocks))
+		class <- factor(rep(1:object$nclass,each=blocksize*nblocks))
+		block <- factor(rep(1:nblocks,each=blocksize,times=object$nclass))
 	}
+	outcomep <- ifelse(outcomep>1-1.0e-14,1-1.0e-14,outcomep)
+	outcomep <- ifelse(outcomep<1.0e-14,1.0e-14,outcomep)
 	margdata <- data.frame(class,block,outcome,outcomep)
 	margdata
 }

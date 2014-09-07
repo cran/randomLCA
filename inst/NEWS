@@ -1,3 +1,25 @@
+Changes in randomLCA version 0.9-0
+
+  o there have been major changes in this version
+
+  o added constload parameter to specify that loadings are constant for each outcome and modified use of blocksize parameter so it now refers only to size of level2 units or repeated outcomes in single level models.
+
+  o reduce stepmax in nlm to reduce chance of not finding true maximum
+
+  o use routine from fastGHQuad for Gauss-Hermite quadrature
+
+  o remove initmodel parameter
+
+  o changed fitting algorithm for both random effects models to use generalised EM algorithm.
+
+  o tidy up namespace requirements.
+
+  o change default method for standard errors with outcome.probs to normal bootstrap with 50 simulations.
+
+  o increased the quadrature points in the calculation of marginal probabilities, just to be safe. This should be converted to use adaptive quadrature.
+
+  o change name of class.probs to post.class.probs to better reflect what it does, and add class.probs function to return overall probability of each class
+
 Changes in randomLCA version 0.8-7
 
   o moved vignettes to correct folder

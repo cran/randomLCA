@@ -31,17 +31,20 @@ simulate.randomLCA <-
 			else alloutcomex <- log(alloutcomep/(1-alloutcomep))
 	# create lambda randoms
 			rlambda <- rep(rnorm(object$nobs),each=dim(object$patterns)[2])		
-			nrepeats <- dim(object$patterns)[2]/object$blocksize
-			if (object$level2) {
+			if (!object$byclass) nrepeats <- dim(object$patterns)[2]/length(object$lambdacoef)
+      else nrepeats <- dim(object$patterns)[2]/dim(object$lambdacoef)[2]
+	
+	if (object$level2) {
 				if (object$byclass) alltau <- 
 							as.vector(apply(matrix(rclass,ncol=1),1,function(x) {
 								object$taucoef[x]
 							}))
 				else alltau <- rep(object$taucoef,object$nobs)
 #				browser()
-				rlambda <-  rlambda+rep(rnorm(object$nobs*nrepeats),
-						each=object$blocksize)*rep(alltau,each=dim(object$patterns)[2])
+				rlambda <-  rlambda+rep(rnorm(object$nobs*dim(object$patterns)[2]/object$level2size),
+						each=object$level2size)*rep(alltau,each=dim(object$patterns)[2])
 			}
+# browser()
 			if (object$byclass) {
 				alllambda <- as.vector(apply(matrix(rclass,ncol=1),1,function(x) {
 								rep(object$lambdacoef[x,],nrepeats)

@@ -5,32 +5,30 @@ format.perc <- function(probs, digits)
     paste(format(100 * probs, trim = TRUE, scientific = FALSE, digits = digits),
 	  "%")
 
-outcome.probs <- function(object, ...)
+outcome.probs <- function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,999),...)
 	UseMethod("outcome.probs")
 
 outcome.probs.randomLCA <-
-function(object,level = 0.95, boot=FALSE, type="perc",R=ifelse(type=="perc",999,200),...) {
+function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,999),...) {
     if (!inherits(object, "randomLCA"))
         stop("Use only with 'randomLCA' objects.\n")
     if (object$random & !boot)
         stop("Not implemented for models with random effects. Use bootstrap option.\n")
+    if (object$random & boot & !(type %in% c("perc","norm")))
+        stop("Only bootstrap of type perc or normal available")
     out <- list()
 	nclass <- object$nclass
 	if (boot) {
 		dostatistic <- function(x,initmodel) {
 	# fit the model using the simulated data
 			onesim <- function () {
-				sim <- randomLCA(x,nclass=initmodel$nclass,
-					calcSE=FALSE,initmodel=initmodel,
-					blocksize=initmodel$blocksize,notrials=1,random=initmodel$random,
-					byclass=initmodel$byclass,quadpoints=initmodel$quadpoints,
-					level2=initmodel$level2,probit=initmodel$probit,verbose=FALSE)
+				sim <- refit(initmodel,newpatterns=x)
 				if (sim$random) {
 					marg.prob <- calc.marg.prob(sim)
 					marg.prob <- as.vector(matrix(marg.prob$outcomep,
 						nrow=nclass,byrow=TRUE))
 # convert to appropriate scale
-					if (sim$probit) estimate <- qnorm(marg.prob)
+          if (sim$probit) estimate <- qnorm(marg.prob)
 					else estimate <- log(marg.prob/(1-marg.prob))	
 					} else  estimate <- sim$fit$estimate[nclass:(length(sim$fit$estimate))]
 					return(estimate)
@@ -50,10 +48,7 @@ function(object,level = 0.95, boot=FALSE, type="perc",R=ifelse(type=="perc",999,
 		}
 # expand data so one observation per row
 		newdata <- object$patterns[rep(1:length(object$freq),object$freq),]
-		newmodel <- randomLCA(newdata,nclass=object$nclass,calcSE=FALSE,initmodel=object,
-				blocksize=object$blocksize,notrials=1,random=object$random,
-				byclass=object$byclass,quadpoints=object$quadpoints,
-				level2=object$level2,probit=object$probit)
+		newmodel <- refit(object,newpatterns=newdata)
 		themle <- newmodel
 		theboot <- boot(newdata,dostatistic,R=R,sim="parametric",
 		ran.gen=gendata,
@@ -62,19 +57,18 @@ function(object,level = 0.95, boot=FALSE, type="perc",R=ifelse(type=="perc",999,
 			)
 		failed <- sum(is.na(theboot$t[,1]))
 		if (failed > 0) warning(sprintf("Convergence failed for %d models",failed))
+    #browser()
 		ci <- t(apply(as.matrix(1:length(theboot$t0)),1,function(x) {
 				ci <- boot.ci(theboot, conf = level, type = type,index = x)
 				if (type=="perc") return(c(ci$t0,ci$percent[4:5]))
-				if (type=="normal") return(c(ci$t0,ci$normal[2:3]))
-				if (type=="basic") return(c(ci$t0,ci$basic[4:5]))
+				if (type=="norm") return(c(ci$t0,ci$normal[2:3]))
 		}))
-        
 		outcomex <- ci[,1]
 		outcomexl <- ci[,2]
 		outcomexu <- ci[,3]
 		
-# transform using logistic to probabilities  
-		if (object$probit) {
+# transform using logistic to probabilities
+ 		if (object$probit) {
 			outcomep <- pnorm(outcomex)
 			outcomepl <- pnorm(outcomexl)
 			outcomepu <- pnorm(outcomexu)
@@ -85,9 +79,9 @@ function(object,level = 0.95, boot=FALSE, type="perc",R=ifelse(type=="perc",999,
 		}
 	} else {
 # needs changes for random effects models
-		outcomex <- object$fit$estimate[nclass:(length(object$fit$estimate))]
+	  outcomex <- object$fit$estimate[nclass:(length(object$fit$estimate))]
 		outcomexse <- object$se[nclass:(length(object$fit$estimate))]
-# transform using logistic to probabilities  
+# transform using logistic or probit to probabilities  
 		if (object$probit) {
 			outcomep <- pnorm(outcomex)
 			outcomepl <- pnorm(outcomex+qnorm((1-level)/2)*outcomexse)

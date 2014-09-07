@@ -25,6 +25,7 @@ Not complete.
   \item{margoutcomep}{outcome probabilities (marginal), if model contains random effects}
   \item{random}{model includes random effects}
   \item{level2}{model has 2 level hierarchy}
+  \item{constload}{loadings are constant by outcome}
   \item{byclass}{lambda and tau vary by class}
   \item{lambdacoef}{lambda coefficients}
   \item{taucoef}{tau coefficients}

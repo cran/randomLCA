@@ -6,7 +6,7 @@ SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP ve
 	SEXP ans, ill, ill2, classprob, logl, newoutcomep, newclassp;
 	int emit, irow, iclass, outcome, index, noutcomes, nrows, nclass, lverbose;
 	double *rpatterns = REAL(patterns),  
-		*rfreq=REAL(freq), *rans, oldll, *rill, *rill2, *rclassprob, product,
+		*rfreq=REAL(freq), oldll, *rill, *rill2, *rclassprob, product,
 		sumll, ll, sumfreq, sum1, sum2, *rlogl, *rnewoutcomep, *rnewclassp;
 
 	lverbose = asLogical(verbose);

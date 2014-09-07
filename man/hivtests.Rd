@@ -20,7 +20,7 @@
   Qu, Tan and Kutner (1989)
   }
 \references{
-   Alvord, W.G., Drummond, J.E., Arthur, L.O., Goedert, J.J., Levine, P.H., Murphy, E.L., Weiss, S.H., and Blattner, W.A. (1988) A method for predicting individual HIV infection status in teh absence of clinical information. \emph{AIDS Research and Human Retroviruses}, \bold{4}, 295--304.
+   Alvord, W.G., Drummond, J.E., Arthur, L.O., Goedert, J.J., Levine, P.H., Murphy, E.L., Weiss, S.H., and Blattner, W.A. (1988) A method for predicting individual HIV infection status in the absence of clinical information. \emph{AIDS Research and Human Retroviruses}, \bold{4}, 295--304.
 
   Qu, Y., Tan, M. and Kutner, M.H. (1996) Random effects models in latent
   class analysis for evaluating accuracy of diagnostic tests.
@@ -28,11 +28,9 @@
 }
 \examples{
 data(hivtests)
-# fit 2LC model from Qu et al (1996)
-hivtests.lca <- randomLCA(hivtests[,1:4],freq=hivtests$freq)
 # fit model with random effect
-# this is different to teh Qu paper which only applies the RE to tests 2 and 3
+# this is different to the Qu paper which only applies the RE to tests 2 and 3
 hivtests.lcarandom <- randomLCA(hivtests[,1:4],freq=hivtests$freq,
-	initmodel=hivtests.lca,random=TRUE,blocksize=1,quadpoints=41,probit=TRUE)
+	random=TRUE,constload=TRUE,quadpoints=41,probit=TRUE)
 }
 \keyword{datasets}

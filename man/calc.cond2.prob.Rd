@@ -14,6 +14,6 @@ calc.cond2.prob(object, conditionalp = 0.5)
 \value{
 Returns a data frame containing perc (p value for random effect) , class, block, outcome and outcomep (outcome probability).
 }
-\author{Ken Beath \email{ken@kjbeath.com.au}
+\author{Ken Beath \email{kenbeath@mq.edu.au}
 }
 \keyword{methods}

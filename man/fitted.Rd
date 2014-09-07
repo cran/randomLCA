@@ -1,6 +1,6 @@
 \name{fitted}
 \alias{fitted.randomLCA}
-\title{fitteded values}
+\title{fitted values}
 \description{
 Extract fitteded values for randomLCA object
 }
@@ -12,7 +12,7 @@ Extract fitteded values for randomLCA object
   \item{\dots}{ additional argument; currently none is used. }
 }
 \value{
-Vector of fitteded values corresponding to the observed frequencies.
+A data frame. The first columns of the data frame correspond to the patterns, followed by the frequency of each pattern, and then the fitted number for each pattern.
 }
 \author{Ken Beath \email{ken@kjbeath.com.au}
 }

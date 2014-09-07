@@ -2,7 +2,7 @@
 \alias{plot.randomLCA}
 \title{Plot a randomLCA object}
 \description{
-Plots the outcome probabilities for a randomLCA object, for random effects objects this can be either marginal or conditional or both. For a 2 level random effects model conditional2 will condition on the subject random effect and integrate over the period random effects.
+Plots the outcome probabilities for a randomLCA object, for random effects objects this can be either marginal or conditional or both. For a 2 level random effects model conditional2 will condition on the subject random effect and integrate over the period random effects. Note that plot is based on the xyplot function.
 }
 \usage{
 \method{plot}{randomLCA}(x, \ldots ,graphtype = c("conditional", "marginal",

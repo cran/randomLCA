@@ -5,15 +5,14 @@
 SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP ltaucoef,
 	SEXP gh, SEXP momentdata, SEXP probit, SEXP updatemoments)
 {
-	SEXP ans, ill, outcomep, newmomentdata, ll2,  ll3, sum3, sum4, sum5, sum3total, sum4total, sum5total, mye_2, mye2_2, mye23_2,e_2,e2_2,e23_2,e,e2;
-	int irow, outcome, index, noutcomes, nrows, i2point, i3point, npoints, blocksize,
-		ilambda, lprobit, lupdatemoments, nlevel2, i2;
-	double *rpatterns = REAL(patterns), *routcomex = REAL(outcomex), *rans,
-		*routcomep,new3w, new3p, new2w, new2p, *rmomentdata=REAL(momentdata),
+	SEXP ans, ill,  newmomentdata,  sum3, sum4, sum5, sum3total, sum4total, sum5total;
+	int irow, outcome, index, noutcomes, nrows, i2point, i3point, npoints, level2size,
+		lprobit, lupdatemoments, nlevel2, i2;
+	double *rpatterns = REAL(patterns), *routcomex = REAL(outcomex),
+		new3w, new3p, new2w, new2p, *rmomentdata=REAL(momentdata),
 		*rgh=REAL(gh),*rlambdacoef=REAL(lambdacoef), *rill, *rnewmomentdata,
-		 *rll2,  *rll3, *rmye_2, *rmye2_2,  *rmye23_2, *re_2, *re2_2, *re23_2, *re, *re2,
 		 product, sum2, sum2total, suml3, suml4,suml5, *rsum3, *rsum4, *rsum5, *rsum3total,
-		 *rsum4total, *rsum5total, sumll3, llsum, myoutcomex, myoutcomep, rtaucoef;
+		 *rsum4total, *rsum5total,  myoutcomex, myoutcomep, rtaucoef;
 	
 	lprobit = asLogical(probit);
 	lupdatemoments = asLogical(updatemoments);
@@ -23,8 +22,8 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 	noutcomes = LENGTH(outcomex);
 	nrows = LENGTH(patterns)/noutcomes;
 	npoints = LENGTH(gh)/2;
-	blocksize=LENGTH(lambdacoef);
-	nlevel2=noutcomes/blocksize;
+	level2size=LENGTH(lambdacoef);
+	nlevel2=noutcomes/level2size;
 
 	
 	if (lupdatemoments) PROTECT(ans = allocVector(VECSXP,2));
@@ -90,16 +89,16 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 						dnorm(new2p,0.0,1.0,TRUE);
 					/* calculate logl for level 2 unit */
 					product=1.0;
-					for (outcome=0; outcome <blocksize; outcome++) {
+					for (outcome=0; outcome <level2size; outcome++) {
 						/* calculate outcome probability for this outcome */
-						myoutcomex = routcomex[outcome+i2*blocksize]+ (new3p+new2p*rtaucoef)*rlambdacoef[outcome];
+						myoutcomex = routcomex[outcome+i2*level2size]+ (new3p+new2p*rtaucoef)*rlambdacoef[outcome];
 						if (lprobit)
 							myoutcomep=pnorm(myoutcomex,0,1,TRUE,FALSE);
 						else
 							myoutcomep=exp(myoutcomex)/(1+exp(myoutcomex));
 						/* update likelihood for this observation */
 					/*  Rprintf("myoutcomep  %f\n",myoutcomep); */
-						index = irow+(outcome+i2*blocksize)*nrows;
+						index = irow+(outcome+i2*level2size)*nrows;
 						if (!ISNAN(rpatterns[index])) {
 							product = product*(rpatterns[index]*myoutcomep+
 								(1-rpatterns[index])*(1-myoutcomep));

@@ -5,10 +5,10 @@
 SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef, 
 	SEXP gh, SEXP momentdata, SEXP probit)
 {
-	SEXP ans,outcomep;
-	int irow, outcome, index, noutcomes, nrows, ipoint, npoints, blocksize, ilambda, lprobit;
+	SEXP ans;
+	int irow, outcome, index, noutcomes, nrows, ipoint, npoints, level2size, ilambda, lprobit;
 	double *rpatterns = REAL(patterns), *routcomex = REAL(outcomex), *rans,
-		*routcomep,neww,newp, *rmomentdata=REAL(momentdata),
+		neww,newp, *rmomentdata=REAL(momentdata),
 		*rgh=REAL(gh),*rlambdacoef=REAL(lambdacoef);
 	double product, sum, myoutcomex, myoutcomep;
 	
@@ -17,7 +17,7 @@ SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef,
 	noutcomes = LENGTH(outcomex);
 	nrows = LENGTH(patterns)/noutcomes;
 	npoints = LENGTH(gh)/2;
-	blocksize=LENGTH(lambdacoef);
+	level2size=LENGTH(lambdacoef);
 	
 	PROTECT(ans = allocVector(REALSXP,nrows));
 	
@@ -45,7 +45,7 @@ SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef,
 					myoutcomep=pnorm(myoutcomex,0,1,TRUE,FALSE);
 				else
 					myoutcomep=exp(myoutcomex)/(1+exp(myoutcomex));
-				ilambda=(ilambda+1) % blocksize;				
+				ilambda=(ilambda+1) % level2size;				
 				/* update likelihood for this observation */
 			/*  Rprintf("myoutcomep  %f\n",myoutcomep); */
 				index = irow+outcome*nrows;

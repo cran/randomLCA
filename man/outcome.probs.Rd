@@ -1,24 +1,23 @@
 \name{outcome.probs}
 \alias{outcome.probs}
-\alias{outcome.probs.randomLCA}
 \title{Extract outcome probabilities for randomLCA object}
 \description{
 Extract outcome probabilities and confidence intervals for a randomLCA object.
 }
 \usage{
-\method{outcome.probs}{randomLCA}(object, level = 0.95, boot=FALSE, type="perc",
-	R=ifelse(type=="perc",999,200),\ldots)
+outcome.probs(object,level = 0.95, boot=FALSE, type="norm",
+    R=ifelse(type=="norm",199,999),\ldots)
 }
 \arguments{
   \item{object}{randomLCA object}
   \item{level}{confidence interval}
   \item{boot}{use parametric bootstrap to obtain confidence interval}
-  \item{type}{type of bootstrap confidence intervals to use "perc", "normal" and "basic" are valid, see boot.ci for description. There is a risk of excessively large confidence limits when using other than "perc"}
+  \item{type}{type of bootstrap confidence intervals to use, with "perc" or "norm" valid, see boot.ci for description. It seems reasonable to use the normal approximation.}
   \item{R}{replications for parametric bootstrap}
   \item{\dots}{ additional argument; currently none is used. }
 }
 \details{
-Confidence intervals are calculated based on asymptotic normality of the estimates transformed by either the inverse of the probit or logistic, or using parametric bootstrap. The asymptotic confidence intervals are currently only available for models without random effects.
+Confidence intervals are calculated based on asymptotic normality of the estimates transformed by either the inverse of the probit or logistic, or using parametric bootstrap. The asymptotic confidence intervals are currently only available for models without random effects. For the confidence intervals obtained from the parametric bootstrap, the bootstrap is performed on the data that has been transformed to the logit or probit scale, as appropriate. The samples are close to normal allowing for the use of confidence intervals based on the normal approximation. About 199 replications gives similar accuracy to percentile with 999.
 }
 \value{
 Data frame consisting of outcome probabilities and confidence intervals. One for each class.

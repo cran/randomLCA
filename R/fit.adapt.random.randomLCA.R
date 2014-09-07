@@ -1,4 +1,4 @@
-`fit.adapt.random.randomLCA` <- function(patterns,freq,nclass,calcSE,initoutcomep,initclassp,initlambdacoef,gh,blocksize,probit,byclass,qniterations,penalty,verbose) {
+`fit.adapt.random.randomLCA` <- function(patterns,freq,nclass,calcSE,initoutcomep,initclassp,initlambdacoef,gh,constload,blocksize,probit,byclass,qniterations,penalty,verbose) {
 
 # parameters
 #   outcomes matrix of outcomes 0 or 1
@@ -7,7 +7,7 @@
 #   initoutcomep initial outcome probabilities
 #   initclassp initial class probabilities
 #   initlambdacoef initial lambda coefficient
-#   blocksize number of outcomes in each period
+#   constload are the loadings constant or different for each outcome
 #   calcSE calculate standard errors ?
 #   gh matrix of gauss-hermite coefficients first column positions, second columns weights
 #   probit use probit transform rather than logitic to obtain outcome probabilities
@@ -18,13 +18,14 @@
 	patterns <- as.matrix(patterns)
 	mode(patterns) <- "double"
 
-	nrepeats <- dim(patterns)[2]/blocksize
+	nrepeats <- ifelse(constload,dim(patterns)[2],1)
+	lambdasize <- ifelse(constload,1,min(dim(patterns)[2],blocksize))
 	nlevel1 <- dim(patterns)[2]
 	nlevel2 <- length(freq)
 
 	if (verbose) print("fit.random.randomLCA")
 
-		calclikelihood <- function(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=FALSE) {
+		calclikelihood <- function(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=FALSE,zprop=NULL) {
 			#starttime <- proc.time()
 			# turn classx into actual probabilities
 			classp2 <- c(0,classx)       
@@ -40,8 +41,16 @@
 				}
 				##browser()
 			}
-			ill2 <- rowSums(ill,na.rm=TRUE)
-			ll <- sum(log(ill2)*freq,na.rm=TRUE)
+# if zprop not supplied then we have the usual maximum likelihood
+			if (is.null(zprop)) {
+          ill2 <- rowSums(ill,na.rm=TRUE)
+			    ll <- sum(log(ill2)*freq,na.rm=TRUE)
+			} else {
+# otherwise calculate the comple data maximum likelihood for the em algorithm
+#        browser()
+			  ill2 <- rowSums(log(ill)*zprop,na.rm=TRUE)
+			  ll <- sum(ill2*freq,na.rm=TRUE)			  
+			}
 # penalise extreme outcome probabilities
 			outcomep <- as.vector(1/(1+exp(abs(outcomex))))
 			pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
@@ -49,7 +58,9 @@
 			pen11 <- ll+sum(pen)
 			if (is.nan(ll) || is.infinite(ll)) ll <- -1.0*.Machine$double.xmax
 			if (calcfitted) {
-				fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*
+# do this again in case we are using likelihood for em
+			  ill2 <- rowSums(ill,na.rm=TRUE)
+			  fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*
 					ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
 				classprob <- ill/ill2
 				return(list(logLik=ll,penlogLik=pen11,fitted=fitted,classprob=classprob))
@@ -95,26 +106,26 @@
 	
 	
 		fitparams <- function(classx,outcomex,lambdacoef,
-			momentdata,calcSE,gh,patterns,noiterations=qniterations) {
-			calcllfornlm <- function(params,momentdata,gh,patterns) {
+			momentdata,calcSE,gh,patterns,noiterations=qniterations,zprop=NULL) {
+			calcllfornlm <- function(params,momentdata,gh,patterns,zprop) {
 				oneiteration <- calclikelihood(if (nclass==1) NULL else params[1:(nclass-1)],
 					matrix(params[nclass:(nclass+nlevel1*nclass-1)],nrow=nclass),
-					if (byclass) matrix(params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
-					else params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)],
-					momentdata,gh,patterns)
+					if (byclass) matrix(params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*lambdasize-1)],nrow=nclass)
+					else params[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+lambdasize-1)],
+					momentdata,gh,patterns,zprop=zprop)
 				ll <- -oneiteration$penlogLik
 				if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
 				ll
 			}
 			
 			nlm1 <- nlm(calcllfornlm, c(classx, as.vector(outcomex), lambdacoef), iterlim = noiterations,
-				print.level=ifelse(verbose,2,0),hessian=calcSE,
-				check.analyticals = FALSE,momentdata=momentdata,gh=gh,patterns=patterns)
+				print.level=ifelse(verbose,2,0),hessian=calcSE,stepmax=1,
+				check.analyticals = FALSE,momentdata=momentdata,gh=gh,patterns=patterns,zprop=zprop)
 			return(list(penlogLik=-nlm1$minimum,
 				classx=(if (nclass==1) NULL else nlm1$estimate[1:(nclass-1)]),
 				outcomex=matrix(nlm1$estimate[nclass:(nclass+nlevel1*nclass-1)],nrow=nclass),
-				 lambdacoef=(if (byclass) matrix(nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
-				else lambdacoef=nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)]),
+				 lambdacoef=(if (byclass) matrix(nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*lambdasize-1)],nrow=nclass)
+				else lambdacoef=nlm1$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+lambdasize-1)]),
 				nlm=nlm1))	
 		}
 	
@@ -124,17 +135,19 @@
 		if (verbose) cat('Initial ll',currll,"\n")
 	# shift the quadrature points for the first time
 		momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
-		oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
+		oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=TRUE)
 		currll <- oneiteration$penlogLik
+    zprop <- oneiteration$classprobs
 		if (verbose) cat("current ll",currll,"\n")		
 		
 		adaptive <- TRUE
 		prevll <- -Inf
 		nadaptive <- 0
-        while(adaptive) {
+    while(adaptive) {
 			# need to do an optimisation on the other parameters
-			fitresults <- fitparams(classx,outcomex,lambdacoef,momentdata,FALSE,gh,patterns)
+			fitresults <- fitparams(classx,outcomex,lambdacoef,momentdata,FALSE,gh,patterns,zprop=zprop)
 			currll <- fitresults$penlogLik
+ #     print(cat("em likelihood",currll)
 			outcomex <- fitresults$outcomex
 			classx <- fitresults$classx
 			lambdacoef <- fitresults$lambdacoef
@@ -161,7 +174,10 @@
         	nadaptive <- nadaptive+1
         	if (nadaptive > 500) stop("too many adaptive iterations - increase quadrature points")
         	prevll <- currll
-		}
+    # get the proportions for the em algorithm
+			oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=TRUE)
+      zprop <- oneiteration$classprobs
+    }
 		fitresults <- fitparams(classx,outcomex,lambdacoef,momentdata,calcSE,gh,patterns,noiterations=500)
 		return(list(nlm=fitresults$nlm,momentdata=momentdata))
 	} # end adaptivefit
@@ -196,7 +212,7 @@
  		maxll <- -Inf
  		repeat {
 			if (verbose) cat('trying lambdacoef ',testlambdacoef,"\n")
-			lambdacoef <- rep(testlambdacoef,blocksize)
+			lambdacoef <- rep(testlambdacoef,lambdasize)
 			oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
 			currll <- oneiteration$penlogLik
 			if (verbose) cat('Initial ll',currll,"\n")
@@ -219,8 +235,8 @@
 			if (testlambdacoef >= 3.0) break()
 		}
 		if (verbose) cat('using lambdacoef ',maxlambda,"\n")
-		if (byclass) lambdacoef <- matrix(rep(maxlambda,nclass*blocksize),nrow=nclass)
-		else lambdacoef <- rep(maxlambda,blocksize)
+		if (byclass) lambdacoef <- matrix(rep(maxlambda,nclass*lambdasize),nrow=nclass)
+		else lambdacoef <- rep(maxlambda,lambdasize)
 		momentdata <- lastmomentdata
  	}
  	else lambdacoef <- initlambdacoef
@@ -237,8 +253,8 @@
 	if (nclass>1) classx <- optim.fit$estimate[1:(nclass-1)]
 	outcomex <- matrix(optim.fit$estimate[nclass:(nclass+nclass*nlevel1-1)],ncol=dim(patterns)[2])
 # transform using logistic to probabilities     
-       if (byclass) lambdacoef <- matrix(optim.fit$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*blocksize-1)],nrow=nclass)
-       else lambdacoef <- optim.fit$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+blocksize-1)]
+       if (byclass) lambdacoef <- matrix(optim.fit$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+nclass*lambdasize-1)],nrow=nclass)
+       else lambdacoef <- optim.fit$estimate[(nlevel1*nclass+nclass):(nlevel1*nclass+nclass+lambdasize-1)]
 	
 	final <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=TRUE)
 			

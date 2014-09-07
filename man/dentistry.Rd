@@ -35,11 +35,13 @@
 \dontrun{
 data(dentistry)
 # fit LCR model from Qu et al (1996)
-dentistry.lca <- randomLCA(dentistry[,1:5],freq=dentistry$freq,blocksize=5)
+dentistry.lca <- randomLCA(dentistry[,1:5],freq=dentistry$freq,level2size=5)
+# start with constant laoding
 dentistry.lcarandom <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	initmodel=dentistry.lca,random=TRUE,blocksize=1,probit=TRUE)
+	random=TRUE,probit=TRUE)
+# allow loading to vary by dentist
 dentistry.lcarandomunequal <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	initmodel=dentistry.lcarandom,random=TRUE,blocksize=5,probit=TRUE)
+	random=TRUE,constload=FALSE,probit=TRUE)
 }
 }
 \keyword{datasets}
