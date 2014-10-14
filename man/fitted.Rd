@@ -14,6 +14,6 @@ Extract fitteded values for randomLCA object
 \value{
 A data frame. The first columns of the data frame correspond to the patterns, followed by the frequency of each pattern, and then the fitted number for each pattern.
 }
-\author{Ken Beath \email{ken@kjbeath.com.au}
+\author{Ken Beath \email{ken.beath@mq.edu.au}
 }
 \keyword{methods}

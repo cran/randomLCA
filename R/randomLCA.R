@@ -1,7 +1,7 @@
 .onAttach <-
   function (libname, pkgname) 
   {
-    loadmsg <- "\nNote that there are changes to the parameters for the randomLCA and class.probs functions in version 9.0. See NEWS.\n"
+    loadmsg <- "\nNote that there are changes to the parameters for the randomLCA and class.probs functions in version 0.9. See NEWS.\n"
     packageStartupMessage(loadmsg, domain = NULL, appendLF = TRUE)
   }
 
