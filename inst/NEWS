@@ -1,3 +1,13 @@
+Changes in randomLCA version 1.0-1
+
+  o improvements to help documentation
+
+  o added check for non-identifiability of model
+
+  o include patterns with zero frequency in fitting if supplied - this increases fitting time but gives the predictions for these patterns
+
+ o fixed errors in examples vignette
+
 Changes in randomLCA version 1.0-0
 
   o changed default graph to marginal for random effects models

@@ -78,7 +78,6 @@ function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,
 			outcomepu <- exp(outcomexu)/(1+exp(outcomexu))
 		}
 	} else {
-# needs changes for random effects models
 	  outcomex <- object$fit$estimate[nclass:(length(object$fit$estimate))]
 		outcomexse <- object$se[nclass:(length(object$fit$estimate))]
 # transform using logistic or probit to probabilities  

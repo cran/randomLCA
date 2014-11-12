@@ -12,8 +12,8 @@ randomLCA(patterns,freq,nclass=2,calcSE=TRUE,notrials=20,
   seed = as.integer(runif(1, 0, .Machine$integer.max)))}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{patterns}{Matrix of 0 and 1 defining the outcome patterns}
-  \item{freq}{Frequency for each outcome pattern, if missing this is calculated from the patterns}
+  \item{patterns}{Data frame or matrix of 0 and 1 defining the outcome patterns}
+  \item{freq}{Frequency for each outcome pattern, if missing this is calculated from the patterns, and the patterns are summarised to remove duplicate values.}
   \item{nclass}{Number of classes to be fitted}
   \item{calcSE}{Calculate standard errors for parameters}
   \item{notrials}{For a standard latent class model, the number of random starting values used}
@@ -41,9 +41,33 @@ NOTE: in the returned object there a fields for patterns and frequencies. If fre
 \value{
   randomLCA object
   This contains
-\item{outcomep}{Outcome probability}
+\item{fit}{Fit object from optim}
+\item{nclass}{Number of classes}
 \item{classp}{Class probabilities}
+\item{outcomep}{Outcome probability}
 \item{lambdacoef}{Loadings}
+\item{se}{Standard errors corresponding to results returned by optim}
+\item{np}{Number of parameters}
+\item{nobs}{Number of observations in total}
+\item{logLik}{log likelihood for fitted model}
+\item{penlogLik}{Penalised log likelihood for fitted model}
+\item{observed}{Observed numbers corresponding to each pattern}
+\item{fitted}{Fitted number corresponding to each pattern}
+\item{deviance}{Deviance}
+\item{classprob}{Posterior class probability for each pattern}
+\item{bics}{BIC obtained for each trial when fitting initial latent class models}
+\item{call}{call to randomLCA}
+\item{random}{random parameter to randomLCA}
+\item{constload}{constload parameter to randomLCA}
+\item{level2}{level2 parameter to randomLCA}
+\item{level2size}{level2size parameter to randomLCA}
+\item{byclass}{byclass parameter to randomLCA}
+\item{probit}{probit parameter to randomLCA}
+\item{quadpoints}{quadpoints parameter to randomLCA}
+\item{blocksize}{blocksize parameter to randomLCA}
+\item{freq}{frequency of each pattern}
+\item{qniterations}{qniterations parameter to randomLCA}
+\item{penalty}{penalty parameter to randomLCA}
 }
 \author{Ken Beath}
 \examples{

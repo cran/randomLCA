@@ -28,9 +28,8 @@
 }
 \examples{
 data(hivtests)
-# fit model with random effect
-# this is different to the Qu paper which only applies the RE to tests 2 and 3
-hivtests.lcarandom <- randomLCA(hivtests[,1:4],freq=hivtests$freq,
-	random=TRUE,constload=TRUE,quadpoints=41,probit=TRUE)
+# fit standard latent class
+hivtests.lca2 <- randomLCA(hivtests[,1:4],freq=hivtests$freq)
+# with random effect model is not identifiable
 }
 \keyword{datasets}

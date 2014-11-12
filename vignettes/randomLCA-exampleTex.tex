@@ -28,15 +28,14 @@ A requirement for the estimates of the probabilities $\pi_{cj}$ is that they be 
 
 This example demonstrates the fitting of data from \citet{rindskopf:1986}, where latent class analysis is used to determine diagnostic classifications based on medical tests. Although this example is for medical data, the model is simply standard latent class so the methods can be applied to data from other areas.
 
-A series of latent class models for 1 to 4 classes can be fitted using the commands
+A series of latent class models for 1 and 2 classes (any models with additional classes are not identifiable) can be fitted using the commands
 \begin{Schunk}
 \begin{Sinput}
+> data(myocardial)
 > myocardial.lca1 <- randomLCA(myocardial[,1:4],
-+   freq=myocardial$freq,nclass=1)
++ 	freq=myocardial$freq,nclass=1)
 > myocardial.lca2 <- randomLCA(myocardial[,1:4],
 + 	freq=myocardial$freq,nclass=2)
-> myocardial.lca3 <- randomLCA(myocardial[,1:4],
-+ 	freq=myocardial$freq,nclass=3)
 \end{Sinput}
 \end{Schunk}
 
@@ -44,15 +43,14 @@ The BIC values may be extracted from the fitted objects and are shown in Table~\
 
 \begin{Schunk}
 \begin{Sinput}
-> bic.data <- data.frame(classes=1:3,bic=c(BIC(myocardial.lca1),
-+ 	BIC(myocardial.lca2),BIC(myocardial.lca3)))
+> bic.data <- data.frame(classes=1:2,bic=c(BIC(myocardial.lca1),BIC(myocardial.lca2)))
 \end{Sinput}
 \end{Schunk}
 
 
 
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 21:59:38 2014
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:15:10 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rr}
@@ -61,7 +59,6 @@ classes & bic \\
   \hline
 1 & 524.7 \\ 
   2 & 402.3 \\ 
-  3 & 421.1 \\ 
    \hline
 \end{tabular}
 \caption{BIC by class.} 
@@ -99,8 +96,8 @@ Individual results may be obtained from summary, for example the outcome probabi
 
 
 
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 21:59:38 2014
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:15:10 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrrrr}
@@ -133,8 +130,8 @@ with results shown in Table~\ref{tab:classprob1}. This shows subjects with 3 or 
 
 
 
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 21:59:38 2014
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:15:10 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrrrrrr}
@@ -207,8 +204,8 @@ The BIC values may be extracted from the fitted objects and are shown in Table~\
 
 
 
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 22:00:07 2014
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:15:19 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rr}
@@ -255,7 +252,7 @@ classes & bic \\
 \end{figure}
 
 The 2 Class results can be interpreted as a diagnostic test. Important results for diagnostic testing are the sensitivity and specificity for each test. The sensitivity is the probability of the test correctly identifying the subject as diseased given that the subject is diseased. In classical diagnostic testing the "true" status of a subject is known through use of a "gold standard" which is assumed to, sometiems optimistically, correctly classify the subject. The latent class method constructs a hypothetical standard, which has the disadvantage that this is not known with certainty but it allows correctly for any uncertainty in the underlying disease state. The other measure is specificity which is the probability of correctly identifying a subject as not diseased.
-The sensitivities are then simply the outcome probabilities for the diseased class, Class 1 and the specificity one minus the outcome probabilities for the non-diseased class, Class 2. These can be obtained with 95\% confidence intervals using the outcome.probs function.
+The sensitivities are then simply the outcome probabilities for the diseased class, Class 2 and the specificity one minus the outcome probabilities for the non-diseased class, Class 1. These can be obtained with 95\% confidence intervals using the outcome.probs function.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -263,19 +260,19 @@ The sensitivities are then simply the outcome probabilities for the diseased cla
 \end{Sinput}
 \begin{Soutput}
 Class  1 
-   Outcome p     2.5 %    97.5 %
-V1 0.4033507 0.3616410 0.4465062
-V2 0.7128814 0.6691323 0.7529812
-V3 0.5981282 0.5494260 0.6449679
-V4 0.4888447 0.4468917 0.5309554
-V5 0.9154706 0.8856534 0.9380563
-Class  2 
     Outcome p       2.5 %     97.5 %
-V1 0.01061848 0.006938933 0.01621735
-V2 0.10198787 0.089733658 0.11570283
-V3 0.01359122 0.008592972 0.02143394
-V4 0.03156300 0.024211228 0.04105323
-V5 0.30527870 0.287118959 0.32406489
+V1 0.01061849 0.006938943 0.01621734
+V2 0.10198791 0.089733840 0.11570269
+V3 0.01359123 0.008593070 0.02143371
+V4 0.03156301 0.024211341 0.04105307
+V5 0.30527875 0.287119234 0.32406470
+Class  2 
+   Outcome p     2.5 %    97.5 %
+V1 0.4033508 0.3616418 0.4465055
+V2 0.7128814 0.6691330 0.7529807
+V3 0.5981284 0.5494271 0.6449673
+V4 0.4888448 0.4468921 0.5309552
+V5 0.9154706 0.8856536 0.9380562
 \end{Soutput}
 \end{Schunk}
 
@@ -307,8 +304,8 @@ The sensitivity and specificity are shown in Table~\ref{tab:outcomeconfint}. A r
 + 	caption="Sensitivity and Specificity",
 + 	label="tab:outcomeconfint"),include.rownames=TRUE)
 \end{Sinput}
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 22:00:07 2014
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:15:19 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rll}
@@ -330,25 +327,50 @@ V1 & 0.40 (0.36,0.45) & 0.99 (0.98,0.99) \\
 The confidence intervals for the outcome probabilities can be calculated using the parametric bootstrap. These are shown in Table~\ref{tab:outcomeconfintboot} and are in agreement with those from the standard errors.
 
 
+\begin{Schunk}
+\begin{Sinput}
+> probs <- outcome.probs(dentistry.lca2,boot=TRUE)
+> # this swaps around the probabilities based on the knowledge that outcome probabilities are higher in the diseased class
+> order <- ifelse(probs[[1]]$Outcome[1]>probs[[2]]$Outcome[1],1,2)
+> spec <- NULL
+> sens <- NULL
+> for (i in 1:5) {
++ 	sens <- c(sens,sprintf("%3.2f (%3.2f,%3.2f)",probs[[order]]$Outcome[i],
++       probs[[order]]$"2.5 %"[i],probs[[order]]$"97.5 %"[i]))
++ 	spec <- c(spec,sprintf("%3.2f (%3.2f,%3.2f)",1-probs[[3-order]]$Outcome[i],
++       1-probs[[3-order]]$"97.5 %"[i],1-probs[[3-order]]$"2.5 %"[i]))
++ }
+> stable <- data.frame(sens,spec)
+> names(stable) <- c("Sensitivity","Specificity")
+> row.names(stable) <- paste("V",1:5,sep="")
+\end{Sinput}
+\end{Schunk}
 
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 22:00:40 2014
+\begin{Schunk}
+\begin{Sinput}
+> print(xtable(stable, digits = c(0,2,2),
++ 	caption="Sensitivity and Specificity",
++ 	label="tab:outcomeconfintboot"),include.rownames=TRUE)
+\end{Sinput}
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:15:42 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rll}
   \hline
  & Sensitivity & Specificity \\ 
   \hline
-V1 & 0.40 (0.36,0.44) & 0.99 (0.98,0.99) \\ 
+V1 & 0.40 (0.37,0.44) & 0.99 (0.98,0.99) \\ 
   V2 & 0.71 (0.67,0.75) & 0.90 (0.88,0.91) \\ 
-  V3 & 0.60 (0.55,0.65) & 0.99 (0.98,0.99) \\ 
+  V3 & 0.60 (0.55,0.64) & 0.99 (0.98,0.99) \\ 
   V4 & 0.49 (0.45,0.53) & 0.97 (0.96,0.97) \\ 
-  V5 & 0.92 (0.89,0.94) & 0.69 (0.68,0.71) \\ 
+  V5 & 0.92 (0.88,0.94) & 0.69 (0.68,0.71) \\ 
    \hline
 \end{tabular}
 \caption{Sensitivity and Specificity} 
 \label{tab:outcomeconfintboot}
-\end{table}
+\end{table}\end{Schunk}
+
 
 The true and false positive rates can be plotted for each dentist, and are shown in Figure~\ref{fig:truefalse}. This gives a better explanation of what is happening. It appears that the difference between dentists is mainly related to the threshold for what they classify as diseased. Dentist 5 is more likely to correctly identify teeth as diseased but at the expense of being more likely to identify non-diseased teeth as diseased.
 
@@ -411,29 +433,28 @@ We now continue the analysis of the dentistry data, allowing for random effects.
 \end{Sinput}
 \end{Schunk}
 
-The BIC is reduced to 14944.7 showing an improvement over any of the latent class models. An alternative model is to allow the variance of the random effect to vary by outcome (dentist). This can be performed using the \texttt{blocksize} parameter. This allows the structure of the data to be set as a series of blocks, and within each block each outcome has a different loading.
+The BIC is reduced to 14944.7 showing an improvement over any of the latent class models. An alternative model is to allow the variance of the random effect to vary by outcome (dentist). This can be performed using the \texttt{constload} parameter. The default is true, so setting this to false allows the loading to vary for each outcome.
 
 \begin{Schunk}
 \begin{Sinput}
 > dentistry.lca2random1 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-+ 	nclass=2,random=TRUE,probit=TRUE,
-+ 	quadpoints=41,blocksize=5)
++ 	nclass=2,random=TRUE,probit=TRUE,quadpoints=41,constload=FALSE)
 \end{Sinput}
 \end{Schunk}
 
-This increases the BIC to 14944.7, and is the 2LCR model obtained by \citet{qu:1996}. It appears that the simpler model is more appropriate.
+This increases the BIC to 14949.4, and is the 2LCR model obtained by \citet{qu:1996}. It appears that the simpler model is more appropriate.
 
 A further extension is to allow the loading or random effect variance to vary by class.
 
 \begin{Schunk}
 \begin{Sinput}
 > dentistry.lca2random2 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-+ 	nclass=2,random=TRUE,probit=TRUE,
-+ 	blocksize=5,byclass=TRUE,quadpoints=41)
++ 	nclass=2,random=TRUE,probit=TRUE,constload=FALSE,byclass=TRUE,
++   quadpoints=41)
 \end{Sinput}
 \end{Schunk}
 
-The BIC increases to 14951.1. It is not surprising that this model isn't an improvement, there are now 21 parameters fitted to 32 observations. This also may give problems with the fitting algorithm so the number of quadrature points is increased to 41.
+The BIC increases to 14987.6. It is not surprising that this model isn't an improvement, there are now 21 parameters fitted to 32 observations. This also may give problems with the fitting algorithm so the number of quadrature points is increased to 41.
 
 The marginal outcome probabilities, obtained by integrating over the random effect can be plotted, as in Figure~\ref{fig:outcome2}.
 
@@ -459,6 +480,24 @@ NULL
 Outcome probabilities with confidence intervals may be calculated for models with random effects only using the parametric bootstrap. The sensitivity and specificity may be obtained from these and are shown in Table~\ref{tab:outcomeconfintboot2}. Differences from the Qu et al paper result from them using a model with an individual loading for each dentist when calculating their Table 6.
 
 
+\begin{Schunk}
+\begin{Sinput}
+> probs <-outcome.probs(dentistry.lca2random,boot=TRUE)
+> # this swaps around the probabilities based on the knowledge that outcome probabilities are higher in the diseased class
+> order <- ifelse(probs[[1]]$Outcome[1]>probs[[2]]$Outcome[1],1,2)
+> spec <- NULL
+> sens <- NULL
+> for (i in 1:5) {
++ 	sens <- c(sens,sprintf("%3.2f (%3.2f,%3.2f)",probs[[order]]$Outcome[i],
++       probs[[order]]$"2.5 %"[i],probs[[order]]$"97.5 %"[i]))
++ 	spec <- c(spec,sprintf("%3.2f (%3.2f,%3.2f)",1-probs[[3-order]]$Outcome[i],
++       1-probs[[3-order]]$"97.5 %"[i],1-probs[[3-order]]$"2.5 %"[i]))
++ }
+> stable <- data.frame(sens,spec)
+> names(stable) <- c("Sensitivity","Specificity")
+> row.names(stable) <- paste("V",1:5,sep="")
+\end{Sinput}
+\end{Schunk}
 
 
 \begin{Schunk}
@@ -467,19 +506,19 @@ Outcome probabilities with confidence intervals may be calculated for models wit
 + 	caption="Sensitivity and Specificity",
 + 	label="tab:outcomeconfintboot2"),include.rownames=TRUE)
 \end{Sinput}
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 22:05:23 2014
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:23:50 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rll}
   \hline
  & Sensitivity & Specificity \\ 
   \hline
-V1 & 0.40 (0.34,0.48) & 0.98 (0.97,0.99) \\ 
-  V2 & 0.65 (0.56,0.73) & 0.87 (0.85,0.89) \\ 
-  V3 & 0.62 (0.51,0.73) & 0.98 (0.73,1.00) \\ 
+V1 & 0.40 (0.33,0.47) & 0.98 (0.96,0.99) \\ 
+  V2 & 0.65 (0.56,0.72) & 0.87 (0.85,0.89) \\ 
+  V3 & 0.62 (0.32,0.84) & 0.98 (0.80,1.00) \\ 
   V4 & 0.42 (0.35,0.49) & 0.94 (0.93,0.96) \\ 
-  V5 & 0.86 (0.77,0.91) & 0.67 (0.64,0.69) \\ 
+  V5 & 0.86 (0.78,0.91) & 0.67 (0.64,0.70) \\ 
    \hline
 \end{tabular}
 \caption{Sensitivity and Specificity} 
@@ -498,46 +537,46 @@ The observed and fitted values can be obtained and are shown in Table~\ref{tab:o
 
 
 
-% latex table generated in R 3.1.1 by xtable 1.7-3 package
-% Mon Sep  1 22:05:23 2014
+% latex table generated in R 3.1.2 by xtable 1.7-3 package
+% Mon Nov 17 10:23:50 2014
 \begin{table}[ht]
 \centering
 \begin{tabular}{rrrrrrrr}
   \hline
 V1 & V2 & V3 & V4 & V5 & Obs & Exp 2LC & Exp 2LCR \\ 
   \hline
-0 & 0 & 0 & 0 & 0 & 1880 & 1836.3 & 1882.2 \\ 
-  0 & 0 & 0 & 0 & 1 & 789 & 830.4 & 779.8 \\ 
-  0 & 0 & 0 & 1 & 0 & 43 & 61.9 & 56.1 \\ 
-  0 & 0 & 0 & 1 & 1 & 75 & 49.6 & 72.3 \\ 
-  0 & 0 & 1 & 0 & 0 & 23 & 28.6 & 25.8 \\ 
-  0 & 0 & 1 & 0 & 1 & 63 & 47.5 & 60.4 \\ 
-  0 & 0 & 1 & 1 & 0 & 8 & 4.0 & 4.7 \\ 
-  0 & 0 & 1 & 1 & 1 & 22 & 35.1 & 25.1 \\ 
-  0 & 1 & 0 & 0 & 0 & 188 & 213.9 & 176.1 \\ 
-  0 & 1 & 0 & 0 & 1 & 191 & 152.2 & 209.7 \\ 
-  0 & 1 & 0 & 1 & 0 & 17 & 12.1 & 17.6 \\ 
-  0 & 1 & 0 & 1 & 1 & 67 & 61.0 & 53.8 \\ 
-  0 & 1 & 1 & 0 & 0 & 15 & 11.2 & 14.5 \\ 
-  0 & 1 & 1 & 0 & 1 & 85 & 91.6 & 79.0 \\ 
-  0 & 1 & 1 & 1 & 0 & 8 & 8.1 & 5.6 \\ 
-  0 & 1 & 1 & 1 & 1 & 56 & 86.4 & 67.1 \\ 
-  1 & 0 & 0 & 0 & 0 & 22 & 21.2 & 17.0 \\ 
-  1 & 0 & 0 & 0 & 1 & 26 & 25.2 & 30.6 \\ 
-  1 & 0 & 0 & 1 & 0 & 6 & 2.1 & 2.5 \\ 
-  1 & 0 & 0 & 1 & 1 & 14 & 16.1 & 10.6 \\ 
-  1 & 0 & 1 & 0 & 0 & 1 & 2.5 & 3.3 \\ 
-  1 & 0 & 1 & 0 & 1 & 20 & 24.7 & 20.8 \\ 
-  1 & 0 & 1 & 1 & 0 & 2 & 2.2 & 1.4 \\ 
-  1 & 0 & 1 & 1 & 1 & 17 & 23.5 & 17.8 \\ 
-  1 & 1 & 0 & 0 & 0 & 2 & 6.0 & 7.4 \\ 
-  1 & 1 & 0 & 0 & 1 & 20 & 42.0 & 31.9 \\ 
-  1 & 1 & 0 & 1 & 0 & 6 & 3.7 & 2.4 \\ 
-  1 & 1 & 0 & 1 & 1 & 27 & 39.3 & 23.6 \\ 
-  1 & 1 & 1 & 0 & 0 & 3 & 5.7 & 4.6 \\ 
-  1 & 1 & 1 & 0 & 1 & 72 & 61.1 & 59.4 \\ 
-  1 & 1 & 1 & 1 & 0 & 1 & 5.4 & 3.5 \\ 
-  1 & 1 & 1 & 1 & 1 & 100 & 58.4 & 102.5 \\ 
+0 & 0 & 0 & 0 & 0 & 1880 & 1836.3 & 1882.6 \\ 
+  0 & 0 & 0 & 0 & 1 & 789 & 830.4 & 784.7 \\ 
+  0 & 0 & 0 & 1 & 0 & 43 & 61.9 & 38.2 \\ 
+  0 & 0 & 0 & 1 & 1 & 75 & 49.6 & 79.7 \\ 
+  0 & 0 & 1 & 0 & 0 & 23 & 28.6 & 24.2 \\ 
+  0 & 0 & 1 & 0 & 1 & 63 & 47.5 & 63.8 \\ 
+  0 & 0 & 1 & 1 & 0 & 8 & 4.0 & 6.8 \\ 
+  0 & 0 & 1 & 1 & 1 & 22 & 35.1 & 25.8 \\ 
+  0 & 1 & 0 & 0 & 0 & 188 & 213.9 & 184.7 \\ 
+  0 & 1 & 0 & 0 & 1 & 191 & 152.2 & 192.5 \\ 
+  0 & 1 & 0 & 1 & 0 & 17 & 12.1 & 23.1 \\ 
+  0 & 1 & 0 & 1 & 1 & 67 & 61.0 & 67.2 \\ 
+  0 & 1 & 1 & 0 & 0 & 15 & 11.2 & 12.5 \\ 
+  0 & 1 & 1 & 0 & 1 & 85 & 91.6 & 87.4 \\ 
+  0 & 1 & 1 & 1 & 0 & 8 & 8.1 & 7.1 \\ 
+  0 & 1 & 1 & 1 & 1 & 56 & 86.4 & 50.8 \\ 
+  1 & 0 & 0 & 0 & 0 & 22 & 21.2 & 18.5 \\ 
+  1 & 0 & 0 & 0 & 1 & 26 & 25.2 & 27.9 \\ 
+  1 & 0 & 0 & 1 & 0 & 6 & 2.1 & 4.8 \\ 
+  1 & 0 & 0 & 1 & 1 & 14 & 16.1 & 16.0 \\ 
+  1 & 0 & 1 & 0 & 0 & 1 & 2.5 & 2.3 \\ 
+  1 & 0 & 1 & 0 & 1 & 20 & 24.7 & 19.7 \\ 
+  1 & 0 & 1 & 1 & 0 & 2 & 2.2 & 1.8 \\ 
+  1 & 0 & 1 & 1 & 1 & 17 & 23.5 & 14.5 \\ 
+  1 & 1 & 0 & 0 & 0 & 2 & 6.0 & 7.3 \\ 
+  1 & 1 & 0 & 0 & 1 & 20 & 42.0 & 19.8 \\ 
+  1 & 1 & 0 & 1 & 0 & 6 & 3.7 & 4.7 \\ 
+  1 & 1 & 0 & 1 & 1 & 27 & 39.3 & 22.4 \\ 
+  1 & 1 & 1 & 0 & 0 & 3 & 5.7 & 2.7 \\ 
+  1 & 1 & 1 & 0 & 1 & 72 & 61.1 & 69.6 \\ 
+  1 & 1 & 1 & 1 & 0 & 1 & 5.4 & 3.2 \\ 
+  1 & 1 & 1 & 1 & 1 & 100 & 58.4 & 103.0 \\ 
    \hline
 \end{tabular}
 \caption{Observed and expected frequencies} 

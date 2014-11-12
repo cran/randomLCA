@@ -14,9 +14,6 @@ Refits an randomLCA object using new data.
   \item{newfreq}{the frequencies corresponding to the patterns if required}
   \item{\dots}{ additional argument; currently none is used. }
 }
-\details{
-Not complete.
-}
 \value{
 The fitted model to the new data.
 }

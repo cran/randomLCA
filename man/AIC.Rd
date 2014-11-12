@@ -11,9 +11,6 @@ Returns AIC for a randomLCA object.
   \item{object}{randomLCA object}
   \item{\dots}{ additional argument; currently none is used. }
 }
-\details{
-Not complete.
-}
 \value{
 AIC.
 }

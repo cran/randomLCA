@@ -27,7 +27,7 @@
     }
     if (random & ((dim(patterns)[2] %% blocksize)!=0))
       stop("number of outcomes must be a multiple of blocksize")
-    # if no frequencies given, then assume that the data needs to be summaried
+    # if no frequencies given, then assume that the data needs to be summarised
     if (missing(freq)) {
       pats <- apply(patterns, 1, function(x) {paste(ifelse(is.na(x),"N",x),collapse="")})
       tpats <- table(pats)
@@ -43,11 +43,29 @@
       # check that freq doesn't contain missing
       if (any(is.na(freq))) stop("freq cannot contain missing values")
       # remove any observations with frequency of zero
-      patterns <- patterns[freq!=0,]
-      freq <- freq[freq!=0]
+#       patterns <- patterns[freq!=0,]
+#       freq <- freq[freq!=0]
     }
+# determine df
+    nparams <- dim(patterns)[2]*nclass
+    nparams <- nparams+nclass-1
+    if (random) {
+        if (level2) {
+          nparams <- nparams+ifelse(constload,1,level2size)*ifelse(byclass,nclass,1)
+          nparams <- nparams+ifelse(byclass,nclass,1)
+        } else nparams <- nparams+ifelse(constload,1,min(blocksize,dim(patterns)[2]))*ifelse(byclass,nclass,1)
+    }
+    df <- dim(patterns)[2]^2-nparams-1
+#    print(paste('df = ',df))
+    nonident <- FALSE
+    if (df < 0) nonident <- TRUE
+    if ((nclass==2) & (dim(patterns)[2]<3)) nonident <- TRUE
+    if ((nclass==3) & (dim(patterns)[2]<5)) nonident <- TRUE
+    if ((nclass==4) & (dim(patterns)[2]<5)) nonident <- TRUE
+    if ((nclass==5) & (dim(patterns)[2]<5)) nonident <- TRUE
+    if (nonident) stop("Model is not identifiable - decrease classes or random effects")
     if (!random) initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-                                      calcSE=(calcSE & !random),notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
+            calcSE=(calcSE & !random),notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
     else {
       if (!level2) {
         initmodel <- bestlca(patterns,freq=freq,nclass=nclass,

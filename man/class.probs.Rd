@@ -4,7 +4,7 @@
 Determines class probabilities for fitted model
 }
 \description{
-The class probabililities for the model is returned.
+The class probabililities for the model are returned.
 }
 \usage{
 class.probs(object)
@@ -14,7 +14,7 @@ class.probs(object)
   \item{object}{randomLCA object}
 }
 \details{
-Not complete.
+Simply extracts the corresponding variable from the randomLCA object.
 }
 \value{
 A vector of class probabilities for each class.

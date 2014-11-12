@@ -33,10 +33,9 @@ Qu, Y., Tan, M. and Kutner, M.H. (1996) Random effects models in latent class an
 data(uterinecarcinoma)
 
 uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[,1:7],
-	freq=uterinecarcinoma$freq,random=TRUE,probit=TRUE,quadpoints=41)
-# LCR1 model of Que et al. This is fairly unstable and requires
-#	starting values from the simpler model without loadings by class
-# it is also slow and doesn't improve the model fit
+  freq=uterinecarcinoma$freq,random=TRUE,probit=TRUE,quadpoints=41)
+# LCR1 model of Que et al. This is fairly unstable and 
+# is also slow and doesn't improve the model fit
 uterinecarcinoma.lcarandom2by <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq,
 	byclass=TRUE,random=TRUE,probit=TRUE,quadpoints=61)}
 }

@@ -11,9 +11,6 @@ Summarises the fit of a randomLCA object.
   \item{object}{randomLCA object}
   \item{\dots}{ additional argument; currently none is used. }
 }
-\details{
-Not complete.
-}
 \value{
   \item{logLik}{Log Likelihood}
   \item{AIC}{AIC}

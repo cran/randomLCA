@@ -15,7 +15,7 @@ post.class.probs(object,class=0)
   \item{class}{class to be returned. Zero returns all classes.}
 }
 \details{
-Not complete.
+Extracts the corresponding data from teh randomLCA object..
 }
 \value{
 A data frame. The first columns of the data frame correspond to the patterns, followed by the frequency of each pattern, and then the posterior class probabilities for either the selected class or for all classes.
