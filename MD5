@@ -1,4 +1,4 @@
-eb41d609edcb3b9adda1d7f3d414dd0c *DESCRIPTION
+1da6e68d935501410b7f2a2b4a49d3af *DESCRIPTION
 8b6350a12e41091aa13e753c42a646a0 *NAMESPACE
 fdb194d39de0f780cb341f9f9d25fe67 *R/bestlca.R
 5788ae8078fbf33e644a3a3968ee4986 *R/calc.cond.prob.R
@@ -15,19 +15,19 @@ c3271f751f5cef2cddc7d7e065491a81 *R/misc.randomLCA.R
 afbf88d7d93a67f4d9c888e277d46794 *R/outcome.probs.randomLCA.R
 2d14fa405c3b06fcef64116d4681f384 *R/plot.randomLCA.R
 e5840ba64f7955e03a074dc7bfa7d14c *R/post.class.probs.randomLCA.R
-e65c47cac6d7a75aba3ccc76ff7e4d0d *R/randomLCA.R
+bfc78c51c9906a0af81761deb0ad7c45 *R/randomLCA.R
 36162412e4c53d19402c237bcd8d610a *R/ranef.randomLCA.R
 d4c19a118992ffc0be51fb87ae45a976 *R/refit.randomLCA.R
 a3ec3ec03f31d757d22ac0c889afb7c1 *R/simulate.randomLCA.R
 cc42bd6bb62a90f8a0f073b6e994b26b *R/summary.randomLCA.R
-b39f7913f23f31272b7784b704433dc6 *build/vignette.rds
+d10228fc435461419ca32163bcaa564b *build/vignette.rds
 32464514a5b449cbe3e82bc66015d13d *data/dentistry.rda
 1e20f00b74fb6ff271b212a0c600624f *data/genderrole.rda
 0f1c37f72dec894cbe66d1ce50306a7a *data/hivtests.rda
 31c00c49804e0c51592d1e1bd534977c *data/myocardial.rda
 55a0c34453eb0605616ac6f7dc28bf34 *data/symptoms.RData
 40524198ab57f576f45eaa83f3a2d5a4 *data/uterinecarcinoma.rda
-82086ccc57e128ab170af0dd9eb6c2ba *inst/NEWS
+8d5ae75438da14a5a4ec7060ee1af484 *inst/NEWS
 7a6961a9d5d4e9ffa51198a0b54bf8f5 *inst/doc/randomLCA-example.Rnw
 3434b0d8c5d1e16c99eda439e4deb438 *inst/doc/randomLCA-example.pdf
 61b09886ce7523dc5786cbd0c0712965 *man/AIC.Rd
@@ -36,7 +36,7 @@ b39f7913f23f31272b7784b704433dc6 *build/vignette.rds
 04a49744b0d3b2dedeeca0c661259064 *man/calc.cond2.prob.Rd
 ba6a63bf04c41dc1bacbfc0549f0cdad *man/calc.marg.prob.Rd
 5b983054f6315b9630ccc087cf5fa677 *man/class.probs.Rd
-c976e1d864f7736188af8a95dcfef271 *man/dentistry.Rd
+e9b9b6e8ad8c49f3e8f4fc497f098e9a *man/dentistry.Rd
 d85e3a1b6b5a7e651eca22ff0c17de42 *man/fitted.Rd
 1fcb33b7b00b67a1af5a711538a3d702 *man/genderrole.Rd
 4f830becf941ec13b4dc45ba538423d9 *man/hivtests.Rd
@@ -62,6 +62,6 @@ c24b317c62a569f44b579083bd6a3866 *vignettes/randomLCA-example-015.pdf
 279837c83e4be0d182c70de60472fb38 *vignettes/randomLCA-example-022.pdf
 5859a008639b5de07208b7375230b600 *vignettes/randomLCA-example-026.pdf
 7a6961a9d5d4e9ffa51198a0b54bf8f5 *vignettes/randomLCA-example.Rnw
-184278dd856f4c898dcce86b0a332631 *vignettes/randomLCA-example.tex
+ab2d79f236685789944503e179bdae62 *vignettes/randomLCA-example.tex
 da1ca8f335d662b80c3e5ab4d611d084 *vignettes/randomLCA-exampleTex.tex
 8ca20a3474960dc0c4f9c38694314881 *vignettes/randomLCA.bib

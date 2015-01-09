@@ -55,8 +55,8 @@
           nparams <- nparams+ifelse(byclass,nclass,1)
         } else nparams <- nparams+ifelse(constload,1,min(blocksize,dim(patterns)[2]))*ifelse(byclass,nclass,1)
     }
-    df <- dim(patterns)[2]^2-nparams-1
-#    print(paste('df = ',df))
+    df <- 2^dim(patterns)[2]-nparams-1
+    #print(paste('df = ',df))
     nonident <- FALSE
     if (df < 0) nonident <- TRUE
     if ((nclass==2) & (dim(patterns)[2]<3)) nonident <- TRUE

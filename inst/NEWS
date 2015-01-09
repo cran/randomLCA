@@ -1,3 +1,7 @@
+Changes in randomLCA version 1.0-2
+
+  o fixed bug that caused some non-dentifiable models to be missed
+
 Changes in randomLCA version 1.0-1
 
   o improvements to help documentation

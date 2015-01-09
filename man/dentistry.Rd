@@ -35,7 +35,7 @@
 \dontrun{
 data(dentistry)
 # fit LCR model from Qu et al (1996)
-dentistry.lca <- randomLCA(dentistry[,1:5],freq=dentistry$freq,level2size=5)
+dentistry.lca <- randomLCA(dentistry[,1:5],freq=dentistry$freq)
 # start with constant laoding
 dentistry.lcarandom <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
 	random=TRUE,probit=TRUE)
