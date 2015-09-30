@@ -5,7 +5,7 @@
 \description{
  Opinions collected on gender roles in a study by Felling et al (1987). This was originally published in Heinen (1996) and subsequently in  Galindo Garre and Vermunt (2006).
 }
-\usage{data(genderrole)}
+\usage{genderrole}
 \format{
   A data frame with 16 observations on the following 5 variables.
   \describe{
@@ -29,7 +29,6 @@
 }
 \examples{
 \dontrun{
-data(genderrole)
 # standard latent class
 genderrole.lca1 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=1)
 genderrole.lca2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq)
@@ -38,9 +37,9 @@ genderrole.lca3 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,nclass=3)
 genderrole.lca1random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
 	nclass=1,random=TRUE)
 genderrole.lca2random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	random=TRUE,quadpoints=41)
+	random=TRUE,quadpoints=61)
 genderrole.lca3random <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=3,random=TRUE,quadpoints=51)
+	nclass=3,random=TRUE,quadpoints=61)
 # improved BIC for 1 class random
 print(c(BIC(genderrole.lca1),BIC(genderrole.lca2),BIC(genderrole.lca3)))
 print(c(BIC(genderrole.lca1random),BIC(genderrole.lca2random),
@@ -49,9 +48,9 @@ print(c(BIC(genderrole.lca1random),BIC(genderrole.lca2random),
 genderrole.lca1random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
 	nclass=1,random=TRUE,constload=FALSE)
 genderrole.lca2random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	random=TRUE,constload=FALSE,quadpoints=41)
+	random=TRUE,constload=FALSE,quadpoints=61)
 genderrole.lca3random2 <- randomLCA(genderrole[,1:5],freq=genderrole$Freq,
-	nclass=3,random=TRUE,constload=FALSE,quadpoints=51)
+	nclass=3,random=TRUE,constload=FALSE,quadpoints=61)
 	# no improvement in fit
 print(c(BIC(genderrole.lca1random2),BIC(genderrole.lca2random2),
 	BIC(genderrole.lca3random2)))

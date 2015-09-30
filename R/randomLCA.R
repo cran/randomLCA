@@ -1,12 +1,12 @@
 .onAttach <-
   function (libname, pkgname) 
   {
-    loadmsg <- "\nNote that there are changes to the parameters for the randomLCA and class.probs functions in version 0.9. See NEWS.\n"
+    loadmsg <- "\nNote that there are changes to the names of some functions in version 1.0.3. See NEWS.\n"
     packageStartupMessage(loadmsg, domain = NULL, appendLF = TRUE)
   }
 
 `randomLCA` <-
-  function(patterns,freq,nclass=2,calcSE=TRUE,notrials=20,
+  function(patterns,freq=NULL,nclass=2,calcSE=TRUE,notrials=20,
            random=FALSE,byclass=FALSE,quadpoints=21,constload=TRUE,blocksize=dim(patterns)[2],
            level2=FALSE,probit=FALSE,level2size=blocksize,
            qniterations=5,penalty=0.0001,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
@@ -28,7 +28,7 @@
     if (random & ((dim(patterns)[2] %% blocksize)!=0))
       stop("number of outcomes must be a multiple of blocksize")
     # if no frequencies given, then assume that the data needs to be summarised
-    if (missing(freq)) {
+    if (missing(freq) | is.null(freq)) {
       pats <- apply(patterns, 1, function(x) {paste(ifelse(is.na(x),"N",x),collapse="")})
       tpats <- table(pats)
       freq <- as.numeric(tpats)
@@ -74,14 +74,14 @@
         if (constload) nlambda <- 1
         else nlambda <- min(dim(patterns)[2],blocksize)
         # now fit the simplest random efefcts model ie with constant loading
-        initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+        initmodel <- fitAdaptRandom(patterns,freq=freq,
                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                 initclassp=initmodel$classp,initlambdacoef=1.0,
                                                 gh=norm.gauss.hermite(quadpoints),
                                                 constload=TRUE,probit=probit,byclass=FALSE,qniterations=qniterations,
                                                 penalty=penalty,verbose=verbose)
         # fit with variable loading if required
-        if (!constload)  initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+        if (!constload)  initmodel <- fitAdaptRandom(patterns,freq=freq,
                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                 initclassp=initmodel$classp,
                                                  initlambdacoef=rep(initmodel$lambdacoef,nlambda),
@@ -91,7 +91,7 @@
                                                   penalty=penalty,verbose=verbose)
         if (byclass)  {
           initlambdacoef <- matrix(rep(initmodel$lambdacoef,nclass),nrow=nclass,byrow=TRUE)
-          initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+          initmodel <- fitAdaptRandom(patterns,freq=freq,
                                                   nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                   initclassp=initmodel$classp,
                                                   initlambdacoef=initlambdacoef,
@@ -108,14 +108,14 @@
         if (constload) nlambda <- 1
         else nlambda <- min(dim(patterns)[2],blocksize)
         # now fit the simplest random efefcts model
-        initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+        initmodel <- fitAdaptRandom(patterns,freq=freq,
                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                 initclassp=initmodel$classp,initlambdacoef=NULL,
                                                 gh=norm.gauss.hermite(quadpoints),
                                                 constload=TRUE,probit=probit,byclass=FALSE,qniterations=qniterations,
                                                 penalty=penalty,verbose=verbose)
         # fit with variable loading if required
-        if (!constload)  initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+        if (!constload)  initmodel <- fitAdaptRandom(patterns,freq=freq,
                                                                  nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                                  initclassp=initmodel$classp,
                                                                  initlambdacoef=rep(initmodel$lambdacoef,nlambda),
@@ -125,7 +125,7 @@
                                                                  penalty=penalty,verbose=verbose)
         if (byclass)  {
           initlambdacoef <- matrix(rep(initmodel$lambdacoef,nclass),nrow=nclass,byrow=TRUE)
-          initmodel <- fit.adapt.random.randomLCA(patterns,freq=freq,
+          initmodel <- fitAdaptRandom(patterns,freq=freq,
                                                   nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                   initclassp=initmodel$classp,
                                                   initlambdacoef=initlambdacoef,
@@ -135,7 +135,7 @@
                                                   penalty=penalty,verbose=verbose)
         }
         # now fit the level 2
-        initmodel <- fit.adapt.random2.randomLCA(patterns,freq=freq,
+        initmodel <- fitAdaptRandom2(patterns,freq=freq,
                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                 initclassp=initmodel$classp,
                                                 initlambdacoef=initmodel$lambdacoef,

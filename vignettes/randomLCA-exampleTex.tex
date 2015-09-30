@@ -122,7 +122,7 @@ The posterior class probs can be obtained as
 
 \begin{Schunk}
 \begin{Sinput}
-> classprobs <- post.class.probs(myocardial.lca2)
+> classprobs <- post.classProbs(myocardial.lca2)
 \end{Sinput}
 \end{Schunk}
 
@@ -252,11 +252,11 @@ classes & bic \\
 \end{figure}
 
 The 2 Class results can be interpreted as a diagnostic test. Important results for diagnostic testing are the sensitivity and specificity for each test. The sensitivity is the probability of the test correctly identifying the subject as diseased given that the subject is diseased. In classical diagnostic testing the "true" status of a subject is known through use of a "gold standard" which is assumed to, sometiems optimistically, correctly classify the subject. The latent class method constructs a hypothetical standard, which has the disadvantage that this is not known with certainty but it allows correctly for any uncertainty in the underlying disease state. The other measure is specificity which is the probability of correctly identifying a subject as not diseased.
-The sensitivities are then simply the outcome probabilities for the diseased class, Class 2 and the specificity one minus the outcome probabilities for the non-diseased class, Class 1. These can be obtained with 95\% confidence intervals using the outcome.probs function.
+The sensitivities are then simply the outcome probabilities for the diseased class, Class 2 and the specificity one minus the outcome probabilities for the non-diseased class, Class 1. These can be obtained with 95\% confidence intervals using the outcomeProbs function.
 
 \begin{Schunk}
 \begin{Sinput}
-> outcome.probs(dentistry.lca2)
+> outcomeProbs(dentistry.lca2)
 \end{Sinput}
 \begin{Soutput}
 Class  1 
@@ -280,7 +280,7 @@ The sensitivity and specificity are shown in Table~\ref{tab:outcomeconfint}. A r
 
 \begin{Schunk}
 \begin{Sinput}
-> probs <- outcome.probs(dentistry.lca2)
+> probs <- outcomeProbs(dentistry.lca2)
 > # this swaps around the probabilities based on the knowledge that
 > # the outcome probabilities are higher in the diseased class
 > order <- ifelse(probs[[1]][1,1]<probs[[2]][1,1],2,1)
@@ -329,7 +329,7 @@ The confidence intervals for the outcome probabilities can be calculated using t
 
 \begin{Schunk}
 \begin{Sinput}
-> probs <- outcome.probs(dentistry.lca2,boot=TRUE)
+> probs <- outcomeProbs(dentistry.lca2,boot=TRUE)
 > # this swaps around the probabilities based on the knowledge that outcome probabilities are higher in the diseased class
 > order <- ifelse(probs[[1]]$Outcome[1]>probs[[2]]$Outcome[1],1,2)
 > spec <- NULL
@@ -378,7 +378,7 @@ The true and false positive rates can be plotted for each dentist, and are shown
 \begin{Sinput}
 > itpr <- ifelse(dentistry.lca2$classp[2]>dentistry.lca2$classp[1],1,2)
 > ifpr <- 3-itpr
-> probs <- outcome.probs(dentistry.lca2)
+> probs <- outcomeProbs(dentistry.lca2)
 > probs <- data.frame(tpr=probs[[itpr]][,1],fpr=probs[[ifpr]][,1])
 \end{Sinput}
 \end{Schunk}
@@ -482,7 +482,7 @@ Outcome probabilities with confidence intervals may be calculated for models wit
 
 \begin{Schunk}
 \begin{Sinput}
-> probs <-outcome.probs(dentistry.lca2random,boot=TRUE)
+> probs <-outcomeProbs(dentistry.lca2random,boot=TRUE)
 > # this swaps around the probabilities based on the knowledge that outcome probabilities are higher in the diseased class
 > order <- ifelse(probs[[1]]$Outcome[1]>probs[[2]]$Outcome[1],1,2)
 > spec <- NULL

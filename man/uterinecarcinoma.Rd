@@ -3,9 +3,9 @@
 \docType{data}
 \title{Uterine Carcinoma Data}
 \description{
- Classification of 118 histology samples by 118 pathologists. Original classification in Holmquist et al (1967) was to one of five categories, this has been reduced to two. Analysed by a number of authors, with a random effects in Qu et al (1996).
+ Classification of 118 histology samples by 118 pathologists. Original classification in Holmquist et al (1967) was to one of five categories, this has been reduced to two. Analysed by a number of authors, with a random effects model in Qu et al (1996).
 }
-\usage{data(uterinecarcinoma)}
+\usage{uterinecarcinoma}
 \format{
   A data frame with 20 observations on the following 8 variables.
   \describe{
@@ -24,14 +24,12 @@
 }
 \references{
 
-Holmquist, N.D., McMahan, C.A., and Williams, O.D. (1967) Variability in classificationof carcinoma in situ of the uterine cervix.\emph{Archives of Pathology}, \bold{84}, 344--345.
+Holmquist, N.D., McMahan, C.A., and Williams, O.D. (1967) Variability in classificationof carcinoma in situ of the uterine cervix. \emph{Archives of Pathology}, \bold{84}, 344--345.
   
 Qu, Y., Tan, M. and Kutner, M.H. (1996) Random effects models in latent class analysis for evaluating accuracy of diagnostic tests. \emph{Biometrics}, \bold{52}, 797--810.
 }
 \examples{
 \dontrun{
-data(uterinecarcinoma)
-
 uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[,1:7],
   freq=uterinecarcinoma$freq,random=TRUE,probit=TRUE,quadpoints=41)
 # LCR1 model of Que et al. This is fairly unstable and 

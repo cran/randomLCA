@@ -5,7 +5,7 @@
 \description{
   Serum samples are tested for HIV by 4 different biossays in Alvord et al (1988) and sensitivity and specificity determined using latent class analysis. Qu et al (1996) repeat the analysis using a model incorporating a random effect.
 }
-\usage{data(hivtests)}
+\usage{hivtests}
 \format{
   A data frame with 16 observations on the following 5 variables.
   \describe{
@@ -27,9 +27,15 @@
   \emph{Biometrics}, \bold{52}, 797--810.
 }
 \examples{
-data(hivtests)
+\dontrun{
 # fit standard latent class
 hivtests.lca2 <- randomLCA(hivtests[,1:4],freq=hivtests$freq)
-# with random effect model is not identifiable
+# with random effect and constant laoding
+hivtests.lca2random <- randomLCA(hivtests[,1:4],freq=hivtests$freq,random=TRUE)
+# with random effect and variable loading
+# for this model there are 13 parameters fitted to 16 observations, so model is fairly unstable
+hivtests.lca2random2 <- randomLCA(hivtests[,1:4],freq=hivtests$freq,random=TRUE,constload=FALSE)
+# BIC shows best model is random effects with constant loading
+print(c(BIC(hivtests.lca2),BIC(hivtests.lca2random),BIC(hivtests.lca2random2)))}
 }
 \keyword{datasets}

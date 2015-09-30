@@ -2,7 +2,7 @@
 \alias{fitted.randomLCA}
 \title{fitted values}
 \description{
-Extract fitteded values for randomLCA object
+Extract fitted values for randomLCA object.
 }
 \usage{
 \method{fitted}{randomLCA}(object, \ldots)

@@ -5,11 +5,12 @@
 Returns AIC for a randomLCA object.
 }
 \usage{
-\method{AIC}{randomLCA}(object, \ldots)
+\method{AIC}{randomLCA}(object, \ldots, k = 2)
 }
 \arguments{
   \item{object}{randomLCA object}
   \item{\dots}{ additional argument; currently none is used. }
+  \item{k}{penalty per parameter}
 }
 \value{
 AIC.

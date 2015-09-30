@@ -1,3 +1,21 @@
+Changes in randomLCA version 1.0-3
+
+  o When selecting initial starting values only perform the EM algorithm to choose the best starting values, and then use the quasi-Newton to perform the final optimisation to increase speed.
+
+  o To avoid possible problems removed "." from some method names. Changed class.probs to classProbs, post.class.probs to postClassProbs, outcome.probs to outcomeProbs, calc.cond.prob to calcCondProb, calc.cond2.prob to calcCond2Prob, calc.marg.prob to calcMargProb
+
+  o add AIC3 method to calculate AIC with a penalty of 3, and added this to the summary
+
+  o reduced number of S3 methods to only those that are necessary
+
+  o added print method for randomLCA objects that just calls summary
+
+  o with plots use outcome labels from the data
+  
+  o improved graphing code to incorporate better labels and allow these to be overriden from the plot command
+
+  o added penalty parameter to AIC to conform to stats arguments
+
 Changes in randomLCA version 1.0-2
 
   o fixed bug that caused some non-dentifiable models to be missed

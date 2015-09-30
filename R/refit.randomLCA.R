@@ -24,10 +24,10 @@ refit <-
       newpatterns <- newpatterns[newfreq!=0,]
       newfreq <- newfreq[newfreq!=0]
     }
-    if (!object$random) newfit <- fit.fixed.randomLCA(newpatterns,newfreq,object$outcomep,object$classp,
-                                                      object$nclass,calcSE=FALSE,object$probit,object$penalty,verbose=FALSE)
+     if (!object$random) newfit <- fitFixed(newpatterns,newfreq,object$outcomep,object$classp,
+                                                      object$nclass,calcSE=FALSE,justEM=FALSE,object$probit,object$penalty,verbose=FALSE)
     else {
-       if (!object$level2) newfit <- fit.adapt.random.randomLCA(newpatterns,newfreq,
+       if (!object$level2) newfit <- fitAdaptRandom(newpatterns,newfreq,
                                                                nclass=object$nclass,calcSE=FALSE,initoutcomep=object$outcomep,
                                                                initclassp=object$classp,
                                                                initlambdacoef=object$lambdacoef,
@@ -35,7 +35,7 @@ refit <-
                                                                gh=norm.gauss.hermite(object$quadpoints),
                                                                constload=object$constload,probit=object$probit,byclass=object$byclass,
                                                                qniterations=object$qniterations,penalty=object$penalty,verbose=FALSE)
-      else newfit <- fit.adapt.random2.randomLCA(newpatterns,newfreq,
+      else newfit <- fitAdaptRandom2(newpatterns,newfreq,
                                                  nclass=object$nclass,calcSE=FALSE,initoutcomep=object$outcomep,
                                                  initclassp=object$classp,
                                                  initlambdacoef=object$lambdacoef,

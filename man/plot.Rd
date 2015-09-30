@@ -18,10 +18,9 @@ Plots the outcome probabilities for a randomLCA object, for random effects objec
 }
 \author{Ken Beath \email{ken.beath@mq.edu.au}
 }
-\seealso{\code{\link{calc.cond.prob}},\code{\link{calc.marg.prob}}}
+\seealso{\code{\link{calcCondProb}},\code{\link{calcMargProb}}}
 \examples{
 \dontrun{
-data(uterinecarcinoma)
 # standard latent class with 2 classes
 uterinecarcinoma.lca2 <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq)
 plot(uterinecarcinoma.lca2)

@@ -11,7 +11,7 @@
   
   Thanks to the investigators of the CAPS study for making the data available.
 }
-\usage{data(symptoms)}
+\usage{symptoms}
 \format{
   A data frame with 444 observations on the following 17 variables.
   \describe{
@@ -44,7 +44,6 @@ Beath, K.J. and Heller, G.Z. (2009) Latent trajectory modelling of multivariate 
 }
 \examples{
 \dontrun{
-data(symptoms)
 symptoms.lca2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=2)
 symptoms.lca2random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
 	random=TRUE,nclass=2,blocksize=4,constload=FALSE)

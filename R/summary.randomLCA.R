@@ -7,6 +7,7 @@ function(object,...) {
 	out$logLik <- logLik(object)
 	out$AIC <- AIC(object)
 	out$BIC <- BIC(object)
+	out$AIC3 <- AIC3(object)
 	out$penlogLik <- object$penlogLik
 	out$nclass <- object$nclass
 	out$classp <- object$classp
@@ -46,7 +47,7 @@ function(object,...) {
 				names(out$taucoef) <-''
 			}
 		}
-		margp <- calc.marg.prob(object)
+		margp <- calcMargProb(object)
 		out$margoutcomep <- data.frame(t(matrix(margp$outcomep,ncol=object$nclass)))
 		row.names(out$margoutcomep) <- paste("Class ",1:object$nclass)
 		names(out$margoutcomep) <- names(object$patterns)
@@ -58,11 +59,13 @@ function(object,...) {
 
 print.summary.randomLCA <- function(x, ...)
 {
-	if (x$probit) link <- "Probit"
+  if (!inherits(x, "summary.randomLCA"))
+    stop("Use only with 'randomLCA summary' objects.\n")
+  if (x$probit) link <- "Probit"
 	else link <- "Logit"
-	if (x$random) print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
+	if (x$random) print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC, AIC3 = x$AIC3,
 		logLik = c(x$logLik),penlogLik = c(x$penlogLik),Link=link,row.names = " ") )
-	else print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC,
+	else print(data.frame(Classes = x$nclass, AIC = x$AIC, BIC = x$BIC, AIC3 = x$AIC3,
 		logLik = c(x$logLik),penlogLik = c(x$penlogLik),row.names = " ") )
     cat("Class probabilities","\n")
 	print(round(x$classp,4))
@@ -83,3 +86,12 @@ print.summary.randomLCA <- function(x, ...)
 	}
 	invisible(x)
 }
+
+print.randomLCA <- function(x, ...)
+{   
+  if (!inherits(x, "randomLCA"))
+    stop("Use only with 'randomLCA' objects.\n")
+  print(summary(x),...)
+  invisible()
+}
+  
