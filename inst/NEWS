@@ -1,3 +1,17 @@
+Changes in randomLCA version 1.0-5
+
+ o Added argument to refit method to use the estimates from current model for the initial values
+
+ o Changed outcomeProbs to use the initial values from teh current model when bootstrapping. This avoids problems with label switching.
+ 
+Changes in randomLCA version 1.0-4
+
+ o Added check for rank of Hessian and give warning that model may not be identified or there may be boundary estimates.
+
+ o Improve starting values for random effects models
+
+ o For refit now totally redetermine starting values rather than using those from model, as this produces more reliable results
+ 
 Changes in randomLCA version 1.0-3
 
   o When selecting initial starting values only perform the EM algorithm to choose the best starting values, and then use the quasi-Newton to perform the final optimisation to increase speed.

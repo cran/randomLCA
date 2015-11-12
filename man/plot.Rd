@@ -25,7 +25,7 @@ Plots the outcome probabilities for a randomLCA object, for random effects objec
 uterinecarcinoma.lca2 <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq)
 plot(uterinecarcinoma.lca2)
 uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[,1:7],
-  freq=uterinecarcinoma$freq,random=TRUE,probit=TRUE,quadpoints=41)
+  freq=uterinecarcinoma$freq,random=TRUE,probit=TRUE,quadpoints=61)
 # default for random effects models is marginal
 plot(uterinecarcinoma.lcarandom2)
 # default for random effects models conditional is p=0.5 i.e. median

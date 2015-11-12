@@ -22,7 +22,7 @@ function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,
 		dostatistic <- function(x,initmodel) {
 	# fit the model using the simulated data
 			onesim <- function () {
-				sim <- refit(initmodel,newpatterns=x)
+				sim <- refit(initmodel,newpatterns=x,useinit=TRUE)
 				if (sim$random) {
 					marg.prob <- calcMargProb(sim)
 					marg.prob <- as.vector(matrix(marg.prob$outcomep,
@@ -48,7 +48,7 @@ function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,
 		}
 # expand data so one observation per row
 		newdata <- object$patterns[rep(1:length(object$freq),object$freq),]
-		newmodel <- refit(object,newpatterns=newdata)
+		newmodel <- refit(object,newpatterns=newdata,useinit=TRUE)
 		themle <- newmodel
 		theboot <- boot(newdata,dostatistic,R=R,sim="parametric",
 		ran.gen=gendata,

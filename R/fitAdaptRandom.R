@@ -129,17 +129,32 @@
 				nlm=nlm1))	
 		}
 	
-
+		#browser()
+		
 		oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
 		currll <- oneiteration$penlogLik
-		if (verbose) cat('Initial ll',currll,"\n")
 	# shift the quadrature points for the first time
-		momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
+		nshift <- 0
+		repeat {
+		  momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
+		  oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
+		  # check if moving quadrature points has changed likelihood
+		  if (verbose) cat("current ll",oneiteration$penlogLik,"\n")
+		  if (abs((oneiteration$penlogLik-currll)/oneiteration$penlogLik) < 1.0e-6) {
+		    currll <- oneiteration$penlogLik
+		    break()
+		  }
+		  currll <- oneiteration$penlogLik
+		  nshift <- nshift+1
+		  if (nshift > 200) stop("too many shift iterations - increase quadrature points")
+		}
+
+		
 		oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns,calcfitted=TRUE)
 		currll <- oneiteration$penlogLik
     zprop <- oneiteration$classprobs
-		if (verbose) cat("current ll",currll,"\n")		
-		
+
+      
 		adaptive <- TRUE
 		prevll <- -Inf
 		nadaptive <- 0
@@ -203,44 +218,8 @@
 
 	momentdata <- matrix(rep(c(0,1),each=nlevel2),nrow=nlevel2)
 
-	#browser()
-# choose among possible lambdacoef
- 	if (missing(initlambdacoef) || is.null(initlambdacoef)) {
-		lastmomentdata <- momentdata
- 		testlambdacoef <- 0
- 		maxlambda <- NA
- 		maxll <- -Inf
- 		repeat {
-			if (verbose) cat('trying lambdacoef ',testlambdacoef,"\n")
-			lambdacoef <- rep(testlambdacoef,lambdasize)
-			oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
-			currll <- oneiteration$penlogLik
-			if (verbose) cat('Initial ll',currll,"\n")
-			lastll <- 2*currll
-		# shift the quadrature points for the first time
-			while (abs((lastll-currll)/lastll)>1.0e-6) {
-				lastll <- currll
-				momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
-				oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
-				currll <- oneiteration$penlogLik
-				if (verbose) cat("current ll",currll,"\n")		
-			}
-			momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
-			# when the ll starts decreasing, give up
-			if (currll < maxll) break()
-			maxll <- currll
-			maxlambda <- testlambdacoef
-			lastmomentdata <- momentdata
-			testlambdacoef <- testlambdacoef+0.1
-			if (testlambdacoef >= 3.0) break()
-		}
-		if (verbose) cat('using lambdacoef ',maxlambda,"\n")
-		if (byclass) lambdacoef <- matrix(rep(maxlambda,nclass*lambdasize),nrow=nclass)
-		else lambdacoef <- rep(maxlambda,lambdasize)
-		momentdata <- lastmomentdata
- 	}
- 	else lambdacoef <- initlambdacoef
-
+	if (missing(initlambdacoef) || is.null(initlambdacoef)) lambdacoef <- rep(3.0,lambdasize)
+	else lambdacoef <- initlambdacoef
 	#browser()  	   
  	myfit <- adaptivefit(classx,outcomex,lambdacoef,calcSE,momentdata,gh,patterns)
 

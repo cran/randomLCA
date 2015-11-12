@@ -76,7 +76,7 @@
         # now fit the simplest random efefcts model ie with constant loading
         initmodel <- fitAdaptRandom(patterns,freq=freq,
                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
-                                                initclassp=initmodel$classp,initlambdacoef=1.0,
+                                                initclassp=initmodel$classp,initlambdacoef=NULL,
                                                 gh=norm.gauss.hermite(quadpoints),
                                                 constload=TRUE,probit=probit,byclass=FALSE,qniterations=qniterations,
                                                 penalty=penalty,verbose=verbose)
@@ -146,7 +146,11 @@
                                                 penalty=penalty,verbose=verbose)
       }
     }
-    
+# check rank of Hessian
+    if (calcSE) {
+      if (rankMatrix(initmodel$fit$hessian) < dim(initmodel$fit$hessian)[1])
+        warning("Rank of Hessian less than number of estimated parameters - model is possibly underidentified or a parameter estimate is on the boundary")
+    }
     fit <- initmodel
     fit$call <- cl
     fit$nclass <- nclass
