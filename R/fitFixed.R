@@ -38,9 +38,12 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,justEM,probit,penal
         ll <- sum(log(ill2)*freq)
 # penalise extreme outcome probabilities
 		outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-		pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
+#		pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
+		pen <-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1+penalty/(nclass*2),length(outcomep)),log=TRUE)-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1,length(outcomep)),log=TRUE)
+		#browser()
 		penll <- ll+sum(pen)
-		if (is.nan(penll) || is.infinite(penll)) penll <- -1.0*.Machine$double.xmax
+		#print(c(dbeta(outcomep,1+penalty,1+penalty,log=TRUE),sum(pen)))
+		  if (is.nan(penll) || is.infinite(penll)) penll <- -1.0*.Machine$double.xmax
        	return(list(logl=ll,penlogl=penll))
     }
 

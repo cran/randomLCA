@@ -53,8 +53,9 @@
 			}
 # penalise extreme outcome probabilities
 			outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-			pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
-#			print(c(ll,sum(pen)))
+#			pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
+			pen <-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1+penalty/(nclass*2),length(outcomep)),log=TRUE)-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1,length(outcomep)),log=TRUE)
+			#			print(c(ll,sum(pen)))
 			pen11 <- ll+sum(pen)
 			if (is.nan(ll) || is.infinite(ll)) ll <- -1.0*.Machine$double.xmax
 			if (calcfitted) {

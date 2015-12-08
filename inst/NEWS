@@ -1,8 +1,18 @@
+Changes in randomLCA version 1.0-6
+
+ o Added warning if only one set of starting values produced the maximum value of the maximum likelihood
+
+ o Changed likelihood penalty from product of beta to Dirichlet to match the Galindo Garre paper
+
+ o Changed default penalty to 0.001, which produces neglible effect except to remove some numerical instabilities
+
+ o Changed most of the Depends to Imports which removes the messages on loading
+
 Changes in randomLCA version 1.0-5
 
  o Added argument to refit method to use the estimates from current model for the initial values
 
- o Changed outcomeProbs to use the initial values from teh current model when bootstrapping. This avoids problems with label switching.
+ o Changed outcomeProbs to use the initial values from the current model when bootstrapping. This avoids problems with label switching.
  
 Changes in randomLCA version 1.0-4
 

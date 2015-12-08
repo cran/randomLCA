@@ -9,7 +9,7 @@
   function(patterns,freq=NULL,nclass=2,calcSE=TRUE,notrials=20,
            random=FALSE,byclass=FALSE,quadpoints=21,constload=TRUE,blocksize=dim(patterns)[2],
            level2=FALSE,probit=FALSE,level2size=blocksize,
-           qniterations=5,penalty=0.0001,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
+           qniterations=5,penalty=0.001,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
     set.seed(seed)
     if (quadpoints > 190)
       stop("Maximum of 190 quadrature points\n")

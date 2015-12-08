@@ -26,6 +26,7 @@ function(patterns,freq,nclass,calcSE,notrials,probit,penalty,verbose) {
 		print("bic for class")
 		print(bics)
 	}
+	if (sum(abs((maxbic-bics)/maxbic)<1.0e-6)==1) warning("Only one fitted model at maximum loglikelihood. Increase number of trials.")
 	return(c(maxlca,list(bics=bics)))
 }
 
