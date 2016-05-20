@@ -1,3 +1,13 @@
+Changes in randomLCA version 1.0-8
+
+ o Removed spaces after doi: in description file
+
+Changes in randomLCA version 1.0-7
+
+ o Improved speed of random effects models
+
+ o Fixed bug with 2 level models with constant loadings which caused crashing
+
 Changes in randomLCA version 1.0-6
 
  o Added warning if only one set of starting values produced the maximum value of the maximum likelihood

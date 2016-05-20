@@ -22,7 +22,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   #   verbose print information about algorithm    
   
   outcomes <- as.matrix(outcomes)
-  mode(outcomes) <- "double"
+  mode(outcomes) <- "integer"
   
   nlevel1 <- level2size
   nlevel2 <- dim(outcomes)[2]/level2size
@@ -83,13 +83,14 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
                       if (byclass) mylambdacoef[iclass,]  else mylambdacoef,
                       if (byclass) ltaucoef[iclass] else ltaucoef,
                       gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
-                      probit,updatemoments)
-      ill[,iclass] <- exp(result[[1]])*classp2[iclass]
+                      probit,updatemoments,level2size)
+      ill[,iclass] <- exp(result[[1]])
       if (updatemoments) newmoments <- cbind(newmoments,result[[2]])
     }
     #		browser()
     # if zprop not supplied then we have the usual maximum likelihood
     if (is.null(zprop)) {
+      for (iclass in 1:nclass) ill[,iclass] <- ill[,iclass]*classp2[iclass]
       ill2 <- log(rowSums(ill))
       ll <- sum(ill2*freq)
     } else {
@@ -103,7 +104,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
 #    pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
     pen <-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1+penalty/(nclass*2),length(outcomep)),log=TRUE)-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1,length(outcomep)),log=TRUE)
     penll <- ll+sum(pen)
-    if (is.nan(penll) || is.infinite(penll)) penll <- -1.0*.Machine$double.xmax
+     if (is.nan(penll) || is.infinite(penll)) penll <- -1.0*.Machine$double.xmax
     if (calcfitted) {
       fitted <- exp(ill2)*sum(ifelse(apply(outcomes,1,function(x) 
         any(is.na(x))),0,freq))*
@@ -255,8 +256,37 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   optim.fit <- myfit$nlm
   momentdata <- myfit$momentdata
   
-  # extract the se
-  #browser()
+#   library(numDeriv)
+#   
+#   myfunc <- function(x,momentdata,nclass,outcomestart,outcomeend,lambdastart,lambdaend,taustart,tauend,byclass,gh){
+#     if (byclass) final <- calclikelihood(if (nclass==1) NULL else x[1:(nclass-1)],
+#                                          matrix(x[outcomestart:outcomeend],nrow=nclass),
+#                                          matrix(x[lambdastart:lambdaend],nrow=nclass),
+#                                          x[taustart:tauend],
+#                                          momentdata,gh,updatemoments=FALSE,calcfitted=FALSE)    
+#     else final <- calclikelihood(if (nclass==1) NULL else x[1:(nclass-1)],
+#                                  matrix(x[outcomestart:outcomeend],nrow=nclass),
+#                                  x[lambdastart:lambdaend],
+#                                  x[taustart:tauend],
+#                                  momentdata,gh,updatemoments=FALSE,calcfitted=FALSE) 
+#     return(final$logLik)
+#   }
+#   
+  # print(system.time(thehessian <- hessian(myfunc,optim.fit$estimate,momentdata=momentdata,nclass=nclass,outcomestart=outcomestart,
+  #                                         outcomeend=outcomeend,lambdastart=lambdastart,lambdaend=lambdaend,
+  #                                         taustart=taustart,tauend=tauend,byclass=byclass,gh=gh)))
+  # 
+  # iclass <- 1
+  # print(system.time(
+  #   for (i in 1:10000) result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],
+  #                 if (byclass) lambdacoef[iclass,]  else lambdacoef,
+  #                 if (byclass) ltaucoef[iclass] else ltaucoef,
+  #                 gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
+  #                 probit=FALSE,updatemoments=FALSE,level2size)
+  # ))
+  # # extract the se
+  # browser()
+  
   if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
   else {
     s <- svd(optim.fit$hessian)

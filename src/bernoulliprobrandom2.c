@@ -3,12 +3,12 @@
 #include <Rmath.h>
 
 SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP ltaucoef,
-	SEXP gh, SEXP momentdata, SEXP probit, SEXP updatemoments)
+	SEXP gh, SEXP momentdata, SEXP probit, SEXP updatemoments, SEXP ilevel2size)
 {
 	SEXP ans, ill,  newmomentdata,  sum3, sum4, sum5, sum3total, sum4total, sum5total;
 	int irow, outcome, index, noutcomes, nrows, i2point, i3point, npoints, level2size,
-		lprobit, lupdatemoments, nlevel2, i2;
-	double *rpatterns = REAL(patterns), *routcomex = REAL(outcomex),
+		lprobit, lupdatemoments, nlevel2, i2, nlambdacoef, *rpatterns = INTEGER(patterns);
+	double  *routcomex = REAL(outcomex),
 		new3w, new3p, new2w, new2p, *rmomentdata=REAL(momentdata),
 		*rgh=REAL(gh),*rlambdacoef=REAL(lambdacoef), *rill, *rnewmomentdata,
 		 product, sum2, sum2total, suml3, suml4,suml5, *rsum3, *rsum4, *rsum5, *rsum3total,
@@ -17,12 +17,14 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 	lprobit = asLogical(probit);
 	lupdatemoments = asLogical(updatemoments);
 	
+	level2size=asInteger(ilevel2size);
+	
 	rtaucoef = exp(REAL(ltaucoef)[0]);
 	
 	noutcomes = LENGTH(outcomex);
 	nrows = LENGTH(patterns)/noutcomes;
 	npoints = LENGTH(gh)/2;
-	level2size=LENGTH(lambdacoef);
+	nlambdacoef=LENGTH(lambdacoef);
 	nlevel2=noutcomes/level2size;
 
 	
@@ -67,9 +69,9 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 		for (i3point=0; i3point < npoints; i3point++) {
 			/* Rprintf("momentdata  %f,%f\n",rmomentdata[irow],rmomentdata[nrows+irow]); */
 			new3p = rmomentdata[irow]+rmomentdata[nrows+irow]*rgh[i3point];
-			new3w = log(sqrt(2.0*M_PI))+log(rmomentdata[nrows+irow])+
-				(rgh[i3point]*rgh[i3point])/2.0+log(rgh[npoints+i3point])+
-				dnorm(new3p,0.0,1.0,TRUE);
+			new3w = log(rmomentdata[nrows+irow])+
+				(rgh[i3point]*rgh[i3point])/2.0+log(rgh[npoints+i3point])-
+				new3p*new3p/2.0;
 			sum2total=0;
 			for (i2=0; i2<nlevel2; i2++) {			
 				sum2=0.0;
@@ -84,24 +86,25 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 					/* Rprintf("momentdata  %f,%f\n",rmomentdata[irow+2+3*i2],rmomentdata[nrows+irow+3+3*i2]); */
 					new2p = rmomentdata[irow+nrows*(2+3*i2)]+rmomentdata[irow+nrows*(3+3*i2)]*rgh[i2point];
 					new2p = new2p-rmomentdata[irow+nrows*(4+3*i2)]*(new3p-rmomentdata[irow]);
-					new2w = log(sqrt(2.0*M_PI))+log(rmomentdata[irow+nrows*(3+3*i2)])+
-						(rgh[i2point]*rgh[i2point])/2.0+log(rgh[npoints+i2point])+
-						dnorm(new2p,0.0,1.0,TRUE);
+					new2w = log(rmomentdata[irow+nrows*(3+3*i2)])+
+						(rgh[i2point]*rgh[i2point])/2.0+log(rgh[npoints+i2point])-
+						new2p*new2p/2.0;
 					/* calculate logl for level 2 unit */
 					product=1.0;
 					for (outcome=0; outcome <level2size; outcome++) {
 						/* calculate outcome probability for this outcome */
-						myoutcomex = routcomex[outcome+i2*level2size]+ (new3p+new2p*rtaucoef)*rlambdacoef[outcome];
+						if (nlambdacoef==1) myoutcomex = routcomex[outcome+i2*level2size]+ (new3p+new2p*rtaucoef)*rlambdacoef[1];
+						else myoutcomex = routcomex[outcome+i2*level2size]+ (new3p+new2p*rtaucoef)*rlambdacoef[outcome];
 						if (lprobit)
-							myoutcomep=pnorm(myoutcomex,0,1,TRUE,FALSE);
+							myoutcomep=pnorm(myoutcomex,0.0,1.0,TRUE,FALSE);
 						else
-							myoutcomep=exp(myoutcomex)/(1+exp(myoutcomex));
+							myoutcomep=1.0/(1.0+exp(-myoutcomex));
 						/* update likelihood for this observation */
 					/*  Rprintf("myoutcomep  %f\n",myoutcomep); */
 						index = irow+(outcome+i2*level2size)*nrows;
-						if (!ISNAN(rpatterns[index])) {
-							product = product*(rpatterns[index]*myoutcomep+
-								(1-rpatterns[index])*(1-myoutcomep));
+						if (rpatterns[index]!=NA_INTEGER) {
+						  if (rpatterns[index]==1) product = product*myoutcomep;
+						  else product = product*(1-myoutcomep); 
 						}
 					}
 					/* sum across level 2 quadrature points */

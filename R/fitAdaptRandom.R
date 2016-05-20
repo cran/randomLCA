@@ -35,14 +35,15 @@
 				if (byclass) {
 					#browser()
 					ill[,iclass] <- .Call("bernoulliprobrandom",patterns,outcomex[iclass,],lambdacoef[iclass,],
-						gh,momentdata,probit)*classp2[iclass]				} else {
+						gh,momentdata,probit)				} else {
 					ill[,iclass] <- .Call("bernoulliprobrandom",patterns,outcomex[iclass,],lambdacoef,
-						gh,momentdata,probit)*classp2[iclass]
+						gh,momentdata,probit)
 				}
 				##browser()
 			}
 # if zprop not supplied then we have the usual maximum likelihood
 			if (is.null(zprop)) {
+			   for (iclass in 1:nclass) ill[,iclass] <- ill[,iclass]*classp2[iclass]	
           ill2 <- rowSums(ill,na.rm=TRUE)
 			    ll <- sum(log(ill2)*freq,na.rm=TRUE)
 			} else {

@@ -1,12 +1,12 @@
-ae3f80affa1e269e2bb675030dbb7e85 *DESCRIPTION
+124fdf08c6dee4abbfef533645bfc39e *DESCRIPTION
 e835c35be4ed50f7c34c8d398a334da1 *NAMESPACE
 e585e6178031f582ce4c5e805f0fa06f *R/bestlca.R
 8d12fb9e524ebda8d096cf165d18dfcf *R/calcCond2Prob.R
 859e52e99440ddb528dc6ae09808704a *R/calcCondProb.R
 06cfdd3b6d13e6738d83711f111ca16e *R/calcMargProb.R
 1b527892f5fd165b3dc3054c46ce86cf *R/classProbs.R
-493b1f67394c7b0d177140d7bc87f203 *R/fitAdaptRandom.R
-9175349f8878b81331c5969925bcb0bb *R/fitAdaptRandom2.R
+f2b94d0c527c4e902fe264bbc6550bbb *R/fitAdaptRandom.R
+5465b4051d9e16e67c4d7ff1089472a0 *R/fitAdaptRandom2.R
 6f2aa564689c8616ae315c72a6a02d2a *R/fitFixed.R
 bd8149da588f164be06cf72da2425771 *R/fitted.randomLCA.R
 8585b2a717142ea91fde01d8e794c8c3 *R/globals.R
@@ -15,7 +15,7 @@ bd8149da588f164be06cf72da2425771 *R/fitted.randomLCA.R
 6d839bfbbdc7643275975ee27ee83397 *R/outcomeProbs.R
 1b216bc621ccaab61332288585cd4be5 *R/plot.randomLCA.R
 e07596c8b40b395424af2c7447f31f01 *R/postClassProbs.R
-3a6ae7a3582842eab02a0e213222983d *R/randomLCA.R
+f6b48cd266f26372d7714ca2ad5c69ee *R/randomLCA.R
 36162412e4c53d19402c237bcd8d610a *R/ranef.randomLCA.R
 799d1dd73a56c84e97cf49136fc27a5a *R/refit.randomLCA.R
 a3ec3ec03f31d757d22ac0c889afb7c1 *R/simulate.randomLCA.R
@@ -28,7 +28,7 @@ a3ec3ec03f31d757d22ac0c889afb7c1 *R/simulate.randomLCA.R
 3f1bdd44944c14ac0545ee4ee43dd86d *data/pap.RData
 55a0c34453eb0605616ac6f7dc28bf34 *data/symptoms.RData
 40524198ab57f576f45eaa83f3a2d5a4 *data/uterinecarcinoma.rda
-1a7811d22c48aa1fb5f8a983b2af3bf6 *inst/NEWS
+c7cdf6b7b837874513acf999c78ad4c1 *inst/NEWS
 c86cde0c88f2f08d709f04193ab8b655 *inst/doc/randomLCA-example.Rnw
 3e5064492895dad08f3221035c6a24da *inst/doc/randomLCA-example.pdf
 0dbd25283c5b3f35631d7ee7ebd5f501 *man/AIC.Rd
@@ -58,7 +58,7 @@ e95545aeee85c8ede1c890452df012da *man/symptoms.Rd
 e3833b9ce270207dc905f7e03e644088 *man/uterinecarcinoma.Rd
 2d27ae9d944109cdbdfa91dcc3db121f *src/bernoulliprob.c
 2cd0ec6c2ddf53704b66689bf0da226b *src/bernoulliprobrandom.c
-39218a9a38d8c4bbcceb807beef340f4 *src/bernoulliprobrandom2.c
+865035e5945cad44ca9a7874ba45b1af *src/bernoulliprobrandom2.c
 85d2bc429524f43b0040f8b4b7267d32 *src/lcemalgorith.c
 b50c23978be778fd5b8ceb052c630334 *vignettes/randomLCA-example-010.pdf
 8e7a0d514cbece20d9b6651afdfe69dc *vignettes/randomLCA-example-014.pdf
