@@ -23,6 +23,9 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   
   outcomes <- as.matrix(outcomes)
   mode(outcomes) <- "integer"
+
+  #momentdata <- NULL
+  momentdata <- replicate(nclass, NULL)  
   
   nlevel1 <- level2size
   nlevel2 <- dim(outcomes)[2]/level2size
@@ -46,7 +49,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
     tauend <- (nlevel1*nlevel2*nclass+nclass+nlambda)
   }
   
-  calclikelihood <- function(classx,outcomex,lambdacoef,ltaucoef,momentdata,gh,
+  calclikelihood <- function(classx,outcomex,lambdacoef,ltaucoef,
                              updatemoments=FALSE,calcfitted=FALSE,zprop=NULL) {
     
 #       print("classx")
@@ -69,7 +72,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
     
     #		browser()
     
-    newmoments <- NULL
+    newmoments <- replicate(nclass, NULL)
     ill <- matrix(rep(NA,nclass*nlevel3),ncol=nclass)
     mylambdacoef <- lambdacoef
     if (constload) {
@@ -79,13 +82,18 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
     #   print("mylambdacoef")
     #   print(mylambdacoef)
     for (iclass in 1:nclass) {
+      # result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],
+      #                 if (byclass) mylambdacoef[iclass,]  else mylambdacoef,
+      #                 if (byclass) ltaucoef[iclass] else ltaucoef,
+      #                 gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
+      #                 probit,updatemoments,level2size)
       result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],
                       if (byclass) mylambdacoef[iclass,]  else mylambdacoef,
                       if (byclass) ltaucoef[iclass] else ltaucoef,
-                      gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
+                      gh,momentdata[[iclass]],
                       probit,updatemoments,level2size)
       ill[,iclass] <- exp(result[[1]])
-      if (updatemoments) newmoments <- cbind(newmoments,result[[2]])
+      if (updatemoments) newmoments[[iclass]] <- result[[2]]
     }
     #		browser()
     # if zprop not supplied then we have the usual maximum likelihood
@@ -100,10 +108,14 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       ll <- sum(ill2*freq)			  
     }
     # penalise extreme outcome probabilities
-    outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-#    pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
-    pen <-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1+penalty/(nclass*2),length(outcomep)),log=TRUE)-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1,length(outcomep)),log=TRUE)
-    penll <- ll+sum(pen)
+    if (probit) {
+      outcomep <- pnorm(as.vector(outcomex))
+      noutcomep <- pnorm(as.vector(-outcomex))
+    } else {
+      outcomep <- as.vector(1/(1+exp(-outcomex)))
+      noutcomep <- as.vector(1/(1+exp(outcomex)))
+    }
+    penll <- ll+penalty/(nclass*2)*sum(log(outcomep))+penalty/(nclass*2)*sum(log(noutcomep))
      if (is.nan(penll) || is.infinite(penll)) penll <- -1.0*.Machine$double.xmax
     if (calcfitted) {
       fitted <- exp(ill2)*sum(ifelse(apply(outcomes,1,function(x) 
@@ -114,24 +126,24 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
     } else return(list(logLik=ll,penlogLik=penll,moments=newmoments))
   }  # end of calclikelihood
   
-  adaptivefit <- function(classx,outcomex,lambdacoef,ltaucoef,momentdata,gh) {
+  adaptivefit <- function(classx,outcomex,lambdacoef,ltaucoef) {
     
     fitparams <- function(classx,outcomex,lambdacoef,ltaucoef,
-                          momentdata,gh,calcSE,noiterations=qniterations,zprop=NULL) {
+                          calcSE,noiterations=qniterations,zprop=NULL) {
       
-      calcllfornlm <- function(params,momentdata,gh,zprop) {  
+      calcllfornlm <- function(params,zprop) {  
         oneiteration <- calclikelihood(if (nclass==1) NULL else params[1:(nclass-1)],
                                        matrix(params[outcomestart:outcomeend],nrow=nclass),
                                        if (byclass) matrix(params[lambdastart:lambdaend],nrow=nclass) else params[lambdastart:lambdaend],
                                        params[taustart:tauend],
-                                       momentdata,gh,zprop=zprop)
+                                       zprop=zprop)
         return(-oneiteration$penlogLik)
       }
       
       nlm1 <- nlm(calcllfornlm, c(classx,as.vector(outcomex),lambdacoef,ltaucoef),
                   iterlim = noiterations,
                   print.level=ifelse(verbose,2,0),
-                  check.analyticals = FALSE,hessian=calcSE,momentdata=momentdata,gh=gh,zprop=zprop)
+                  check.analyticals = FALSE,hessian=calcSE,zprop=zprop)
       return(list(penlogLik=-nlm1$minimum,
                   classx=if (nclass==1) NULL else nlm1$estimate[1:(nclass-1)],
                   outcomex=matrix(nlm1$estimate[outcomestart:outcomeend],nrow=nclass),
@@ -142,16 +154,16 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
     
     
     oneiteration <- calclikelihood(classx, outcomex, lambdacoef,ltaucoef,
-                                   momentdata,gh,updatemoments=TRUE)
+                                   updatemoments=TRUE)
     currll <- oneiteration$penlogLik
     if (verbose) cat('Initial ll',currll,"\n")
     lastll <- 2*currll
     # shift the quadrature points for the first time
     while (abs((lastll-currll)/lastll)>1.0e-6) {
       lastll <- currll
-      momentdata <- oneiteration$moments
+      momentdata <<- oneiteration$moments
       oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
-                                     momentdata,gh,updatemoments=TRUE)
+                                     updatemoments=TRUE)
       currll <- oneiteration$penlogLik
       zprop <- oneiteration$classprobs
       if (verbose) cat("current ll",currll,"\n")       
@@ -163,7 +175,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
     while(adaptive) {
       # need to do an optimisation on the other parameters
       fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
-                              momentdata,gh,calcSE=FALSE,zprop=zprop)
+                              calcSE=FALSE,zprop=zprop)
       currll <- fitresults$penlogLik
       outcomex <- fitresults$outcomex
       classx <- fitresults$classx
@@ -173,14 +185,14 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       optll <- currll
       # shift the quadrature points again
       oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
-                                     momentdata,gh,updatemoments=TRUE)
+                                     updatemoments=TRUE)
       currll <- oneiteration$penlogLik
       lastll <- 2*currll
       while(abs((lastll-currll)/lastll)>1.0e-7) {
         lastll <- currll
-        momentdata <- oneiteration$moments
+        momentdata <<- oneiteration$moments
         oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
-                                       momentdata,gh,updatemoments=TRUE)
+                                       updatemoments=TRUE)
         currll <- oneiteration$penlogLik
         if (verbose) cat("current ll",currll,"\n")       
       }
@@ -194,7 +206,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       zprop <- oneiteration$classprobs
     }
     fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
-                            momentdata,gh,calcSE=calcSE,noiterations=500)
+                            calcSE=calcSE,noiterations=500)
     return(list(nlm=fitresults$nlm,momentdata=momentdata))
   } # end adaptivefit
   
@@ -202,8 +214,11 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   # mu3,tau3,nlevel2*(mu2,taucoef,gamma2)
   # repeated for each class
   
-  momentdata <- matrix(rep(c(rep(c(0,1),each=nlevel3),
-                             rep(rep(c(0,1,0),each=nlevel3),times=nlevel2)),times=nclass),
+  # momentdata <- matrix(rep(c(rep(c(0,1),each=nlevel3),
+  #                            rep(rep(c(0,1,0),each=nlevel3),times=nlevel2)),times=nclass),
+  #                      nrow=nlevel3)
+  for (iclass in 1:nclass) momentdata[[iclass]] <- matrix(c(rep(c(0,1),each=nlevel3),
+                              rep(rep(c(0,1,0),each=nlevel3),times=nlevel2)),
                        nrow=nlevel3)
   
   if (nclass==1) classx <- NULL
@@ -234,7 +249,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       if (byclass) theltaucoef <- rep(testltaucoef,nclass)
       else theltaucoef <- testltaucoef
       # browser()
-      onelikelihood <- calclikelihood(classx,outcomex,lambdacoef,theltaucoef,momentdata,gh)
+      onelikelihood <- calclikelihood(classx,outcomex,lambdacoef,theltaucoef)
       currll <- onelikelihood$penlogLik
       if (verbose) cat("ll",currll,"\n")		
       # when the ll starts decreasing, give up
@@ -251,10 +266,10 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   }
   else ltaucoef <- initltaucoef
   
-  myfit <- adaptivefit(classx, outcomex, lambdacoef,ltaucoef,momentdata,gh)
+  myfit <- adaptivefit(classx, outcomex, lambdacoef,ltaucoef)
   
   optim.fit <- myfit$nlm
-  momentdata <- myfit$momentdata
+  momentdata <<- myfit$momentdata
   
 #   library(numDeriv)
 #   
@@ -290,9 +305,11 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
   else {
     s <- svd(optim.fit$hessian)
-    separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
-    separ[!is.finite(separ)] <- NA
-  }
+    #if(nclass>2) browser()
+	      separ <- diag(s$v %*% diag(1/s$d) %*% t(s$u))
+	      separ[!is.nan(separ) & (separ>=0.0)] <- sqrt(separ[!is.nan(separ) & (separ>=0.0)])
+	      separ[is.nan(separ) | (separ<0.0)] <- NA
+ }
   # calculate the probabilities
   if (nclass==1) classp <- 1
   else {
@@ -361,12 +378,12 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
                                        matrix(optim.fit$estimate[outcomestart:outcomeend],nrow=nclass),
                                        matrix(optim.fit$estimate[lambdastart:lambdaend],nrow=nclass),
                                        optim.fit$estimate[taustart:tauend],
-                                       momentdata,gh,updatemoments=FALSE,calcfitted=TRUE)    
+                                       updatemoments=FALSE,calcfitted=TRUE)    
   else final <- calclikelihood(if (nclass==1) NULL else optim.fit$estimate[1:(nclass-1)],
                                matrix(optim.fit$estimate[outcomestart:outcomeend],nrow=nclass),
                                optim.fit$estimate[lambdastart:lambdaend],
                                optim.fit$estimate[taustart:tauend],
-                               momentdata,gh,updatemoments=FALSE,calcfitted=TRUE)    
+                               updatemoments=FALSE,calcfitted=TRUE)    
   fitted <- final$fitted
   classprob <- final$classprob
   

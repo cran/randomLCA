@@ -12,7 +12,7 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 		new3w, new3p, new2w, new2p, *rmomentdata=REAL(momentdata),
 		*rgh=REAL(gh),*rlambdacoef=REAL(lambdacoef), *rill, *rnewmomentdata,
 		 product, sum2, sum2total, suml3, suml4,suml5, *rsum3, *rsum4, *rsum5, *rsum3total,
-		 *rsum4total, *rsum5total,  myoutcomex, myoutcomep, rtaucoef;
+		 *rsum4total, *rsum5total,  myoutcomex, myoutcomep, mynoutcomep, rtaucoef;
 	
 	lprobit = asLogical(probit);
 	lupdatemoments = asLogical(updatemoments);
@@ -95,16 +95,20 @@ SEXP bernoulliprobrandom2(SEXP patterns, SEXP outcomex,SEXP lambdacoef, SEXP lta
 						/* calculate outcome probability for this outcome */
 						if (nlambdacoef==1) myoutcomex = routcomex[outcome+i2*level2size]+ (new3p+new2p*rtaucoef)*rlambdacoef[1];
 						else myoutcomex = routcomex[outcome+i2*level2size]+ (new3p+new2p*rtaucoef)*rlambdacoef[outcome];
-						if (lprobit)
-							myoutcomep=pnorm(myoutcomex,0.0,1.0,TRUE,FALSE);
-						else
-							myoutcomep=1.0/(1.0+exp(-myoutcomex));
+						if (lprobit) {
+						  myoutcomep=pnorm(myoutcomex,0.0,1.0,TRUE,FALSE);
+						  mynoutcomep=pnorm(-myoutcomex,0.0,1.0,TRUE,FALSE);
+						}
+						else {
+						  myoutcomep=1.0/(1.0+exp(-myoutcomex));
+						  mynoutcomep=1.0/(1.0+exp(myoutcomex));
+						}
 						/* update likelihood for this observation */
-					/*  Rprintf("myoutcomep  %f\n",myoutcomep); */
+						/*  Rprintf("myoutcomep  %f\n",myoutcomep); */
 						index = irow+(outcome+i2*level2size)*nrows;
 						if (rpatterns[index]!=NA_INTEGER) {
 						  if (rpatterns[index]==1) product = product*myoutcomep;
-						  else product = product*(1-myoutcomep); 
+						  else product = product*mynoutcomep; 
 						}
 					}
 					/* sum across level 2 quadrature points */

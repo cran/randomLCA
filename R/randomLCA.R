@@ -1,15 +1,16 @@
 .onAttach <-
   function (libname, pkgname) 
   {
-    loadmsg <- "\nNote that there are changes to the names of some functions in version 1.0.3. See NEWS.\n"
-    packageStartupMessage(loadmsg, domain = NULL, appendLF = TRUE)
+    # comment in case we ever want to pt another message
+    # loadmsg <- "\nNote that there are changes to the names of some functions in version 1.0.3. See NEWS.\n"
+    # packageStartupMessage(loadmsg, domain = NULL, appendLF = TRUE)
   }
 
 `randomLCA` <-
   function(patterns,freq=NULL,nclass=2,calcSE=TRUE,notrials=20,
            random=FALSE,byclass=FALSE,quadpoints=21,constload=TRUE,blocksize=dim(patterns)[2],
            level2=FALSE,probit=FALSE,level2size=blocksize,
-           qniterations=5,penalty=0.001,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
+           qniterations=5,penalty=0.01,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
     set.seed(seed)
     if (quadpoints > 190)
       stop("Maximum of 190 quadrature points\n")
@@ -46,6 +47,8 @@
 #       patterns <- patterns[freq!=0,]
 #       freq <- freq[freq!=0]
     }
+	# patterns <- as.matrix(patterns)
+	# mode(patterns) <- "integer"
 # determine df
     nparams <- dim(patterns)[2]*nclass
     nparams <- nparams+nclass-1

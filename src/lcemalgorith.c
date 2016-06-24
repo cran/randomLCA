@@ -4,9 +4,8 @@
 SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP verbose)
 {
 	SEXP ans, ill, ill2, classprob, logl, newoutcomep, newclassp;
-	int emit, irow, iclass, outcome, index, noutcomes, nrows, nclass, lverbose;
-	double *rpatterns = REAL(patterns),  
-		*rfreq=REAL(freq), oldll, *rill, *rill2, *rclassprob, product,
+	int emit, irow, iclass, outcome, index, noutcomes, nrows, nclass, lverbose, *rpatterns = INTEGER(patterns);
+	double *rfreq=REAL(freq), oldll, *rill, *rill2, *rclassprob, product,
 		sumll, ll, sumfreq, sum1, sum2, *rlogl, *rnewoutcomep, *rnewclassp;
 
 	lverbose = asLogical(verbose);
@@ -42,9 +41,10 @@ SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP ve
 				product=1;
 				for (outcome=0; outcome < noutcomes; outcome++) {
 					index = irow+outcome*nrows;
-					if (!ISNAN(rpatterns[index]))
-						product = product*(rpatterns[index]*rnewoutcomep[outcome*nclass+iclass]+
-							(1.0-rpatterns[index])*(1.0-rnewoutcomep[outcome*nclass+iclass]));
+				  if (rpatterns[index]!=NA_INTEGER) {
+				    if (rpatterns[index]==1) product = product*rnewoutcomep[outcome*nclass+iclass];
+				    else product = product*(1-rnewoutcomep[outcome*nclass+iclass]); 
+				  }
 				}
 				rill[irow+iclass*nrows]=product*rnewclassp[iclass];
 			}
@@ -90,11 +90,10 @@ SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP ve
 				sum1=0;
 				sum2=0;
 				for (irow=0; irow < nrows; irow++) {
-						if (!ISNAN(rpatterns[irow+nrows*outcome])) {
-							sum1 += rpatterns[irow+nrows*outcome]*
-								rclassprob[irow+nrows*iclass]*rfreq[irow];
-							sum2 += rclassprob[irow+nrows*iclass]*rfreq[irow];
-					}					
+				  if (rpatterns[irow+nrows*outcome]!=NA_INTEGER) {
+				    if (rpatterns[irow+nrows*outcome]==1) sum1 += rclassprob[irow+nrows*iclass]*rfreq[irow];
+				    sum2 += rclassprob[irow+nrows*iclass]*rfreq[irow];
+				  }
 				}
 				rnewoutcomep[iclass+nclass*outcome]= sum1/sum2;
 			}

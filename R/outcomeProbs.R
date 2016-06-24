@@ -73,9 +73,9 @@ function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,
 			outcomepl <- pnorm(outcomexl)
 			outcomepu <- pnorm(outcomexu)
 		} else {
-			outcomep <- exp(outcomex)/(1+exp(outcomex))
-			outcomepl <- exp(outcomexl)/(1+exp(outcomexl))
-			outcomepu <- exp(outcomexu)/(1+exp(outcomexu))
+			outcomep <- 1.0/(1+exp(-outcomex))
+			outcomepl <- 1.0/(1+exp(-outcomexl))
+			outcomepu <- 1.0/(1+exp(-outcomexu))
 		}
 	} else {
 	  outcomex <- object$fit$estimate[nclass:(length(object$fit$estimate))]
@@ -86,9 +86,9 @@ function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,
 			outcomepl <- pnorm(outcomex+qnorm((1-level)/2)*outcomexse)
 			outcomepu <- pnorm(outcomex+qnorm(1 - (1-level)/2)*outcomexse)
 		} else {
-			outcomep <- exp(outcomex)/(1+exp(outcomex))
-			outcomepl <- exp(outcomex+qnorm((1-level)/2)*outcomexse)/(1+exp(outcomex+qnorm((1-level)/2)*outcomexse))
-			outcomepu <- exp(outcomex+qnorm(1 - (1-level)/2)*outcomexse)/(1+exp(outcomex+qnorm(1 - (1-level)/2)*outcomexse))
+			outcomep <- 1.0/(1.0+exp(-outcomex))
+			outcomepl <- 1.0/(1.0+exp(-outcomex-qnorm((1-level)/2)*outcomexse))
+			outcomepu <- 1.0/(1.0+exp(-outcomex-qnorm(1 - (1-level)/2)*outcomexse))
 		}
 	}
 	

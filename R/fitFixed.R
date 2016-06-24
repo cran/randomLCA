@@ -11,7 +11,7 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,justEM,probit,penal
 #   verbose print information about algorithm    
 
 	patterns <- as.matrix(patterns)
-	mode(patterns) <- "double"
+	mode(patterns) <- "integer"
 	
 	nlevel1 <- dim(patterns)[2]
 
@@ -37,11 +37,14 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,justEM,probit,penal
 		ill2 <- rowSums(ill)
         ll <- sum(log(ill2)*freq)
 # penalise extreme outcome probabilities
-		outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-#		pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
-		pen <-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1+penalty/(nclass*2),length(outcomep)),log=TRUE)-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1,length(outcomep)),log=TRUE)
-		#browser()
-		penll <- ll+sum(pen)
+		if (penalty==0.0) penll <- ll
+		else {
+        outcomep <- as.vector(1.0/(1.0+exp(-outcomex)))
+        noutcomep <- as.vector(1.0/(1.0+exp(outcomex)))
+        #browser()
+		penll <- ll+penalty/(nclass*2)*sum(log(outcomep))+penalty/(nclass*2)*sum(log(noutcomep))
+		}
+		# print(c(ll,penll,penalty/(nclass*2)*sum(log(outcomep))+penalty/(nclass*2)*sum(log(1.0-outcomep))))
 		#print(c(dbeta(outcomep,1+penalty,1+penalty,log=TRUE),sum(pen)))
 		  if (is.nan(penll) || is.infinite(penll)) penll <- -1.0*.Machine$double.xmax
        	return(list(logl=ll,penlogl=penll))
@@ -76,9 +79,12 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,justEM,probit,penal
 		fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
 		classprob <- ill/ill2
 # penalise extreme outcome probabilities
-		outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-		pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
-		penll <- ll+sum(pen)
+if (penalty==0.0) penll <- ll
+else {
+		outcomep <- as.vector(1.0/(1.0+exp(-as.vector(outcomex))))
+		noutcomep <- as.vector(1.0/(1.0+exp(as.vector(outcomex))))
+		penll <- ll+penalty/(nclass*2)*sum(log(outcomep))+penalty/(nclass*2)*sum(log(noutcomep))
+		}
 	  	return(list(fitted=fitted,classprob=classprob,logLik=ll,penlogLik=penll))
     }
 
@@ -130,8 +136,9 @@ function(patterns,freq,initoutcomep,initclassp,nclass,calcSE,justEM,probit,penal
 	    }
 	    else {
 	      s <- svd(optim.fit$hessian)
-	      separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
-	      separ[!is.finite(separ)] <- NA
+	      separ <- diag(s$v %*% diag(1/s$d) %*% t(s$u))
+	      separ[!is.nan(separ) & (separ>=0.0)] <- sqrt(separ[!is.nan(separ) & (separ>=0.0)])
+	      separ[is.nan(separ) | (separ<0.0)] <- NA
 	    }
 	  } else separ <- rep(NA,length(c(as.vector(classp),as.vector(outcomep))));
 	  # calculate the probabilities

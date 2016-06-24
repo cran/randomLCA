@@ -5,8 +5,8 @@
 SEXP bernoulliprob(SEXP patterns, SEXP outcomep)
 {
 	SEXP ans;
-	int irow, outcome, index, noutcomes, nrows;
-	double *rpatterns = REAL(patterns), *routcomep = REAL(outcomep), *rans;
+	int irow, outcome, index, noutcomes, nrows, *rpatterns = INTEGER(patterns);
+	double  *routcomep = REAL(outcomep), *rans;
 	double product;
 	
 	noutcomes = LENGTH(outcomep);
@@ -20,9 +20,10 @@ SEXP bernoulliprob(SEXP patterns, SEXP outcomep)
 		product=1;
 		for (outcome=0; outcome <noutcomes; outcome++) {
 			index = irow+outcome*nrows;
-			if (!ISNAN(rpatterns[index]))
-				product = product*(rpatterns[index]*routcomep[outcome]+
-					(1-rpatterns[index])*(1-routcomep[outcome]));
+		  if (rpatterns[index]!=NA_INTEGER) {
+		    if (rpatterns[index]==1) product = product*routcomep[outcome];
+		    else product = product*(1-routcomep[outcome]); 
+		  }
 		}
 		rans[irow]=product;
 	}

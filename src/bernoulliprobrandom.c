@@ -6,8 +6,8 @@ SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef,
 	SEXP gh, SEXP momentdata, SEXP probit)
 {
 	SEXP ans;
-	int irow, outcome, index, noutcomes, nrows, ipoint, npoints, level2size, ilambda, lprobit;
-	double *rpatterns = REAL(patterns), *routcomex = REAL(outcomex), *rans,
+	int irow, outcome, index, noutcomes, nrows, ipoint, npoints, level2size, ilambda, lprobit, *rpatterns = INTEGER(patterns);
+	double  *routcomex = REAL(outcomex), *rans,
 		neww,newp, *rmomentdata=REAL(momentdata),
 		*rgh=REAL(gh),*rlambdacoef=REAL(lambdacoef);
 	double product, sum, myoutcomex, myoutcomep;
@@ -31,9 +31,9 @@ SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef,
 		for (ipoint=0; ipoint < npoints; ipoint++) {
 			/* Rprintf("momentdata  %f,%f\n",rmomentdata[irow],rmomentdata[nrows+irow]); */
 			newp = rmomentdata[irow]+rmomentdata[nrows+irow]*rgh[ipoint];
-			neww = log(sqrt(2.0*M_PI))+log(rmomentdata[nrows+irow])+
-				(rgh[ipoint]*rgh[ipoint])/2.0+log(rgh[npoints+ipoint])+
-				dnorm(newp,0.0,1.0,TRUE);
+			neww = log(rmomentdata[nrows+irow])+
+				(rgh[ipoint]*rgh[ipoint])/2.0+log(rgh[npoints+ipoint])-
+				newp*newp/2.0;
 			/* Rprintf("newp,neww  %f,%f\n",newp,neww); */
 			ilambda=0;
 			product=1.0;
@@ -44,14 +44,14 @@ SEXP bernoulliprobrandom(SEXP patterns, SEXP outcomex,SEXP lambdacoef,
 				if (lprobit)
 					myoutcomep=pnorm(myoutcomex,0,1,TRUE,FALSE);
 				else
-					myoutcomep=exp(myoutcomex)/(1+exp(myoutcomex));
+					myoutcomep=1.0/(1+exp(-myoutcomex));
 				ilambda=(ilambda+1) % level2size;				
 				/* update likelihood for this observation */
 			/*  Rprintf("myoutcomep  %f\n",myoutcomep); */
 				index = irow+outcome*nrows;
-				if (!ISNAN(rpatterns[index])) {
-					product = product*(rpatterns[index]*myoutcomep+
-						(1-rpatterns[index])*(1-myoutcomep));
+				if (rpatterns[index]!=NA_INTEGER) {
+				  if (rpatterns[index]==1) product = product*myoutcomep;
+				  else product = product*(1-myoutcomep); 
 				}
 			}
 			sum=sum+product*exp(neww);

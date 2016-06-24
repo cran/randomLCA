@@ -1,3 +1,15 @@
+Changes in randomLCA version 1.0-9
+
+ o removed reliance on SciencePo package by implementing Dirichlet density directly
+
+ o fixed minor bug in calculating penalty 
+
+ o changed default penalty to 0.01 increasing speed and with only very minor change in estimates
+
+ o various modifications to code to improve speed
+
+ o avoid error messages due to problems in inverting Hessian in certain cases
+
 Changes in randomLCA version 1.0-8
 
  o Removed spaces after doi: in description file

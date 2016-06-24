@@ -16,7 +16,7 @@
 	#browser()
 	
 	patterns <- as.matrix(patterns)
-	mode(patterns) <- "double"
+	mode(patterns) <- "integer"
 
 	nrepeats <- ifelse(constload,dim(patterns)[2],1)
 	lambdasize <- ifelse(constload,1,min(dim(patterns)[2],blocksize))
@@ -53,11 +53,17 @@
 			  ll <- sum(ill2*freq,na.rm=TRUE)			  
 			}
 # penalise extreme outcome probabilities
-			outcomep <- as.vector(1/(1+exp(abs(outcomex))))
-#			pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
-			pen <-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1+penalty/(nclass*2),length(outcomep)),log=TRUE)-SciencesPo::ddirichlet(matrix(outcomep,nrow=1),rep(1,length(outcomep)),log=TRUE)
-			#			print(c(ll,sum(pen)))
-			pen11 <- ll+sum(pen)
+			if (probit) {
+			  outcomep <- pnorm(as.vector(outcomex))
+			  noutcomep <- pnorm(as.vector(-outcomex))
+			} else {
+			  outcomep <- as.vector(1/(1+exp(-outcomex)))
+			  noutcomep <- as.vector(1/(1+exp(outcomex)))
+			}
+			#			pen <- dbeta(outcomep,1+penalty,1+penalty,log=TRUE)
+#			print(c(ll,sum(pen)))
+			penll <- ll+penalty/(nclass*2)*sum(log(outcomep))+penalty/(nclass*2)*sum(log(noutcomep))
+			#print(c(ll,penll,outcomep,noutcomep))
 			if (is.nan(ll) || is.infinite(ll)) ll <- -1.0*.Machine$double.xmax
 			if (calcfitted) {
 # do this again in case we are using likelihood for em
@@ -65,8 +71,8 @@
 			  fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*
 					ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
 				classprob <- ill/ill2
-				return(list(logLik=ll,penlogLik=pen11,fitted=fitted,classprob=classprob))
-			} else return(list(logLik=ll,penlogLik=pen11))
+				return(list(logLik=ll,penlogLik=penll,fitted=fitted,classprob=classprob))
+			} else return(list(logLik=ll,penlogLik=penll))
 		}  # end of calclikelihood
 
 	calcrandom <- function(classx,outcomex,lambdacoef,momentdata) {
@@ -80,25 +86,30 @@
 			# calculate probabilities under each class
 						for (i in 1:nclass) {
 			# calculate the outcome probabilities for this class and current random
-							if (byclass) {
-								if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef[i,],nrepeats)*beta)
-								else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef[i,],nrepeats)*beta))				
-							} else {
-								if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef,nrepeats)*beta)
-								else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef,nrepeats)*beta))
-							}
-							oneprob <- exp(sum(outcomes*log(outcomep)+(1-outcomes)*log(1-outcomep),na.rm=TRUE))
-			# multiply by class probabilities
+						  if (byclass) {
+						    if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef[i,],nrepeats)*beta)
+						    else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef[i,],nrepeats)*beta))				
+						    if (probit) noutcomep <- pnorm(-outcomex[i,]-rep(lambdacoef[i,],nrepeats)*beta)
+						    else noutcomep <- 1/(1+exp(outcomex[i,]+rep(lambdacoef[i,],nrepeats)*beta))				
+						  } else {
+						    if (probit) outcomep <- pnorm(outcomex[i,]+rep(lambdacoef,nrepeats)*beta)
+						    else outcomep <- 1/(1+exp(-outcomex[i,]-rep(lambdacoef,nrepeats)*beta))
+						    if (probit) noutcomep <- pnorm(-outcomex[i,]-rep(lambdacoef,nrepeats)*beta)
+						    else noutcomep <- 1/(1+exp(outcomex[i,]+rep(lambdacoef,nrepeats)*beta))
+						  }
+						  #oneprob <- exp(sum(ifelse(outcomes==1,log(outcomep),0)+ifelse(outcomes==0,log(noutcomep),0),na.rm=TRUE)+penalty/(nclass*2)*sum(log(outcomep))+penalty/(nclass*2)*sum(log(noutcomep)))
+						  oneprob <- exp(sum(ifelse(outcomes==1,log(outcomep),0)+ifelse(outcomes==0,log(noutcomep),0),na.rm=TRUE))
+						  # multiply by class probabilities
 							if (i==1) allprob <- oneprob*classp[i]
 							else allprob <- allprob+oneprob*classp[i]
 						}
-					ll <- -(sum(log(allprob))+dnorm(beta,mean=0,sd=1,log=TRUE))
+					ll <- -(log(allprob)+dnorm(beta,mean=0,sd=1,log=TRUE))
 					if (is.nan(ll) || is.infinite(ll)) ll <- .Machine$double.xmax
-				  return(ll)
+					return(ll)
 				}
 			  optim.fit <- nlm(loglik,x[length(x)],print.level=0,iterlim=1000,hessian=TRUE,outcomes=x[1:(length(x)-1)],gradtol=1.0e-7)
 #  calculate se
-			  return(c(beta=optim.fit$estimate[1],sebeta=sqrt(1/optim.fit$hessian)))
+				return(c(beta=optim.fit$estimate[1],sebeta=sqrt(1/optim.fit$hessian)))
 		}
 		betas <- t(apply(cbind(patterns,momentdata[,1]),1,onerandom))
 		return(betas)
@@ -140,6 +151,7 @@
 		repeat {
 		  momentdata <- calcrandom(classx,outcomex,lambdacoef,momentdata)
 		  oneiteration <- calclikelihood(classx,outcomex,lambdacoef,momentdata,gh,patterns)
+		  #browser()
 		  # check if moving quadrature points has changed likelihood
 		  if (verbose) cat("current ll",oneiteration$penlogLik,"\n")
 		  if (abs((oneiteration$penlogLik-currll)/oneiteration$penlogLik) < 1.0e-6) {
@@ -252,8 +264,9 @@
 	if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
 	else {
 		s <- svd(optim.fit$hessian)
-		separ <- sqrt(diag(s$v %*% diag(1/s$d) %*% t(s$u)))
-		separ[!is.finite(separ)] <- NA
+	      separ <- diag(s$v %*% diag(1/s$d) %*% t(s$u))
+	      separ[!is.nan(separ) & (separ>=0.0)] <- sqrt(separ[!is.nan(separ) & (separ>=0.0)])
+	      separ[is.nan(separ) | (separ<0.0)] <- NA
 	}
 
 # determine random effects
