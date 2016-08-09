@@ -8,7 +8,7 @@ Fit latent class models, which may include a random effect.
 randomLCA(patterns,freq=NULL,nclass=2,calcSE=TRUE,notrials=20,
   random=FALSE,byclass=FALSE,quadpoints=21,constload=TRUE,blocksize=dim(patterns)[2],
   level2=FALSE,probit=FALSE,level2size=blocksize,
-  qniterations=5,penalty=0.01,verbose=FALSE,
+  qniterations=5,penalty=0.01,EMtol=1.0e-9,verbose=FALSE,
   seed = as.integer(runif(1, 0, .Machine$integer.max)))}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,6 +27,7 @@ randomLCA(patterns,freq=NULL,nclass=2,calcSE=TRUE,notrials=20,
   \item{level2size}{Size of level 2 blocks if fitting 2 level models}
   \item{qniterations}{Number of Quasi-Newton iterations within each EM/adaptive cycle. Decrease if there is a failure to converge}
   \item{penalty}{penalty applied to likelihood for outcome probabilities. Shrinks outcome probabilities in slightly and can prevent extreme values. Setting penalty to 0 will produce an unpenalized fit.}
+  \item{EMtol}{convergence tolerance for EM algorithm for fixed effect latent class}
   \item{verbose}{Prints fit progress if true}
   \item{seed}{Initial random seed for generating starting values. This can be set to guarantee that the fit is the same each time, including the order of the classes.}
 }

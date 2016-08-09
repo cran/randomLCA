@@ -218,14 +218,14 @@
     if (nclass==1) classx <- NULL
     else  {
         classx <- rep(NA,nclass-1)
-    	initclassp <- ifelse(initclassp==0.0,1.0e-3,initclassp)       	
-    	initclassp <- ifelse(initclassp==1.0,1-1.0e-3,initclassp)  
+    	initclassp <- ifelse(initclassp==0.0,1.0e-4,initclassp)       	
+    	initclassp <- ifelse(initclassp==1.0,1-1.0e-4,initclassp)  
     	initclassp <- initclassp/sum(initclassp)
         for (i in 2:nclass) classx[i-1] <- log(initclassp[i]/initclassp[1])
     }
 
-	initoutcomep <- ifelse(initoutcomep<1.0e-2,1.0e-2,initoutcomep)
-	initoutcomep <- ifelse(initoutcomep>(1-1.0e-2),1-1.0e-2,initoutcomep)
+	initoutcomep <- ifelse(initoutcomep<1.0e-4,1.0e-4,initoutcomep)
+	initoutcomep <- ifelse(initoutcomep>(1-1.0e-4),1-1.0e-4,initoutcomep)
     if (probit) outcomex <- qnorm(initoutcomep)
     else outcomex <- log(initoutcomep/(1-initoutcomep))
 

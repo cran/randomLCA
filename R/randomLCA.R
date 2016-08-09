@@ -10,7 +10,7 @@
   function(patterns,freq=NULL,nclass=2,calcSE=TRUE,notrials=20,
            random=FALSE,byclass=FALSE,quadpoints=21,constload=TRUE,blocksize=dim(patterns)[2],
            level2=FALSE,probit=FALSE,level2size=blocksize,
-           qniterations=5,penalty=0.01,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
+           qniterations=5,penalty=0.01,EMtol=1.0e-9,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max))) {
     set.seed(seed)
     if (quadpoints > 190)
       stop("Maximum of 190 quadrature points\n")
@@ -68,11 +68,11 @@
     if ((nclass==5) & (dim(patterns)[2]<5)) nonident <- TRUE
     if (nonident) stop("Model is not identifiable - decrease classes or random effects")
     if (!random) initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-            calcSE=(calcSE & !random),notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
+            calcSE=(calcSE & !random),notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose)
     else {
       if (!level2) {
         initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
+                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose)
         # work out how many lambda coefs there are
         if (constload) nlambda <- 1
         else nlambda <- min(dim(patterns)[2],blocksize)
@@ -106,7 +106,7 @@
       } else {
         # 2 level models
         initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,verbose=verbose)
+                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose)
         # work out how many lambda coefs there are
         if (constload) nlambda <- 1
         else nlambda <- min(dim(patterns)[2],blocksize)
@@ -170,6 +170,7 @@
     fit$freq <- freq
     fit$qniterations <- qniterations
     fit$penalty <- penalty
+    fit$EMtol <- EMtol
     class(fit) <- "randomLCA"
     return(fit)
   }

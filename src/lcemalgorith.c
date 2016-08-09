@@ -1,12 +1,13 @@
 #include <R.h>
 #include <Rinternals.h>
 
-SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP verbose)
+SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP penalty, SEXP EMtol, SEXP verbose)
 {
 	SEXP ans, ill, ill2, classprob, logl, newoutcomep, newclassp;
 	int emit, irow, iclass, outcome, index, noutcomes, nrows, nclass, lverbose, *rpatterns = INTEGER(patterns);
 	double *rfreq=REAL(freq), oldll, *rill, *rill2, *rclassprob, product,
-		sumll, ll, sumfreq, sum1, sum2, *rlogl, *rnewoutcomep, *rnewclassp;
+		sumll, ll, sumfreq, sum1, sum2, *rlogl, *rnewoutcomep, *rnewclassp,
+	  *rpenalty=REAL(penalty), *rEMtol=REAL(EMtol);
 
 	lverbose = asLogical(verbose);
 
@@ -62,7 +63,7 @@ SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP ve
 		}
 	
 		if (ISNAN(oldll)) oldll = 2*ll;
-		if (fabs((ll-oldll)/ll) < 1.0e-8) break;
+		if (fabs((ll-oldll)/ll) < rEMtol[0]) break;
 		oldll = ll;
 		
 		/* estimated posterior probability */
@@ -95,16 +96,18 @@ SEXP lcemalgorithm(SEXP patterns, SEXP outcomep, SEXP classp, SEXP freq, SEXP ve
 				    sum2 += rclassprob[irow+nrows*iclass]*rfreq[irow];
 				  }
 				}
-				rnewoutcomep[iclass+nclass*outcome]= sum1/sum2;
+				rnewoutcomep[iclass+nclass*outcome]= (sum1+rpenalty[0]/(2.0*(double)nclass))/(sum2+rpenalty[0]/(double)nclass);
 			}
 		}
+		/*
 		for (index=0; index < nclass*noutcomes; index++) {
 			if (rnewoutcomep[index] < 1.0e-10)  rnewoutcomep[index] = 1.0e-10;
 			if (rnewoutcomep[index] > 1-1.0e-10)  rnewoutcomep[index] = 1-1.0e-10;
 		}
+		*/
 		emit++;
 		if (((emit % 100)==0) & lverbose) Rprintf("iteration %d logl %f\n",emit,ll);
-		if (emit > 250) break;
+		/* if (emit > 250) break; */
 	}
 
 	rlogl[0]=ll;	

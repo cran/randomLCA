@@ -1,3 +1,13 @@
+Changes in randomLCA version 1.0-10
+
+ o remove test of best minimum loglikelihood as this was producing too many unnecessary error messages
+
+ o incorporate penalised likelihood into EM algorithm
+
+ o changes to starting values to improve speed
+
+ o added parameter to allow choice of convergence tolerance for EM algorithm
+ 
 Changes in randomLCA version 1.0-9
 
  o removed reliance on SciencePo package by implementing Dirichlet density directly

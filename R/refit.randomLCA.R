@@ -26,7 +26,7 @@ refit <-
     }
     if (useinit) {
       if (!object$random) newfit <- fitFixed(newpatterns,newfreq,object$outcomep,object$classp,
-                                             object$nclass,calcSE=FALSE,justEM=FALSE,object$probit,object$penalty,verbose=FALSE)
+                                             object$nclass,calcSE=FALSE,justEM=FALSE,object$probit,object$penalty,object$EMtol,verbose=FALSE)
       else {
         if (!object$level2) newfit <- fitAdaptRandom(newpatterns,newfreq,
                                                      nclass=object$nclass,calcSE=FALSE,initoutcomep=object$outcomep,
@@ -61,13 +61,14 @@ refit <-
       newfit$notrials <- object$notrials
       newfit$freq <- object$freq
       newfit$qniterations <- object$qniterations
+      newfit$EMtol <- object$EMtol
       newfit$penalty <- object$penalty
       class(newfit) <- "randomLCA"
       } else newfit <- randomLCA(newpatterns,freq=newfreq,nclass=object$nclass,calcSE=TRUE,notrials=object$notrials,
              random=object$random,byclass=object$byclas,quadpoints=object$quadpoints,constload=object$constload,
              blocksize=object$blocksize,
              level2=object$level2,probit=object$probit,level2size=object$level2size,
-             qniterations=object$qniterations,penalty=object$penalty,verbose=FALSE)
+             qniterations=object$qniterations,penalty=object$penalty,EMtol=object$EMtol,verbose=FALSE)
     return(newfit)    
   }
 
