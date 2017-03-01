@@ -270,38 +270,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   
   optim.fit <- myfit$nlm
   momentdata <<- myfit$momentdata
-  
-#   library(numDeriv)
-#   
-#   myfunc <- function(x,momentdata,nclass,outcomestart,outcomeend,lambdastart,lambdaend,taustart,tauend,byclass,gh){
-#     if (byclass) final <- calclikelihood(if (nclass==1) NULL else x[1:(nclass-1)],
-#                                          matrix(x[outcomestart:outcomeend],nrow=nclass),
-#                                          matrix(x[lambdastart:lambdaend],nrow=nclass),
-#                                          x[taustart:tauend],
-#                                          momentdata,gh,updatemoments=FALSE,calcfitted=FALSE)    
-#     else final <- calclikelihood(if (nclass==1) NULL else x[1:(nclass-1)],
-#                                  matrix(x[outcomestart:outcomeend],nrow=nclass),
-#                                  x[lambdastart:lambdaend],
-#                                  x[taustart:tauend],
-#                                  momentdata,gh,updatemoments=FALSE,calcfitted=FALSE) 
-#     return(final$logLik)
-#   }
-#   
-  # print(system.time(thehessian <- hessian(myfunc,optim.fit$estimate,momentdata=momentdata,nclass=nclass,outcomestart=outcomestart,
-  #                                         outcomeend=outcomeend,lambdastart=lambdastart,lambdaend=lambdaend,
-  #                                         taustart=taustart,tauend=tauend,byclass=byclass,gh=gh)))
-  # 
-  # iclass <- 1
-  # print(system.time(
-  #   for (i in 1:10000) result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],
-  #                 if (byclass) lambdacoef[iclass,]  else lambdacoef,
-  #                 if (byclass) ltaucoef[iclass] else ltaucoef,
-  #                 gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
-  #                 probit=FALSE,updatemoments=FALSE,level2size)
-  # ))
-  # # extract the se
-  # browser()
-  
+    
   if (!calcSE) separ <- rep(NA,length(optim.fit$estimate))
   else {
     s <- svd(optim.fit$hessian)
