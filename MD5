@@ -1,4 +1,4 @@
-2092bd855b664f16137272edfc624fec *DESCRIPTION
+61fa809f82dfdd8a3c21e20facd3417c *DESCRIPTION
 88b971e938dbc1addd05bd97f081af6d *NAMESPACE
 2c0095da8bf243ba108655fbdfafcb4d *R/bestlca.R
 8d12fb9e524ebda8d096cf165d18dfcf *R/calcCond2Prob.R
@@ -12,7 +12,7 @@ bd8149da588f164be06cf72da2425771 *R/fitted.randomLCA.R
 8585b2a717142ea91fde01d8e794c8c3 *R/globals.R
 1f67f234837061f09db4c0426e042fb6 *R/misc.R
 1706b39008206cb8950b0b4ccc389b61 *R/normGaussHermite.R
-8a8066499c4b9d45e698b13e4acb3e6a *R/outcomeProbs.R
+65ae6a51fa6c246fb68e30a59122acf5 *R/outcomeProbs.R
 1b216bc621ccaab61332288585cd4be5 *R/plot.randomLCA.R
 e07596c8b40b395424af2c7447f31f01 *R/postClassProbs.R
 e03303cd830ca9a468bda5e5bd087be6 *R/randomLCA.R
@@ -20,7 +20,7 @@ e03303cd830ca9a468bda5e5bd087be6 *R/randomLCA.R
 58589d393c6908b012227b251a572287 *R/refit.randomLCA.R
 a3ec3ec03f31d757d22ac0c889afb7c1 *R/simulate.randomLCA.R
 9f9c63dc4e98d88ccd1a69d93084b9bb *R/summary.randomLCA.R
-82b5a43a4dc07b8e7316b21d6a8f76c3 *build/vignette.rds
+955413b1cfcda2f7d9b898778423a0db *build/vignette.rds
 32464514a5b449cbe3e82bc66015d13d *data/dentistry.rda
 1e20f00b74fb6ff271b212a0c600624f *data/genderrole.rda
 0f1c37f72dec894cbe66d1ce50306a7a *data/hivtests.rda
@@ -28,7 +28,7 @@ a3ec3ec03f31d757d22ac0c889afb7c1 *R/simulate.randomLCA.R
 3f1bdd44944c14ac0545ee4ee43dd86d *data/pap.RData
 55a0c34453eb0605616ac6f7dc28bf34 *data/symptoms.RData
 40524198ab57f576f45eaa83f3a2d5a4 *data/uterinecarcinoma.rda
-b9d8bd5c5944811679a1f4e9cb5dc31f *inst/NEWS
+a860b2a1ff1c2ecd97123a00d028a653 *inst/NEWS
 297b1ab7d7d51b36a93774e263b028ba *inst/doc/randomLCA-package.pdf
 f63cf0b617b19967779bc0c3f2844c4f *inst/doc/randomLCA-package.pdf.asis
 0dbd25283c5b3f35631d7ee7ebd5f501 *man/AIC.Rd
@@ -44,10 +44,10 @@ d9845f75fdc7d51f6fc62c673c324ba2 *man/fitted.Rd
 991d7ab66ea30567911d7c3f252bf91a *man/hivtests.Rd
 0669ad78722ae7e9290588802d45aa9f *man/logLik.Rd
 6054a5b4104dd30c81d440c63453e22d *man/myocardial.Rd
-457b61036e710f939d59bcde1a6efec0 *man/outcomeProbs.Rd
+2e023d10758234c21a452b1176914c34 *man/outcomeProbs.Rd
 86bfc1c7d8e2174c21e499ac377097b9 *man/pap.Rd
 59174a3f451b7cc947bbe6e9d3382c9f *man/plot.Rd
-428c0aa003595c9b727634824e2acf8a *man/postClassProbs.Rd
+66999124bb4b98c67ed3b1959396e552 *man/postClassProbs.Rd
 5e0c764607d10f22c0bf0a513a0656c0 *man/print.randomLCA.Rd
 903b1c876b7fc529a88d71345d2ffe35 *man/randomLCA.Rd
 a82b605bdf0019a5001227f4ca94f50d *man/ranef.Rd

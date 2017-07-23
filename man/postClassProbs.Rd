@@ -15,10 +15,10 @@ postClassProbs(object,class=0)
   \item{class}{class to be returned. Zero returns all classes.}
 }
 \details{
-Extracts the corresponding data from the randomLCA object..
+Extracts the corresponding data from the randomLCA object.
 }
 \value{
-A data frame. The first columns of the data frame correspond to the patterns, followed by the frequency of each pattern, and then the posterior class probabilities for either the selected class or for all classes.
+A data frame. The first columns of the data frame correspond to the patterns, followed by the frequency of each pattern, and then the posterior class probabilities for either the selected class or for all classes. The returned result is for the summarised data. If raw data is used, that is no frequencies, and it is required to calculated the posterior class probability for each observation then it is simply required to merge the class probabilities with the raw data, possibly removing any variable "freq" in the raw data. 
 }
 \author{Ken Beath}
 \keyword{methods}
