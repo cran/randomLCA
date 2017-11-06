@@ -42,6 +42,5 @@ for (isim in 1:nsims) {
 # corrected by adding one to numerator and denominator
 print((sum(simlrt>=obslrt)+1)/(nsims+1))}
 }
-
 \author{Ken Beath}
 \keyword{methods}

@@ -13,7 +13,11 @@ Returns AIC for a randomLCA object.
   \item{k}{penalty per parameter}
 }
 \value{
-AIC.
+AIC
+}
+\examples{
+pap.lca2 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=2)
+print(AIC(pap.lca2))
 }
 \author{Ken Beath}
 \keyword{methods}

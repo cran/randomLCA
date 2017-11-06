@@ -1,3 +1,9 @@
+Changes in randomLCA version 1.0-13
+
+ o change citation to refer to Journal of Statistical Software article
+
+ o added extra examples
+
 Changes in randomLCA version 1.0-12
 
  o add option to obtain outcome probabilities on either the probability or transformed scale

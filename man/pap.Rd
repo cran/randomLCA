@@ -31,10 +31,11 @@ Alcock, A. (2008). Latent Class Analysis (LCA) and Latent Profile Analysis (LPA)
 Beets, M. W., Flay, B. R., Vuchinich, S., Snyder, F. J., Acock, A., Li, K. K.,  Durlak, J. (2009). Use of a social and character development program to prevent substance use, violent behaviors, and sexual activity among elementary-school students in Hawaii. American Journal of Public Health, 99(8), 1438-1445
 }
 \examples{
-\dontrun{
 # standard latent class
 pap.lca1 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=1)
 pap.lca2 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=2)
+\dontrun{
+# standard latent class
 pap.lca3 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=3)
 pap.lca4 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=4)
 pap.lca5 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=5)

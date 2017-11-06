@@ -1,0 +1,15 @@
+bibentry(bibtype = "Article",
+  title        = "{randomLCA}: An {R} Package for Latent Class with Random Effects Analysis",
+  author       = person(given = c("Ken", "J."),
+                        family = "Beath",
+                        email = "ken.beath@mq.edu.au"),
+  journal      = "Journal of Statistical Software",
+  year         = "2017",
+  volume       = "81",
+  number       = "13",
+  pages        = "1--25",
+  doi          = "10.18637/jss.v081.i13",
+
+  header       = "To cite randomLCA in publications use:"
+)
+

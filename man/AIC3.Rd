@@ -13,5 +13,9 @@ AIC3(object)
 \value{
 AIC3.
 }
+\examples{
+pap.lca2 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=2)
+print(AIC3(pap.lca2))
+}
 \author{Ken Beath}
 \keyword{methods}

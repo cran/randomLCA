@@ -71,6 +71,8 @@ The algorithm used is EM for the standard latent class and adaptive (in the sens
 \note{In the returned object there a fields for patterns and frequencies. If frequencies are not supplied then the patterns and frequencies are constructed. If frequencies are supplied then zero rows are removed. When frequencies are supplied it is assumed that the data has been simplified. The returned fitted, posterior class probabilities etc, all correspond to the simplified patterns, not to the original data.
 
 }
+\references{Beath KJ (2017). randomLCA: An R Package for Latent Class with Random Effects Analysis. _Journal of Statistical Software_, *81*(13), pp. 1-25. doi:
+10.18637/jss.v081.i13 (\url{http://doi.org/10.18637/jss.v081.i13})}
 \author{Ken Beath}
 \examples{
 \dontrun{

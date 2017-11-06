@@ -1,4 +1,5 @@
 \name{ranef}
+\alias{ranef}
 \alias{ranef.randomLCA}
 \title{Extract random effects from a randomLCA object}
 \description{
@@ -12,7 +13,13 @@ Extracts the Empirical Bayes estimates of the random effects.
   \item{\dots}{ additional argument; currently none is used. }
 }
 \value{
-A matrix with the first column containg the random effects and the second column the standard error of the random effects. 
+A matrix with the first column containing the random effects and the second column the standard error of the random effects. 
+}
+\examples{
+\dontrun{
+pap.lca2random <- randomLCA(pap[,1:10],freq=pap$Freq,random=TRUE,nclass=2)
+print(ranef(pap.lca2random))
+}
 }
 \author{Ken Beath}
 \keyword{methods}
