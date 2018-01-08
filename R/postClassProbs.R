@@ -1,4 +1,7 @@
-postClassProbs <-
+postClassProbs <- function(object,class=0)
+  UseMethod("postClassProbs")
+
+postClassProbs.randomLCA <-
   function(object,class=0) {
     if (!inherits(object, "randomLCA"))
       stop("Use only with 'randomLCA' objects.\n")

@@ -1,3 +1,7 @@
+Changes in randomLCA version 1.0-14
+
+ o added method to obtain class with maximum posterior probability
+
 Changes in randomLCA version 1.0-13
 
  o change citation to refer to Journal of Statistical Software article

@@ -1,5 +1,6 @@
 \name{postClassProbs}
 \alias{postClassProbs}
+\alias{postClassProbs.randomLCA}
 \title{
 Determines posterior class probabilities for fitted model
 }
