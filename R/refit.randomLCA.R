@@ -1,6 +1,6 @@
 refit <-
   ## Short form for generic function for refitting model
-  function(object, newpatterns,newfreq, useinit=FALSE,  ...) UseMethod("refit")
+  function(object, newpatterns,newfreq, useinit=FALSE,  ...) UseMethod("refit", object)
 
 `refit.randomLCA` <-
   function(object,newpatterns,newfreq=NULL,useinit=FALSE,...) {

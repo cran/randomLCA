@@ -1,3 +1,7 @@
+Changes in randomLCA version 1.0-15
+
+ o corrected exports to allow some methods to be called
+
 Changes in randomLCA version 1.0-14
 
  o added method to obtain class with maximum posterior probability
