@@ -2,14 +2,14 @@
 #include <Rinternals.h>
 #include <Rmath.h>
 
-SEXP bernoulliprob(SEXP patterns, SEXP outcomep)
+SEXP bernoulliprob(SEXP patterns, SEXP loutcomep, SEXP lnoutcomep)
 {
 	SEXP ans;
 	int irow, outcome, index, noutcomes, nrows, *rpatterns = INTEGER(patterns);
-	double  *routcomep = REAL(outcomep), *rans;
-	double product;
+	double  *rloutcomep = REAL(loutcomep), *rlnoutcomep = REAL(lnoutcomep), *rans;
+	double lproduct;
 	
-	noutcomes = LENGTH(outcomep);
+	noutcomes = LENGTH(loutcomep);
 	nrows = LENGTH(patterns)/noutcomes;
 	
 	PROTECT(ans = allocVector(REALSXP,nrows));
@@ -17,15 +17,15 @@ SEXP bernoulliprob(SEXP patterns, SEXP outcomep)
 	rans = REAL(ans);
 	
 	for (irow=0; irow < nrows; irow++) {
-		product=1;
+		lproduct=0;
 		for (outcome=0; outcome <noutcomes; outcome++) {
 			index = irow+outcome*nrows;
 		  if (rpatterns[index]!=NA_INTEGER) {
-		    if (rpatterns[index]==1) product = product*routcomep[outcome];
-		    else product = product*(1-routcomep[outcome]); 
+		    if (rpatterns[index]==1) lproduct = lproduct+rloutcomep[outcome];
+		    else lproduct = lproduct+rlnoutcomep[outcome]; 
 		  }
 		}
-		rans[irow]=product;
+		rans[irow]=lproduct;
 	}
 	UNPROTECT(1);		
 	return ans;

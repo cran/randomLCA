@@ -29,8 +29,10 @@ Summarises the fit of a randomLCA object.
   \item{taucoef}{tau coefficients}
 }
 \examples{
-pap.lca1 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=1)
+\donttest{
+pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1)
 summary(pap.lca1)
+}
 }
 \author{Ken Beath}
 \keyword{methods}

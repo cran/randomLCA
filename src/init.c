@@ -9,14 +9,14 @@
 
 /* .Call calls */
 extern SEXP lcemalgorithm(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-extern SEXP bernoulliprob(SEXP, SEXP);
+extern SEXP bernoulliprob(SEXP, SEXP, SEXP);
 extern SEXP bernoulliprobrandom(SEXP, SEXP, SEXP,  SEXP, SEXP, SEXP);
 extern SEXP bernoulliprobrandom2(SEXP, SEXP, SEXP, SEXP,
 	SEXP, SEXP, SEXP, SEXP, SEXP);
 	
 static const R_CallMethodDef CallEntries[] = {
     {"lcemalgorithm",                        (DL_FUNC) &lcemalgorithm,                         7},
-    {"bernoulliprob",                        (DL_FUNC) &bernoulliprob,                         2},
+    {"bernoulliprob",                        (DL_FUNC) &bernoulliprob,                         3},
     {"bernoulliprobrandom",                  (DL_FUNC) &bernoulliprobrandom,                   6},
     {"bernoulliprobrandom2",                 (DL_FUNC) &bernoulliprobrandom2,                  9},
     {NULL, NULL, 0}

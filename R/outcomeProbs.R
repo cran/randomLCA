@@ -5,11 +5,12 @@ format.perc <- function(probs, digits)
   paste(format(100 * probs, trim = TRUE, scientific = FALSE, digits = digits),
         "%")
 
-outcomeProbs <- function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,999),scale=c("prob","raw"),...)
+outcomeProbs <- function(object,level = 0.95, boot=FALSE, type="perc",R=999,scale=c("prob","raw"),...)
   UseMethod("outcomeProbs")
 
 outcomeProbs.randomLCA <-
-  function(object,level = 0.95, boot=FALSE, type="norm",R=ifelse(type=="norm",199,999),scale=c("prob","raw"),...) {
+  function(object,level = 0.95, boot=FALSE, type="perc",R=999,scale=c("prob","raw"),
+           cores = max(detectCores() - 1, 1),...) {
     if (!inherits(object, "randomLCA"))
       stop("Use only with 'randomLCA' objects.\n")
     if (object$random & !boot)
@@ -35,7 +36,7 @@ outcomeProbs.randomLCA <-
         }
         estimate <- tryCatch(onesim(),
                              error=function(e) {
-                               warning(e)
+                               if (cores==1) warning(e)
                                #browser()
                                return(rep(NA,dim(initmodel$outcomep)[1]*dim(initmodel$outcomep)[2]))
                              })					
@@ -50,15 +51,20 @@ outcomeProbs.randomLCA <-
       newdata <- object$patterns[rep(1:length(object$freq),object$freq),]
       newmodel <- refit(object,newpatterns=newdata,useinit=TRUE)
       themle <- newmodel
+       if (cores>1) {
+        if(.Platform$OS.type=="unix") parallel <- "multicore"
+        else parallel <- "snow"
+      } else parallel <- "no"
       theboot <- boot(newdata,dostatistic,R=R,sim="parametric",
                       ran.gen=gendata,
                       mle=themle,
-                      initmodel=newmodel
+                      initmodel=newmodel,
+                      parallel=parallel,
+                      ncpus = cores
       )
       failed <- sum(is.na(theboot$t[,1]))
       if (failed > 0) warning(sprintf("Convergence failed for %d models",failed))
-      #browser()
-      ci <- t(apply(as.matrix(1:length(theboot$t0)),1,function(x) {
+       ci <- t(apply(as.matrix(1:length(theboot$t0)),1,function(x) {
         ci <- boot.ci(theboot, conf = level, type = type,index = x)
         if (type=="perc") return(c(ci$t0,ci$percent[4:5]))
         if (type=="norm") return(c(ci$t0,ci$normal[2:3]))

@@ -2,10 +2,16 @@ simulate.randomLCA <-
     function(object, nsim = 1, seed = as.integer(runif(1, 0, .Machine$integer.max)),
             ...)
 {
-    if(!exists(".Random.seed", envir = .GlobalEnv, inherits=FALSE))
-        runif(1)		     # initialize the RNG if necessary
-    RNGstate <- get(".Random.seed", envir = .GlobalEnv, inherits=FALSE)
-    set.seed(seed)
+    if(!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE))
+        runif(1)                     # initialize the RNG if necessary
+    if(is.null(seed))
+        RNGstate <- get(".Random.seed", envir = .GlobalEnv)
+    else {
+        R.seed <- get(".Random.seed", envir = .GlobalEnv)
+		set.seed(seed)
+        RNGstate <- structure(seed, kind = as.list(RNGkind()))
+        on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+    }
 
 # create missing data array
 	ismissing <- ifelse(is.na(object$patterns[rep(1:dim(object$patterns)[1],times=object$freq),]),NA,1)
@@ -71,8 +77,7 @@ simulate.randomLCA <-
 #		print(simoutcome[88,])
 		simoutcome
 	})
-    attr(value, "seed") <- seed
-    class(value) <- "simulate.randomLCA"
-    assign(".Random.seed", RNGstate, envir = .GlobalEnv, inherits=FALSE)
+    attr(value, "seed") <- RNGstate
+    class(value) <- "data.frame"
     value
 }

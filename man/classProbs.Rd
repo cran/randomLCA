@@ -20,8 +20,10 @@ Simply extracts the corresponding variable from the randomLCA object.
 A vector of class probabilities for each class.
 }
 \examples{
-pap.lca2 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=2)
+\donttest{
+pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2)
 print(classProbs(pap.lca2))
+}
 }
 \author{Ken Beath}
 \keyword{methods}

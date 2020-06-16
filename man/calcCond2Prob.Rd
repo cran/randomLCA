@@ -17,9 +17,9 @@ Returns a data frame containing class, block, outcome, outcomep (outcome probabi
 \author{Ken Beath \email{kenbeath@mq.edu.au}
 }
 \examples{
-\dontrun{
-symptoms.lca2random2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
-	random=TRUE,level2=TRUE,nclass=2,level2size=4,constload=FALSE)
+\donttest{
+symptoms.lca2random2 <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, 
+	random = TRUE, level2 = TRUE, nclass = 2, level2size = 4, constload = FALSE)
 print(calcCond2Prob(symptoms.lca2random2))
 }
 }

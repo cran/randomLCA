@@ -15,9 +15,11 @@ calcCondProb(object, conditionalp = 0.5)
 Returns a data frame containing class, block, outcome, outcomep (outcome probability) and perc (percentiles of the random effect) if conditionalp is specified. For example a conditionalp of 0.5 is the 50th percentile or the median corresponding to a random effect of zero. 0.025 and 0.975 correspond to the 2.5th and 97.5th percential, so the region between them if 95\% of the variation in the data.
 }
 \examples{
-dentistry.lcarandom <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	random=TRUE,probit=TRUE)
+\donttest{
+dentistry.lcarandom <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
+	random = TRUE, probit = TRUE)
 print(calcCondProb(dentistry.lcarandom))
+}
 }
 \author{Ken Beath \email{ken.beath@mq.edu.au}
 }

@@ -38,17 +38,17 @@
   Mihrshai et al (2001)
   }
 \references{
-Mihrshahi, S.,  Peat, J.K., Webb, K., Tovey, R.E., Marks, G.B., Mellis, C.M. and Leeder S.R. (2001) The Childhood Asthma Prevention Study (CAPS): Design and research protocol of a randomized trial for the primary prevention of asthma. Control led Clinical Trials, \bold{22}:333--354.
+Mihrshahi, S., Peat, J.K., Webb, K., Tovey, R.E., Marks, G.B., Mellis, C.M. and Leeder S.R. (2001) The Childhood Asthma Prevention Study (CAPS): Design and research protocol of a randomized trial for the primary prevention of asthma. Control led Clinical Trials, \bold{22}:333--354.
    
 Beath, K.J. and Heller, G.Z. (2009) Latent trajectory modelling of multivariate binary data. Statistical Modelling, \bold{9(3)}:199--213.
 }
 \examples{
-\dontrun{
-symptoms.lca2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=2)
-symptoms.lca2random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
-	random=TRUE,nclass=2,blocksize=4,constload=FALSE)
-symptoms.lca2random2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
-	random=TRUE,level2=TRUE,nclass=2,level2size=4,constload=FALSE)
+\donttest{
+symptoms.lca2 <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, nclass = 2)
+symptoms.lca2random <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, 
+	random = TRUE, nclass = 2, blocksize = 4, constload = FALSE)
+symptoms.lca2random2 <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, 
+	random = TRUE, level2 = TRUE, nclass = 2, level2size = 4, constload = FALSE)
 }
 }
 \keyword{datasets}

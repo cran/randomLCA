@@ -28,47 +28,48 @@ The Positive Action program is a series of interventions designed to reduce nega
 \references{
 Alcock, A. (2008). Latent Class Analysis (LCA) and Latent Profile Analysis (LPA). Retrieved from http://people.oregonstate.edu/~acock/growth/Mplus files/Latent Class Analysis Presentation.doc
 
-Beets, M. W., Flay, B. R., Vuchinich, S., Snyder, F. J., Acock, A., Li, K. K.,  Durlak, J. (2009). Use of a social and character development program to prevent substance use, violent behaviors, and sexual activity among elementary-school students in Hawaii. American Journal of Public Health, 99(8), 1438-1445
+Beets, M. W., Flay, B. R., Vuchinich, S., Snyder, F. J., Acock, A., Li, K. K., Durlak, J. (2009). Use of a social and character development program to prevent substance use, violent behaviors, and sexual activity among elementary-school students in Hawaii. American Journal of Public Health, 99(8), 1438-1445
 }
 \examples{
 # standard latent class
-pap.lca1 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=1)
-pap.lca2 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=2)
-\dontrun{
+pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1)
+pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2)
+\donttest{
 # standard latent class
-pap.lca3 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=3)
-pap.lca4 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=4)
-pap.lca5 <- randomLCA(pap[,1:10],freq=pap$Freq,nclass=5)
+pap.lca3 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 3)
+pap.lca4 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 4)
+pap.lca5 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 5)
 
 # repeat with random effect with constant loading
 # once BIC increases fitting further models is unnecessary
-pap.lca1random <- randomLCA(pap[,1:10],
-          freq=pap$Freq,nclass=1,random=TRUE)
-pap.lca2random <- randomLCA(pap[,1:10],
-          freq=pap$Freq,nclass=2,random=TRUE)
-pap.lca3random <- randomLCA(pap[,1:10],
-          freq=pap$Freq,nclass=3,random=TRUE)
+pap.lca1random <- randomLCA(pap[, 1:10], 
+          freq = pap$Freq, nclass = 1, random = TRUE)
+pap.lca2random <- randomLCA(pap[, 1:10], 
+          freq = pap$Freq, nclass = 2, random = TRUE)
+pap.lca3random <- randomLCA(pap[, 1:10], 
+          freq = pap$Freq, nclass = 3, random = TRUE)
 # can also repeat fits without constant loading to give mixture of IRT models
-pap.lca1random2 <- randomLCA(pap[,1:10],
-          freq=pap$Freq,nclass=1,random=TRUE,constload=FALSE)
+pap.lca1random2 <- randomLCA(pap[, 1:10], 
+          freq = pap$Freq, nclass = 1, random = TRUE, constload = FALSE)
 
-pap.lca2random2 <- randomLCA(pap[,1:10],
-          freq=pap$Freq,nclass=2,random=TRUE,constload=FALSE)
+pap.lca2random2 <- randomLCA(pap[, 1:10], 
+          freq = pap$Freq, nclass = 2, random = TRUE, constload = FALSE)
 
-pap.lca3random2 <- randomLCA(pap[,1:10],
-          freq=pap$Freq,nclass=3,random=TRUE,constload=FALSE)
+pap.lca3random2 <- randomLCA(pap[, 1:10], 
+          freq = pap$Freq, nclass = 3, random = TRUE, constload = FALSE)
 
 # produce table of BIC values
 # shows 4 class best of standard latent class
 # but 2 class latent class with constant loading has better BIC
-pap.bic <- data.frame(bic=c(BIC(pap.lca1),BIC(pap.lca2),BIC(pap.lca3),BIC(pap.lca4),BIC(pap.lca5)),
-                      bic2=c(BIC(pap.lca1random),BIC(pap.lca2random),BIC(pap.lca3random),NA,NA),
-                      bic3=c(BIC(pap.lca1random2),BIC(pap.lca2random2),BIC(pap.lca3random2),NA,NA))
+pap.bic <- data.frame(bic = c(BIC(pap.lca1), BIC(pap.lca2), BIC(pap.lca3), 
+    BIC(pap.lca4), BIC(pap.lca5)), bic2 = c(BIC(pap.lca1random),
+    BIC(pap.lca2random), BIC(pap.lca3random), NA, NA), bic3 = c(BIC(pap.lca1random2),
+    BIC(pap.lca2random2), BIC(pap.lca3random2), NA, NA))
 print(pap.bic)
 # plot 4 class standard
-plot(pap.lca4,type="b")
+plot(pap.lca4, type = "b")
 # plot 2 class standard
-plot(pap.lca2random,type="b")
+plot(pap.lca2random, type = "b")
 }
 }
 \keyword{datasets}

@@ -13,9 +13,11 @@ calcMargProb(object)
 Returns a data frame containing class, block, outcome, outcomep (outcome probability).
 }
 \examples{
-dentistry.lcarandom <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	random=TRUE,probit=TRUE)
+\donttest{
+dentistry.lcarandom <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
+	random = TRUE, probit = TRUE)
 print(calcMargProb(dentistry.lcarandom))
+}
 }
 \author{Ken Beath}
 \keyword{methods}

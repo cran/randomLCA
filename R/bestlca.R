@@ -16,7 +16,7 @@ function(patterns,freq,nclass,calcSE,notrials,probit,penalty,EMtol,verbose) {
 			maxlca <- lca
 		}
 		if (verbose)
-			cat("iteration ",i,"BIC ",BIC(lca),"\n")
+			cat("iteration ",i,"BIC ",currbic,"\n")
 	}
 	if (verbose) print("refitting to obtain SE")
 	#browser()

@@ -41,15 +41,14 @@
       # calculate probabilities under each class
       for (i in 1:nclass) {
         # calculate the outcome probabilities for this class
-        if (probit)
-          outcomep <- pnorm(outcomex[i, ])
-        else
-          outcomep <- 1 / (1 + exp(-outcomex[i, ]))
-        ill[, i] <- .Call("bernoulliprob", patterns, outcomep) * classp[i]
-        # multiply by class probabilities
+        if (probit) loutcomep <- pnorm(outcomex[i, ], log.p=TRUE)
+        else loutcomep <- -log(1 + exp(-outcomex[i, ]))
+        lnoutcomep <- log(1-exp(loutcomep))
+         ill[, i] <- .Call("bernoulliprob", patterns, loutcomep, lnoutcomep) + log(classp[i])
       }
-      ill2 <- rowSums(ill)
-      ll <- sum(log(ill2) * freq)
+      maxll <- rowMaxs(ill, value=TRUE)
+      ll <- sum((maxll+log(rowSums(exp(ill-maxll))))*freq)
+      #browser()
       # penalise extreme outcome probabilities
       if (penalty == 0.0)
         penll <- ll
@@ -70,7 +69,7 @@
       if (is.nan(penll) ||
           is.infinite(penll))
         penll <- -1.0 * .Machine$double.xmax
-      return(list(logl = ll, penlogl = penll))
+       return(list(logl = ll, penlogl = penll))
     }
     
     calcllfornlm <- function(params) {
@@ -95,22 +94,27 @@
       # calculate probabilities under each class
       for (i in 1:nclass) {
         # calculate the outcome probabilities for this class
-        if (probit)
-          outcomep <- pnorm(outcomex[i, ])
-        else
-          outcomep <- 1 / (1 + exp(-outcomex[i, ]))
-        ill[, i] <- .Call("bernoulliprob", patterns, outcomep) * classp[i]
+        if (probit) loutcomep <- pnorm(outcomex[i, ], log.p=TRUE)
+        else loutcomep <- -log(1 + exp(-outcomex[i, ]))
+        lnoutcomep <- log(1-exp(loutcomep))
+         ill[, i] <- .Call("bernoulliprob", patterns, loutcomep, lnoutcomep) + log(classp[i])
         # multiply by class probabilities
       }
-      ill2 <- rowSums(ill)
-      ll <- sum(log(ill2) * freq)
+      #browser()
+      maxll <- rowMaxs(ill, value=TRUE)
+      ll <- sum((maxll+log(rowSums(exp(ill-maxll))))*freq)
+      ill2 <- rowSums(exp(ill))
       fitted <-
         ill2 * sum(ifelse(apply(patterns, 1, function(x)
           any(is.na(
             x
           ))), 0, freq)) * ifelse(apply(patterns, 1, function(x)
             any(is.na(x))), NA, 1)
-      classprob <- ill / ill2
+       classprob <- t(apply(ill,1,function(x) {
+        x <- x-max(x)
+        x <- ifelse(x==-Inf,-1e100,x)
+        return(exp(x)/sum(exp(x)))
+      }))
       # penalise extreme outcome probabilities
       if (penalty == 0.0)
         penll <- ll

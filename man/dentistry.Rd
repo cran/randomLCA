@@ -30,15 +30,15 @@
   Albert P.S. and Dodd, L.E. (2004) A cautionary note on the robustness of Latent Class Models for estimating diagnostic error without a gold standard. \emph{Biometrics}, \bold{60}, 427--435.
 }
 \examples{
-\dontrun{
+\donttest{
 # fit LCR model from Qu et al (1996)
-dentistry.lca <- randomLCA(dentistry[,1:5],freq=dentistry$freq)
+dentistry.lca <- randomLCA(dentistry[, 1:5], freq = dentistry$freq)
 # start with constant laoding
-dentistry.lcarandom <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	random=TRUE,probit=TRUE)
+dentistry.lcarandom <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
+	random = TRUE, probit = TRUE)
 # allow loading to vary by dentist
-dentistry.lcarandomunequal <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
-	random=TRUE,constload=FALSE,probit=TRUE)
+dentistry.lcarandomunequal <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
+	random = TRUE, constload = FALSE, probit = TRUE)
 }
 }
 \keyword{datasets}

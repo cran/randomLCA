@@ -16,8 +16,8 @@ Extracts the Empirical Bayes estimates of the random effects.
 A matrix with the first column containing the random effects and the second column the standard error of the random effects. 
 }
 \examples{
-\dontrun{
-pap.lca2random <- randomLCA(pap[,1:10],freq=pap$Freq,random=TRUE,nclass=2)
+\donttest{
+pap.lca2random <- randomLCA(pap[, 1:10], freq = pap$Freq, random = TRUE, nclass = 2)
 print(ranef(pap.lca2random))
 }
 }

@@ -37,6 +37,10 @@ importFrom(fastGHQuad, "gaussHermiteData")
 
 importFrom(Matrix, "rankMatrix")
 
+importFrom(Rfast, "rowMaxs")
+
+importFrom(parallel, "detectCores")
+
 # S3 methods
 S3method(plot, randomLCA)
 S3method(summary, randomLCA)

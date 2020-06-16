@@ -38,19 +38,20 @@
 						gh,momentdata,probit)				} else {
 					ill[,iclass] <- .Call("bernoulliprobrandom",patterns,outcomex[iclass,],lambdacoef,
 						gh,momentdata,probit)
-				}
-				##browser()
+						}
 			}
 # if zprop not supplied then we have the usual maximum likelihood
 			if (is.null(zprop)) {
-			   for (iclass in 1:nclass) ill[,iclass] <- ill[,iclass]*classp2[iclass]	
-          ill2 <- rowSums(ill,na.rm=TRUE)
-			    ll <- sum(log(ill2)*freq,na.rm=TRUE)
+			   for (iclass in 1:nclass) ill[,iclass] <- ill[,iclass]+log(classp2[iclass])	
+			   maxll <- rowMaxs(ill, value=TRUE)
+			   ll <- sum((maxll+log(rowSums(exp(ill-maxll))))*freq)
+			   ill2 <- rowSums(exp(ill))
 			} else {
 # otherwise calculate the comple data maximum likelihood for the em algorithm
-#        browser()
-			  ill2 <- rowSums(log(ill)*zprop,na.rm=TRUE)
-			  ll <- sum(ill2*freq,na.rm=TRUE)			  
+			  maxll <- rowMaxs(ill+log(zprop), value=TRUE)
+			  ll <- sum((maxll+log(rowSums(exp(ill-maxll))))*freq)
+			  ill2 <- rowSums(exp(ill))
+			  ll <- sum(log(ill2)*freq,na.rm=TRUE)			  
 			}
 # penalise extreme outcome probabilities
 			if (probit) {
@@ -67,10 +68,10 @@
 			if (is.nan(ll) || is.infinite(ll)) ll <- -1.0*.Machine$double.xmax
 			if (calcfitted) {
 # do this again in case we are using likelihood for em
-			  ill2 <- rowSums(ill,na.rm=TRUE)
+			  ill2 <- rowSums(exp(ill),na.rm=TRUE)
 			  fitted <- ill2*sum(ifelse(apply(patterns,1,function(x) any(is.na(x))),0,freq))*
 					ifelse(apply(patterns,1,function(x) any(is.na(x))),NA,1)
-				classprob <- ill/ill2
+				classprob <- exp(ill)/ill2
 				return(list(logLik=ll,penlogLik=penll,fitted=fitted,classprob=classprob))
 			} else return(list(logLik=ll,penlogLik=penll))
 		}  # end of calclikelihood

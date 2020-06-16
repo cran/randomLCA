@@ -29,12 +29,12 @@ Holmquist, N.D., McMahan, C.A., and Williams, O.D. (1967) Variability in classif
 Qu, Y., Tan, M. and Kutner, M.H. (1996) Random effects models in latent class analysis for evaluating accuracy of diagnostic tests. \emph{Biometrics}, \bold{52}, 797--810.
 }
 \examples{
-\dontrun{
-uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[,1:7],
-  freq=uterinecarcinoma$freq,random=TRUE,probit=TRUE,quadpoints=61)
+\donttest{
+uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[, 1:7], 
+  freq = uterinecarcinoma$freq, random = TRUE, probit = TRUE, quadpoints = 61)
 # LCR1 model of Que et al. This is fairly unstable and 
 # is also slow and doesn't improve the model fit
-uterinecarcinoma.lcarandom2by <- randomLCA(uterinecarcinoma[,1:7],freq=uterinecarcinoma$freq,
-	byclass=TRUE,random=TRUE,probit=TRUE,quadpoints=71)}
+uterinecarcinoma.lcarandom2by <- randomLCA(uterinecarcinoma[, 1:7], freq = uterinecarcinoma$freq, 
+	byclass = TRUE, random = TRUE, probit = TRUE, quadpoints = 71)}
 }
 \keyword{datasets}

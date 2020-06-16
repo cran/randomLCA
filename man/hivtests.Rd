@@ -27,16 +27,17 @@
   \emph{Biometrics}, \bold{52}, 797--810.
 }
 \examples{
-\dontrun{
+\donttest{
 # fit standard latent class
-hivtests.lca2 <- randomLCA(hivtests[,1:4],freq=hivtests$freq)
-# with random effect and constant laoding
-hivtests.lca2random <- randomLCA(hivtests[,1:4],freq=hivtests$freq,random=TRUE,penalty=1.0)
+hivtests.lca2 <- randomLCA(hivtests[, 1:4], freq = hivtests$freq)
+# with random effect and constant loading
+hivtests.lca2random <- randomLCA(hivtests[, 1:4], freq = hivtests$freq, random = TRUE,
+    penalty = 1.0)
 # with random effect and variable loading
 # for this model there are 13 parameters fitted to 16 observations, so model is fairly unstable
-hivtests.lca2random2 <- randomLCA(hivtests[,1:4],freq=hivtests$freq,random=TRUE,
-    constload=FALSE,penalty=1.0)
+hivtests.lca2random2 <- randomLCA(hivtests[, 1:4], freq = hivtests$freq, random = TRUE, 
+    constload = FALSE, penalty = 1.0)
 # BIC shows best model is random effects with constant loading
-print(c(BIC(hivtests.lca2),BIC(hivtests.lca2random),BIC(hivtests.lca2random2)))}
+print(c(BIC(hivtests.lca2), BIC(hivtests.lca2random), BIC(hivtests.lca2random2)))}
 }
 \keyword{datasets}

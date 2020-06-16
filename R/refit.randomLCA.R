@@ -47,7 +47,7 @@ refit <-
                                        probit=object$probit,byclass=object$byclass,
                                        qniterations=object$qniterations,penalty=object$penalty,verbose=FALSE)
       }
-      newfit$call <- object$call
+       newfit$call <- object$call
       newfit$nclass <- object$nclass
       newfit$random <- object$random
       newfit$constload <- object$constload
