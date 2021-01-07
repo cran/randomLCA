@@ -17,7 +17,7 @@ A matrix with the first column containing the random effects and the second colu
 }
 \examples{
 \donttest{
-pap.lca2random <- randomLCA(pap[, 1:10], freq = pap$Freq, random = TRUE, nclass = 2)
+pap.lca2random <- randomLCA(pap[, 1:10], freq = pap$Freq, random = TRUE, nclass = 2, cores = 1)
 print(ranef(pap.lca2random))
 }
 }

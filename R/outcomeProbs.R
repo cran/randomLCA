@@ -23,8 +23,13 @@ outcomeProbs.randomLCA <-
       dostatistic <- function(x,initmodel) {
         # fit the model using the simulated data
         onesim <- function () {
+          #browser()
           sim <- refit(initmodel,newpatterns=x,useinit=TRUE)
+          if (is.null(sim)) {
+            estimate <- rep(NA,dim(initmodel$outcomep)[1]*dim(initmodel$outcomep)[2])
+          } else {
           if (sim$random) {
+            #print(sim$outcomep)
             marg.prob <- calcMargProb(sim)
             marg.prob <- as.vector(matrix(marg.prob$outcomep,
                                           nrow=nclass,byrow=TRUE))
@@ -32,12 +37,12 @@ outcomeProbs.randomLCA <-
             if (sim$probit) estimate <- qnorm(marg.prob)
             else estimate <- log(marg.prob/(1-marg.prob))	
           } else  estimate <- sim$fit$estimate[nclass:(length(sim$fit$estimate))]
+          }
           return(estimate)
         }
         estimate <- tryCatch(onesim(),
                              error=function(e) {
                                if (cores==1) warning(e)
-                               #browser()
                                return(rep(NA,dim(initmodel$outcomep)[1]*dim(initmodel$outcomep)[2]))
                              })					
         return(estimate)

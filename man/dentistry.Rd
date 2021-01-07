@@ -32,13 +32,13 @@
 \examples{
 \donttest{
 # fit LCR model from Qu et al (1996)
-dentistry.lca <- randomLCA(dentistry[, 1:5], freq = dentistry$freq)
+dentistry.lca <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, cores = 1)
 # start with constant laoding
 dentistry.lcarandom <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
-	random = TRUE, probit = TRUE)
+	random = TRUE, probit = TRUE, cores = 1)
 # allow loading to vary by dentist
 dentistry.lcarandomunequal <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
-	random = TRUE, constload = FALSE, probit = TRUE)
+	random = TRUE, constload = FALSE, probit = TRUE, cores = 1)
 }
 }
 \keyword{datasets}

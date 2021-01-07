@@ -29,7 +29,7 @@ Data frame consisting of outcome probabilities and confidence intervals. One for
 \examples{
 \donttest{
 # standard latent class with 2 classes
-dentistry.lca2 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, nclass = 2)
+dentistry.lca2 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, nclass = 2, cores = 1)
 print(outcomeProbs(dentistry.lca2))
 # print on the default logit scale
 print(outcomeProbs(dentistry.lca2, scale = "raw"))

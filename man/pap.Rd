@@ -32,31 +32,31 @@ Beets, M. W., Flay, B. R., Vuchinich, S., Snyder, F. J., Acock, A., Li, K. K., D
 }
 \examples{
 # standard latent class
-pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1)
-pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2)
+pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1, cores = 1)
+pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2, cores = 1)
 \donttest{
 # standard latent class
-pap.lca3 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 3)
-pap.lca4 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 4)
-pap.lca5 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 5)
+pap.lca3 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 3, cores = 1)
+pap.lca4 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 4, cores = 1)
+pap.lca5 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 5, cores = 1)
 
 # repeat with random effect with constant loading
 # once BIC increases fitting further models is unnecessary
 pap.lca1random <- randomLCA(pap[, 1:10], 
-          freq = pap$Freq, nclass = 1, random = TRUE)
+          freq = pap$Freq, nclass = 1, random = TRUE, cores = 1)
 pap.lca2random <- randomLCA(pap[, 1:10], 
-          freq = pap$Freq, nclass = 2, random = TRUE)
+          freq = pap$Freq, nclass = 2, random = TRUE, cores = 1)
 pap.lca3random <- randomLCA(pap[, 1:10], 
-          freq = pap$Freq, nclass = 3, random = TRUE)
+          freq = pap$Freq, nclass = 3, random = TRUE, cores = 1)
 # can also repeat fits without constant loading to give mixture of IRT models
 pap.lca1random2 <- randomLCA(pap[, 1:10], 
-          freq = pap$Freq, nclass = 1, random = TRUE, constload = FALSE)
+          freq = pap$Freq, nclass = 1, random = TRUE, constload = FALSE, cores = 1)
 
 pap.lca2random2 <- randomLCA(pap[, 1:10], 
-          freq = pap$Freq, nclass = 2, random = TRUE, constload = FALSE)
+          freq = pap$Freq, nclass = 2, random = TRUE, constload = FALSE, cores = 1)
 
 pap.lca3random2 <- randomLCA(pap[, 1:10], 
-          freq = pap$Freq, nclass = 3, random = TRUE, constload = FALSE)
+          freq = pap$Freq, nclass = 3, random = TRUE, constload = FALSE, cores = 1)
 
 # produce table of BIC values
 # shows 4 class best of standard latent class

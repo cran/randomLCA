@@ -22,10 +22,10 @@ Plots the outcome probabilities for a randomLCA object, for random effects objec
 \examples{
 \donttest{
 # standard latent class with 2 classes
-uterinecarcinoma.lca2 <- randomLCA(uterinecarcinoma[, 1:7], freq = uterinecarcinoma$freq)
+uterinecarcinoma.lca2 <- randomLCA(uterinecarcinoma[, 1:7], freq = uterinecarcinoma$freq, cores = 1)
 plot(uterinecarcinoma.lca2)
 uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[, 1:7], 
-  freq = uterinecarcinoma$freq, random = TRUE, probit = TRUE, quadpoints = 61)
+  freq = uterinecarcinoma$freq, random = TRUE, probit = TRUE, quadpoints = 61, cores = 1)
 # default for random effects models is marginal
 plot(uterinecarcinoma.lcarandom2)
 # default for random effects models conditional is p = 0.5 i.e. median

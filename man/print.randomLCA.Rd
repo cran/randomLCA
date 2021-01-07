@@ -13,7 +13,7 @@ Prints a randomLCA object. Prints summary.
 }
 \examples{
 \donttest{
-pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1)
+pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1, cores = 1)
 pap.lca1
 # or
 print(pap.lca1)

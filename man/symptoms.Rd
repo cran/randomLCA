@@ -44,11 +44,13 @@ Beath, K.J. and Heller, G.Z. (2009) Latent trajectory modelling of multivariate 
 }
 \examples{
 \donttest{
-symptoms.lca2 <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, nclass = 2)
+symptoms.lca2 <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, nclass = 2,
+  cores = 1)
 symptoms.lca2random <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, 
-	random = TRUE, nclass = 2, blocksize = 4, constload = FALSE)
+	random = TRUE, nclass = 2, blocksize = 4, constload = FALSE, cores = 1)
 symptoms.lca2random2 <- randomLCA(symptoms[, 1:16], freq = symptoms$Freq, 
-	random = TRUE, level2 = TRUE, nclass = 2, level2size = 4, constload = FALSE)
+	random = TRUE, level2 = TRUE, nclass = 2, level2size = 4, constload = FALSE,
+	penalty = 0.1, cores = 1)
 }
 }
 \keyword{datasets}

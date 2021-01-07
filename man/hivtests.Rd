@@ -29,14 +29,14 @@
 \examples{
 \donttest{
 # fit standard latent class
-hivtests.lca2 <- randomLCA(hivtests[, 1:4], freq = hivtests$freq)
+hivtests.lca2 <- randomLCA(hivtests[, 1:4], freq = hivtests$freq, cores = 1)
 # with random effect and constant loading
 hivtests.lca2random <- randomLCA(hivtests[, 1:4], freq = hivtests$freq, random = TRUE,
-    penalty = 1.0)
+    quadpoints = 101, penalty = 1.0, cores = 1)
 # with random effect and variable loading
 # for this model there are 13 parameters fitted to 16 observations, so model is fairly unstable
 hivtests.lca2random2 <- randomLCA(hivtests[, 1:4], freq = hivtests$freq, random = TRUE, 
-    constload = FALSE, penalty = 1.0)
+    constload = FALSE, quadpoints = 101, penalty = 1.0, cores = 1)
 # BIC shows best model is random effects with constant loading
 print(c(BIC(hivtests.lca2), BIC(hivtests.lca2random), BIC(hivtests.lca2random2)))}
 }

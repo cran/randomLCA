@@ -8,8 +8,9 @@ Fit latent class models, which may include a random effect.
 randomLCA(patterns, freq = NULL, nclass = 2, calcSE = TRUE, notrials = 20, 
   random = FALSE, byclass = FALSE, quadpoints = 21, constload = TRUE,
   blocksize = dim(patterns)[2], level2 = FALSE, probit = FALSE,
-  level2size = blocksize, qniterations = 5, penalty = 0.01, EMtol = 1.0e-9,
-  verbose = FALSE, seed = as.integer(runif(1, 0, .Machine$integer.max)))}
+  level2size = blocksize, qniterations = 5, penalty = 0.01, EMtol = 1.0e-5,
+  verbose = FALSE, seed = as.integer(runif(1, 0, .Machine$integer.max)),
+  cores =  max(detectCores() \%/\% 2, 1))}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{patterns}{Data frame or matrix of 0 and 1 defining the outcome patterns. May also include missing values, with randomLCA using maximum likelihood to fit the models using all available data.}
@@ -30,6 +31,7 @@ randomLCA(patterns, freq = NULL, nclass = 2, calcSE = TRUE, notrials = 20,
   \item{EMtol}{convergence tolerance for EM algorithm for fixed effect latent class}
   \item{verbose}{Prints fit progress if true}
   \item{seed}{Initial random seed for generating starting values. This can be set to guarantee that the fit is the same each time, including the order of the classes.}
+  \item{cores}{Number of cores to be used for parallel evaluation of starting values}
 }
 \details{
 The structure of the patterns is assumed to be a number of blocks of different outcomes each of level2size, allowing outcomes to be repeated. Each outcome is assumed to have it's own loading.
@@ -71,20 +73,19 @@ The algorithm used is EM for the standard latent class and adaptive (in the sens
 \note{In the returned object there a fields for patterns and frequencies. If frequencies are not supplied then the patterns and frequencies are constructed. If frequencies are supplied then zero rows are removed. When frequencies are supplied it is assumed that the data has been simplified. The returned fitted, posterior class probabilities etc, all correspond to the simplified patterns, not to the original data.
 
 }
-\references{Beath KJ (2017). randomLCA: An R Package for Latent Class with Random Effects Analysis. _Journal of Statistical Software_, *81*(13), pp. 1-25. doi:
-10.18637/jss.v081.i13 (\url{http://doi.org/10.18637/jss.v081.i13})}
+\references{Beath KJ (2017). randomLCA: An R Package for Latent Class with Random Effects Analysis. Journal of Statistical Software, 81(13), pp. 1-25. \doi{10.18637/jss.v081.i13}}
 \author{Ken Beath}
 \examples{
 \donttest{
 # standard latent class with 2 classes
-dentistry.lca2 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, nclass = 2)
+dentistry.lca2 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, nclass = 2, cores = 1)
 # random effects model with constant random effect loading
 dentistry.lca2random <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
-	nclass = 2, random = TRUE, constload = TRUE, probit = TRUE)
+	nclass = 2, random = TRUE, constload = TRUE, probit = TRUE, cores = 1)
 # allow loading to vary by dentist
 # this is the 2LCR model from Qu et al (1996)
 dentistry.lca2random1 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
-	nclass = 2, random = TRUE, constload = FALSE, probit = TRUE)
+	nclass = 2, random = TRUE, constload = FALSE, probit = TRUE, cores = 1)
 }
 }
 \keyword{multivariate}

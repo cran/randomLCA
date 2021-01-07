@@ -30,29 +30,29 @@
 \examples{
 \donttest{
 # standard latent class
-genderrole.lca1 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, nclass = 1)
-genderrole.lca2 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq)
-genderrole.lca3 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, nclass = 3)
+genderrole.lca1 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, nclass = 1, cores = 1)
+genderrole.lca2 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, cores = 1)
+genderrole.lca3 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, nclass = 3, cores = 1)
 # repeat with random effect with constant loading
 # increase quadrature points and/or use higher penalty to obtain
 # convergence
 genderrole.lca1random <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, 
-	nclass = 1, random = TRUE)
+	nclass = 1, random = TRUE, cores = 1)
 genderrole.lca2random <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, 
-	random = TRUE, penalty = 0.1, quadpoints = 61)
+	random = TRUE, penalty = 0.1, quadpoints = 61, cores = 1)
 genderrole.lca3random <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, 
-	nclass = 3, random = TRUE, penalty = 0.1, quadpoints = 61)
+	nclass = 3, random = TRUE, penalty = 0.1, quadpoints = 61, cores = 1)
 # improved BIC for 1 class random
 print(c(BIC(genderrole.lca1), BIC(genderrole.lca2), BIC(genderrole.lca3)))
 print(c(BIC(genderrole.lca1random), BIC(genderrole.lca2random), 
 	BIC(genderrole.lca3random)))
 # can also repeat fits without constant loading to give mixture of IRT models
 genderrole.lca1random2 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, 
-	nclass = 1, random = TRUE, constload = FALSE)
+	nclass = 1, random = TRUE, constload = FALSE, cores = 1)
 genderrole.lca2random2 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, 
-	random = TRUE, constload = FALSE, quadpoints = 61, penalty = 0.1)
+	random = TRUE, constload = FALSE, quadpoints = 61, penalty = 0.1, cores = 1)
 genderrole.lca3random2 <- randomLCA(genderrole[, 1:5], freq = genderrole$Freq, 
-	nclass = 3, random = TRUE, constload = FALSE, quadpoints = 61, penalty = 0.1)
+	nclass = 3, random = TRUE, constload = FALSE, quadpoints = 61, penalty = 0.1, cores = 1)
 # no improvement in fit
 print(c(BIC(genderrole.lca1random2), BIC(genderrole.lca2random2), 
 	BIC(genderrole.lca3random2)))

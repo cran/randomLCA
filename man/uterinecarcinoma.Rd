@@ -31,10 +31,10 @@ Qu, Y., Tan, M. and Kutner, M.H. (1996) Random effects models in latent class an
 \examples{
 \donttest{
 uterinecarcinoma.lcarandom2 <- randomLCA(uterinecarcinoma[, 1:7], 
-  freq = uterinecarcinoma$freq, random = TRUE, probit = TRUE, quadpoints = 61)
+  freq = uterinecarcinoma$freq, random = TRUE, probit = TRUE, quadpoints = 61, cores = 1)
 # LCR1 model of Que et al. This is fairly unstable and 
 # is also slow and doesn't improve the model fit
 uterinecarcinoma.lcarandom2by <- randomLCA(uterinecarcinoma[, 1:7], freq = uterinecarcinoma$freq, 
-	byclass = TRUE, random = TRUE, probit = TRUE, quadpoints = 71)}
+	byclass = TRUE, random = TRUE, probit = TRUE, quadpoints = 71, cores = 1)}
 }
 \keyword{datasets}

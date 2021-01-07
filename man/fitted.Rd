@@ -17,7 +17,7 @@ A data frame. The first columns of the data frame correspond to the patterns, fo
 \examples{
 \donttest{
 dentistry.lcarandom <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
-	random = TRUE, probit = TRUE)
+	random = TRUE, probit = TRUE, cores = 1)
 print(fitted(dentistry.lcarandom))
 }
 }

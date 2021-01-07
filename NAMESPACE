@@ -28,7 +28,7 @@ importFrom(lattice,xyplot)
 importFrom(lattice,simpleKey)
 importFrom(boot,boot)
 importFrom(boot,boot.ci)
-importFrom("stats", "dbeta", "dnorm", "nlm", "pnorm", "qnorm", "rnorm", "runif","as.formula")
+importFrom("stats", "dbeta", "dnorm", "nlm", "pnorm", "qnorm", "rnorm", "runif","as.formula","rbinom")
 importFrom(stats, BIC)
 importFrom(stats, AIC)
 importFrom(stats, logLik)
@@ -39,7 +39,13 @@ importFrom(Matrix, "rankMatrix")
 
 importFrom(Rfast, "rowMaxs")
 
-importFrom(parallel, "detectCores")
+importFrom(parallel, "detectCores", "makeCluster","stopCluster")
+
+importFrom("doParallel", "registerDoParallel")
+
+importFrom("foreach", "foreach", "%dopar%")
+
+importFrom("doRNG", "%dorng%")
 
 # S3 methods
 S3method(plot, randomLCA)

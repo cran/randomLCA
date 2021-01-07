@@ -22,11 +22,11 @@ A data frame. The first columns of the data frame correspond to the patterns, fo
 }
 \examples{
 \donttest{
-pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2)
+pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2, cores = 1)
 maxClass.lca2 <- maxPostClass(pap.lca2)
 names(maxClass.lca2)[length(names(maxClass.lca2))] <- "maxProb.lca2"
 
-pap.lca3 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 3)
+pap.lca3 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 3, cores = 1)
 maxClass.lca3 <- maxPostClass(pap.lca3)
 names(maxClass.lca3)[length(names(maxClass.lca3))] <- "maxProb.lca3"
 

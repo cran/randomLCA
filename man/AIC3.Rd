@@ -15,7 +15,7 @@ AIC3.
 }
 \examples{
 \donttest{
-pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2)
+pap.lca2 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 2, cores = 1)
 print(AIC3(pap.lca2))
 }
 }

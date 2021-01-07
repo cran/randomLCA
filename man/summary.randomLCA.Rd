@@ -30,7 +30,7 @@ Summarises the fit of a randomLCA object.
 }
 \examples{
 \donttest{
-pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1)
+pap.lca1 <- randomLCA(pap[, 1:10], freq = pap$Freq, nclass = 1, cores = 1)
 summary(pap.lca1)
 }
 }

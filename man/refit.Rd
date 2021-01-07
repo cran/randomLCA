@@ -23,8 +23,8 @@ The useunit parameter determines whether the parameter estimates from the suppli
 }
 \examples{
 \donttest{
-myocardial.lca1 <- randomLCA(myocardial[, 1:4], freq = myocardial$freq, nclass = 1)
-myocardial.lca2 <- randomLCA(myocardial[, 1:4], freq = myocardial$freq)
+myocardial.lca1 <- randomLCA(myocardial[, 1:4], freq = myocardial$freq, nclass = 1, cores = 1)
+myocardial.lca2 <- randomLCA(myocardial[, 1:4], freq = myocardial$freq, cores = 1)
 # calculate observed lrt
 obslrt <- 2*(logLik(myocardial.lca2)-logLik(myocardial.lca1))
 

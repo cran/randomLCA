@@ -1,10 +1,6 @@
 fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initlambdacoef,initltaucoef,
-                                        level2size,constload,calcSE=FALSE,gh,probit,byclass,qniterations,penalty,verbose=FALSE) {
-  
-  #	print(initoutcomep)
-  #	print(initclassp)
-  #	print(initlambdacoef)
-  #	print(initltaucoef)
+                                        level2size,constload,calcSE=FALSE,justEM,gh,probit,byclass,qniterations,
+                            penalty,EMtol,verbose=FALSE) {
   
   # parameters
   #   outcomes matrix of outcomes 0 or 1
@@ -52,25 +48,9 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
   calclikelihood <- function(classx,outcomex,lambdacoef,ltaucoef,
                              updatemoments=FALSE,calcfitted=FALSE,zprop=NULL) {
     
-#       print("classx")
-#     print(classx)
-#     print("outcomex")
-#     print(outcomex)
-#       print("lambdacoef")
-#       print(lambdacoef)
-#       print("ltaucoef")
-#       print(ltaucoef)
-    
     # turn classp into actual probabilities
     classp2 <- c(0,classx)       
     classp2 <- exp(classp2)/sum(exp(classp2))
-    
-    #	print(outcomex)
-    #	print(classp2)
-    #	print(lambdacoef)
-    #	print(exp(ltaucoef))
-    
-    #		browser()
     
     newmoments <- replicate(nclass, NULL)
     ill <- matrix(rep(NA,nclass*nlevel3),ncol=nclass)
@@ -79,14 +59,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       if (byclass) mylambdacoef <- matrix(rep(lambdacoef,nlevel1),nrow=nclass)
       else mylambdacoef <- rep(lambdacoef,nlevel1)       
     }
-    #   print("mylambdacoef")
-    #   print(mylambdacoef)
     for (iclass in 1:nclass) {
-      # result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],
-      #                 if (byclass) mylambdacoef[iclass,]  else mylambdacoef,
-      #                 if (byclass) ltaucoef[iclass] else ltaucoef,
-      #                 gh,momentdata[,((iclass-1)*(2+nlevel2*3)+1):(iclass*(2+nlevel2*3))],
-      #                 probit,updatemoments,level2size)
       result <- .Call("bernoulliprobrandom2",outcomes,outcomex[iclass,],
                       if (byclass) mylambdacoef[iclass,]  else mylambdacoef,
                       if (byclass) ltaucoef[iclass] else ltaucoef,
@@ -165,7 +138,7 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       oneiteration <- calclikelihood(classx,outcomex,lambdacoef,ltaucoef,
                                      updatemoments=TRUE)
       currll <- oneiteration$penlogLik
-      zprop <- oneiteration$classprobs
+      zprop <- oneiteration$classprob
       if (verbose) cat("current ll",currll,"\n")       
     }
     
@@ -196,14 +169,13 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
         currll <- oneiteration$penlogLik
         if (verbose) cat("current ll",currll,"\n")       
       }
-      adaptive <- (abs((currll-optll)/currll)>1.0e-7) ||
-        (abs((currll-prevll)/currll)>1.0e-7)
+      adaptive <- (abs((currll-optll)/currll)>1.0e-6) || (abs((currll-prevll)/currll)>1.0e-6)
       if ((prevll-currll)/abs(currll) > 1.0e-3) stop("divergence - increase quadrature points")
       nadaptive <- nadaptive+1
       if (nadaptive > 200) stop("too many adaptive iterations - increase quadrature points")
       prevll <- currll
       # if (is.na(adaptive)) browser()
-      zprop <- oneiteration$classprobs
+      zprop <- oneiteration$classprob
     }
     fitresults <- fitparams(classx,outcomex,lambdacoef,ltaucoef,
                             calcSE=calcSE,noiterations=500)
@@ -253,8 +225,6 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       currll <- onelikelihood$penlogLik
       if (verbose) cat("ll",currll,"\n")		
       # when the ll starts decreasing, give up
-      #       print("currll")
-      #       print(currll)
       if (currll < maxll) break()
       maxll <- currll
       maxltau <- testltaucoef

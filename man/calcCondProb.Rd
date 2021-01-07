@@ -17,7 +17,7 @@ Returns a data frame containing class, block, outcome, outcomep (outcome probabi
 \examples{
 \donttest{
 dentistry.lcarandom <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, 
-	random = TRUE, probit = TRUE)
+	random = TRUE, probit = TRUE, cores = 1)
 print(calcCondProb(dentistry.lcarandom))
 }
 }

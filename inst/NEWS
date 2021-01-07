@@ -1,3 +1,9 @@
+Changes in randomLCA version 1.1-0
+
+ o used parallel processing for performing multiple starting values
+
+ o used multiple starting values for single level random effects models
+
 Changes in randomLCA version 1.0-16
 
  o replaced dontrun with donttest for examples
