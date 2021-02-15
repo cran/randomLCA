@@ -1,4 +1,4 @@
-8c20303f1d77457f43a95164a18887dd *DESCRIPTION
+e7780da77e1d2ea95c0c97f1ce3eef8d *DESCRIPTION
 850285cbf04c34d9494f92d68027a233 *NAMESPACE
 a3f3c66b5e0e5a54f3e0a4593bd7cbc7 *R/bestfixedlca.R
 ba3800e2e97c831e2f6b3eea03db2d50 *R/besttrandomlca.R
@@ -6,9 +6,9 @@ ba3800e2e97c831e2f6b3eea03db2d50 *R/besttrandomlca.R
 859e52e99440ddb528dc6ae09808704a *R/calcCondProb.R
 06cfdd3b6d13e6738d83711f111ca16e *R/calcMargProb.R
 1b527892f5fd165b3dc3054c46ce86cf *R/classProbs.R
-bdf4e4587cbb6df329546fbc0c0f1aa2 *R/fitAdaptRandom.R
-27dac6238d56e002a7a2e497415eb2b3 *R/fitAdaptRandom2.R
-31dccbb20ee7e83af2da61299250ec26 *R/fitFixed.R
+4bc57359f1996dc96d1cd21f6331d8a9 *R/fitAdaptRandom.R
+cac9f2f4609c40cfaac0d5ade54953e4 *R/fitAdaptRandom2.R
+9e500799163f997edafc5f757fdefbe9 *R/fitFixed.R
 bd8149da588f164be06cf72da2425771 *R/fitted.randomLCA.R
 8585b2a717142ea91fde01d8e794c8c3 *R/globals.R
 8c4d8dab3a51702e49bf537c3721ab94 *R/maxPostClass.R
@@ -17,13 +17,13 @@ bd8149da588f164be06cf72da2425771 *R/fitted.randomLCA.R
 c0339fac309665972f16b78f97bafe91 *R/outcomeProbs.R
 1b216bc621ccaab61332288585cd4be5 *R/plot.randomLCA.R
 31e9e3f9894a83248dc719961b5c3d8e *R/postClassProbs.R
-6d0c9c6d529f3738d0c53ea9c159c154 *R/randomLCA.R
+8e6f67a27be3b1d0e7d9d3bb1be185e0 *R/randomLCA.R
 36162412e4c53d19402c237bcd8d610a *R/ranef.randomLCA.R
 f10f42fc2e77e80433e40086bd97b309 *R/refit.randomLCA.R
 b2e1472d314d278a3a58a26fcc2fe011 *R/simulate.randomLCA.R
 9f9c63dc4e98d88ccd1a69d93084b9bb *R/summary.randomLCA.R
-4dbd25890cb165e49ffc6b2c8d6a445d *build/partial.rdb
-7d94465694d405daf44b780387024529 *build/vignette.rds
+0956908922c65860b5397b96ac1468da *build/partial.rdb
+9633c6be2d9fe6014dae4beda3341920 *build/vignette.rds
 32464514a5b449cbe3e82bc66015d13d *data/dentistry.rda
 1e20f00b74fb6ff271b212a0c600624f *data/genderrole.rda
 0f1c37f72dec894cbe66d1ce50306a7a *data/hivtests.rda
@@ -32,7 +32,7 @@ b2e1472d314d278a3a58a26fcc2fe011 *R/simulate.randomLCA.R
 55a0c34453eb0605616ac6f7dc28bf34 *data/symptoms.RData
 40524198ab57f576f45eaa83f3a2d5a4 *data/uterinecarcinoma.rda
 6570511ee5a3094cf875b90b62db7772 *inst/CITATION
-027631e2e0502fc5ca8da98313d9cd13 *inst/NEWS
+bc111bff359f39e65c004b33899166d5 *inst/NEWS
 bf9ede80d008cbd1d9ae0779b279ad80 *inst/doc/randomLCA-package.pdf
 f63cf0b617b19967779bc0c3f2844c4f *inst/doc/randomLCA-package.pdf.asis
 76178c40fdf4099142dc04fcf4d24050 *man/AIC.Rd

@@ -298,6 +298,10 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       }
       beta <- rep(0,1+nlevel2)
       optim.fit <- nlm(loglik,beta,print.level=0,iterlim=1000,hessian=TRUE,gradtol=1.0e-7)
+
+      if (optim.fit$code >= 3)
+        warning("Maximum likelihood not found - nlm exited with code ", optim.fit$code, " .\n")
+ 
       beta <- optim.fit$estimate
       sebeta <- sqrt(diag(solve(optim.fit$hessian)))
       checkx <- matrix(x,ncol=nlevel1,byrow=T)

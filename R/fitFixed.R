@@ -210,7 +210,7 @@
         )
       
       if (optim.fit$code >= 3)
-        warning("nlm exited with code ", optim.fit$code, " .\n")
+        warning("Maximum likelihood not found - nlm exited with code ", optim.fit$code, " .\n")
       if (calcSE) {
         if (!all(is.finite(optim.fit$hessian))) {
           warning("Cannot calculate standard errors - Hessian not finite")

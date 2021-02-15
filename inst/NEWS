@@ -1,3 +1,9 @@
+Changes in randomLCA version 1.1-1
+
+ o more informative error message if convergence failed when fitting
+
+ o added 0.1s delay before starting parallel process fitting on Windows to avoid bug in RStudio. It seems that it is necessary to allow all plotting to complete.
+
 Changes in randomLCA version 1.1-0
 
  o used parallel processing for performing multiple starting values

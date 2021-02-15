@@ -28,7 +28,7 @@
       if (any(freq<0))
         stop("frequencies must be greater than or equal to zero")
     }
-    if (random & ((dim(patterns)[2] %% blocksize)!=0))
+    if (random & ((dim(patterns)[2] %% blocksize)!=0)) 
       stop("number of outcomes must be a multiple of blocksize")
     # if no frequencies given, then assume that the data needs to be summarised
     if (missing(freq) | is.null(freq)) {
@@ -68,6 +68,7 @@
     if ((nclass==4) & (dim(patterns)[2]<5)) nonident <- TRUE
     if ((nclass==5) & (dim(patterns)[2]<5)) nonident <- TRUE
     if (nonident) stop("Model is not identifiable - decrease classes or random effects")
+    if ((Sys.info()['sysname']=="Windows") & (cores>1)) Sys.sleep(0.1)
     if (!random) initmodel <- bestfixedlca(patterns,freq=freq,nclass=nclass,
             calcSE=calcSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose, cores=cores)
     else {

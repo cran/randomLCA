@@ -242,6 +242,9 @@
       
       fitted.model <- fitparams(classx,outcomex,lambdacoef,
                                 momentdata,calcSE,gh,patterns,noiterations=1000,zprop=NULL)
+
+      if (fitted.model$nlm$code >= 3)
+        warning("Maximum likelihood not found - nlm exited with code ", fitted.model$nlm$code, " .\n")
       
       classx <- fitted.model$classx
       outcomex <- fitted.model$outcomex
