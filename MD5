@@ -1,4 +1,4 @@
-e7780da77e1d2ea95c0c97f1ce3eef8d *DESCRIPTION
+9fa231a9882cdb55c79c3439881db305 *DESCRIPTION
 850285cbf04c34d9494f92d68027a233 *NAMESPACE
 a3f3c66b5e0e5a54f3e0a4593bd7cbc7 *R/bestfixedlca.R
 ba3800e2e97c831e2f6b3eea03db2d50 *R/besttrandomlca.R
@@ -22,8 +22,8 @@ c0339fac309665972f16b78f97bafe91 *R/outcomeProbs.R
 f10f42fc2e77e80433e40086bd97b309 *R/refit.randomLCA.R
 b2e1472d314d278a3a58a26fcc2fe011 *R/simulate.randomLCA.R
 9f9c63dc4e98d88ccd1a69d93084b9bb *R/summary.randomLCA.R
-0956908922c65860b5397b96ac1468da *build/partial.rdb
-9633c6be2d9fe6014dae4beda3341920 *build/vignette.rds
+1961639f6f4f7f9efffa91b624b3d060 *build/partial.rdb
+6a353dd75003013e0df7c8820f1e2f75 *build/vignette.rds
 32464514a5b449cbe3e82bc66015d13d *data/dentistry.rda
 1e20f00b74fb6ff271b212a0c600624f *data/genderrole.rda
 0f1c37f72dec894cbe66d1ce50306a7a *data/hivtests.rda
@@ -31,8 +31,8 @@ b2e1472d314d278a3a58a26fcc2fe011 *R/simulate.randomLCA.R
 3f1bdd44944c14ac0545ee4ee43dd86d *data/pap.RData
 55a0c34453eb0605616ac6f7dc28bf34 *data/symptoms.RData
 40524198ab57f576f45eaa83f3a2d5a4 *data/uterinecarcinoma.rda
-6570511ee5a3094cf875b90b62db7772 *inst/CITATION
-bc111bff359f39e65c004b33899166d5 *inst/NEWS
+8fb1d309d4bd82620eb1c9fec40c686a *inst/CITATION
+bbb2664c7346a17504080d997ca32e2b *inst/NEWS
 bf9ede80d008cbd1d9ae0779b279ad80 *inst/doc/randomLCA-package.pdf
 f63cf0b617b19967779bc0c3f2844c4f *inst/doc/randomLCA-package.pdf.asis
 76178c40fdf4099142dc04fcf4d24050 *man/AIC.Rd
