@@ -169,7 +169,8 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
         currll <- oneiteration$penlogLik
         if (verbose) cat("current ll",currll,"\n")       
       }
-      adaptive <- (abs((currll-optll)/currll)>1.0e-6) || (abs((currll-prevll)/currll)>1.0e-6)
+      adaptive <- (abs((currll-optll)/currll)>1.0e-6) ||
+        (abs((currll-prevll)/currll)>1.0e-6)
       if ((prevll-currll)/abs(currll) > 1.0e-3) stop("divergence - increase quadrature points")
       nadaptive <- nadaptive+1
       if (nadaptive > 200) stop("too many adaptive iterations - increase quadrature points")
@@ -225,6 +226,8 @@ fitAdaptRandom2 <- function(outcomes,freq,nclass=2,initoutcomep,initclassp,initl
       currll <- onelikelihood$penlogLik
       if (verbose) cat("ll",currll,"\n")		
       # when the ll starts decreasing, give up
+      #       print("currll")
+      #       print(currll)
       if (currll < maxll) break()
       maxll <- currll
       maxltau <- testltaucoef

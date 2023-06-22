@@ -69,14 +69,78 @@
     if ((nclass==5) & (dim(patterns)[2]<5)) nonident <- TRUE
     if (nonident) stop("Model is not identifiable - decrease classes or random effects")
     if ((Sys.info()['sysname']=="Windows") & (cores>1)) Sys.sleep(0.1)
-    if (!random) initmodel <- bestfixedlca(patterns,freq=freq,nclass=nclass,
+    if (!random) initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
             calcSE=calcSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose, cores=cores)
     else {
-        initmodel <- bestrandomlca(patterns,freq=freq,nclass=nclass,
-              calcSE=calcSE,notrials=notrials,probit=probit,constload=constload,byclass=byclass,
-              blocksize=blocksize,quadpoints=quadpoints,qniterations=qniterations,penalty=penalty,EMtol=EMtol,verbose=verbose, cores=cores)
-         # now fit the level 2
-        if (level2) initmodel <- fitAdaptRandom2(patterns,freq=freq,
+      if (!level2) {
+        initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
+                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose, cores=cores)
+        # work out how many lambda coefs there are
+        if (constload) nlambda <- 1
+        else nlambda <- min(dim(patterns)[2],blocksize)
+        # now fit the simplest random efefcts model ie with constant loading
+        initmodel <- fitAdaptRandom(patterns,freq=freq,
+                                                nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                initclassp=initmodel$classp,initlambdacoef=NULL,
+                                                gh=norm.gauss.hermite(quadpoints),
+                                                constload=TRUE,probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                penalty=penalty,verbose=verbose)
+        # fit with variable loading if required
+        if (!constload)  initmodel <- fitAdaptRandom(patterns,freq=freq,
+                                                nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                initclassp=initmodel$classp,
+                                                 initlambdacoef=rep(initmodel$lambdacoef,nlambda),
+                                                 gh=norm.gauss.hermite(quadpoints),
+                                                  constload=constload,blocksize=blocksize,
+                                                 probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                  penalty=penalty,verbose=verbose)
+        if (byclass)  {
+          initlambdacoef <- matrix(rep(initmodel$lambdacoef,nclass),nrow=nclass,byrow=TRUE)
+          initmodel <- fitAdaptRandom(patterns,freq=freq,
+                                                  nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                  initclassp=initmodel$classp,
+                                                  initlambdacoef=initlambdacoef,
+                                                  gh=norm.gauss.hermite(quadpoints),
+                                                  constload=constload,blocksize=blocksize,
+                                                  probit=probit,byclass=byclass,qniterations=qniterations,
+                                                  penalty=penalty,verbose=verbose)
+        }
+      } else {
+        # 2 level models
+        initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
+                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose, cores=cores)
+        # work out how many lambda coefs there are
+        if (constload) nlambda <- 1
+        else nlambda <- min(dim(patterns)[2],blocksize)
+        # now fit the simplest random efefcts model
+        initmodel <- fitAdaptRandom(patterns,freq=freq,
+                                                nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                initclassp=initmodel$classp,initlambdacoef=NULL,
+                                                gh=norm.gauss.hermite(quadpoints),
+                                                constload=TRUE,probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                penalty=penalty,verbose=verbose)
+        # fit with variable loading if required
+        if (!constload)  initmodel <- fitAdaptRandom(patterns,freq=freq,
+                                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                                 initclassp=initmodel$classp,
+                                                                 initlambdacoef=rep(initmodel$lambdacoef,nlambda),
+                                                                 gh=norm.gauss.hermite(quadpoints),
+                                                                 constload=constload,blocksize=level2size,
+                                                                 probit=probit,byclass=FALSE,qniterations=qniterations,
+                                                                 penalty=penalty,verbose=verbose)
+        if (byclass)  {
+          initlambdacoef <- matrix(rep(initmodel$lambdacoef,nclass),nrow=nclass,byrow=TRUE)
+          initmodel <- fitAdaptRandom(patterns,freq=freq,
+                                                  nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
+                                                  initclassp=initmodel$classp,
+                                                  initlambdacoef=initlambdacoef,
+                                                  gh=norm.gauss.hermite(quadpoints),
+                                                  constload=constload,blocksize=level2size,
+                                                  probit=probit,byclass=byclass,qniterations=qniterations,
+                                                  penalty=penalty,verbose=verbose)
+        }
+        # now fit the level 2
+        initmodel <- fitAdaptRandom2(patterns,freq=freq,
                                                 nclass=nclass,calcSE=calcSE,initoutcomep=initmodel$outcomep,
                                                 initclassp=initmodel$classp,
                                                 initlambdacoef=initmodel$lambdacoef,
@@ -84,7 +148,8 @@
                                                 gh=norm.gauss.hermite(quadpoints),
                                                 constload=constload,level2size=level2size,
                                                 probit=probit,byclass=byclass,qniterations=qniterations,
-                                                penalty=penalty,EMtol=EMtol,justEM=FALSE,verbose=verbose)
+                                                penalty=penalty,verbose=verbose)
+      }
     }
 # check rank of Hessian
     if (calcSE & !is.null(initmodel$fit$hessian)) {

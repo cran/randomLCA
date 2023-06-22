@@ -27,24 +27,18 @@ refit <-
     }
     if (useinit) {
       if (!object$random) newfit <- fitFixed(newpatterns,newfreq,object$outcomep,object$classp,
-                                             object$nclass,calcSE=FALSE,justEM=FALSE,object$probit,
-                                             object$penalty,object$EMtol,verbose=FALSE)
+                                             object$nclass,calcSE=FALSE,justEM=FALSE,object$probit,object$penalty,object$EMtol,verbose=FALSE)
       else {
-        if (!object$level2) newfit <-
-            fitAdaptRandom(newpatterns,newfreq,
-                           nclass=object$nclass,calcSE=FALSE,justEM=FALSE,
-                           initoutcomep=object$outcomep,
-                           initclassp=object$classp,
-                           initlambdacoef=object$lambdacoef,
-                           initmomentdata=NULL,
-                           blocksize=object$blocksize,
-                           gh=norm.gauss.hermite(object$quadpoints),
-                           constload=object$constload,probit=object$probit,
-                           byclass=object$byclass,
-                           qniterations=object$qniterations,penalty=object$penalty,
-                           EMtol=object$EMtol,verbose=FALSE)
+        if (!object$level2) newfit <- fitAdaptRandom(newpatterns,newfreq,
+                                                     nclass=object$nclass,calcSE=FALSE,initoutcomep=object$outcomep,
+                                                     initclassp=object$classp,
+                                                     initlambdacoef=object$lambdacoef,
+                                                     blocksize=object$blocksize,
+                                                     gh=norm.gauss.hermite(object$quadpoints),
+                                                     constload=object$constload,probit=object$probit,byclass=object$byclass,
+                                                     qniterations=object$qniterations,penalty=object$penalty,verbose=FALSE)
         else newfit <- fitAdaptRandom2(newpatterns,newfreq,
-                                       nclass=object$nclass,calcSE=FALSE,justEM=FALSE,initoutcomep=object$outcomep,
+                                       nclass=object$nclass,calcSE=FALSE,initoutcomep=object$outcomep,
                                        initclassp=object$classp,
                                        initlambdacoef=object$lambdacoef,
                                        initltaucoef=object$ltaucoef,
@@ -52,8 +46,7 @@ refit <-
                                        constload=object$constload,
                                        gh=norm.gauss.hermite(object$quadpoints),
                                        probit=object$probit,byclass=object$byclass,
-                                       qniterations=object$qniterations,penalty=object$penalty,
-                                       verbose=FALSE)
+                                       qniterations=object$qniterations,penalty=object$penalty,verbose=FALSE)
       }
       #browser()
       if (!is.null(newfit)) {

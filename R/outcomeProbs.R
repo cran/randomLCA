@@ -1,16 +1,17 @@
 # taken from confint
-format.perc <- function(probs, digits)
+format_perc <- function(probs, digits)
   ## Not yet exported, maybe useful in other contexts:
   ## quantile.default() sometimes uses a version of it
   paste(format(100 * probs, trim = TRUE, scientific = FALSE, digits = digits),
         "%")
 
-outcomeProbs <- function(object,level = 0.95, boot=FALSE, type="perc",R=999,scale=c("prob","raw"),...)
+outcomeProbs <- function(object,level = 0.95, boot=FALSE, type="perc",R=999,scale=c("prob","raw"),
+                         cores = max(detectCores() %/% 2, 1),...)
   UseMethod("outcomeProbs")
 
 outcomeProbs.randomLCA <-
   function(object,level = 0.95, boot=FALSE, type="perc",R=999,scale=c("prob","raw"),
-           cores = max(detectCores() - 1, 1),...) {
+           cores = max(detectCores() %/% 2, 1),...) {
     if (!inherits(object, "randomLCA"))
       stop("Use only with 'randomLCA' objects.\n")
     if (object$random & !boot)
@@ -119,7 +120,7 @@ outcomeProbs.randomLCA <-
     outcomepl <- t(matrix(outcomepl,nrow=nclass))
     outcomepu <- t(matrix(outcomepu,nrow=nclass))
     
-    qnames <- format.perc(c((1-level)/2,1 - (1-level)/2),3)
+    qnames <- format_perc(c((1-level)/2,1 - (1-level)/2),3)
     
     for (i in 1:nclass) {
       oneoutcome <- data.frame(outcomep[,i],outcomepl[,i],outcomepu[,i])

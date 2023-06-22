@@ -62,7 +62,7 @@ S3method(print, randomLCA)
 S3method(postClassProbs, randomLCA)
 S3method(maxPostClass, randomLCA)
 
-S3method(print,outcomeProbs.randomLCA)
+S3method(print, outcomeProbs.randomLCA)
 S3method(print, summary.randomLCA)
 
 
