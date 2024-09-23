@@ -15,7 +15,7 @@ Extract outcome probabilities and confidence intervals for a randomLCA object.
   \item{boot}{use parametric bootstrap to obtain confidence interval}
   \item{type}{type of bootstrap confidence intervals to use, with "perc" or "norm" valid, see boot.ci for description.}
   \item{R}{replications for parametric bootstrap}
-  \item{scale}{either "prob" where probabilities are returned, the default, or "raw" where the probabilities are returned on the logit or probit scale, depending on which scale was selected in the texttt{randomLCA} function}
+  \item{scale}{either "prob" where probabilities are returned, the default, or "raw" where the probabilities are returned on the logit or probit scale, depending on which scale was selected in the randomLCA function}
   \item{cores}{number of cores to use when bootstrapping, shuld be at least 1 less than available cores}
   \item{\dots}{additional argument; currently none is used. }
 }
