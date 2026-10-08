@@ -1,0 +1,677 @@
+---
+title: "randomLCA: An R Package for Latent Class with Random Effects Analysis"
+author: "Ken J. Beath, Macquarie University"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  bookdown::html_document2:
+    base_format: rmarkdown::html_vignette
+bibliography:  randomLCA-package.bib
+
+vignette: >
+  %\VignetteIndexEntry{randomLCA: An R Package for Latent Class with Random Effects Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r include = FALSE}
+options(prompt="R> ",continue="+  ", width=70, useFancyQuotes=FALSE)
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.height = 4,
+  collapse = TRUE,
+  comment = "#>")
+library(randomLCA)
+library(lattice)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
+set.seed(12345)
+```
+
+## Introduction
+
+Latent class models [@lazarsfeld1968] are a method originally developed for sociology where they are used to identify clusters or sub-groups of subjects, based on multivariate binary observations, and as such are a form of finite mixture model. Their application has been further expanded into many areas, such as psychology, market research and medicine. Diagnostic classification using latent class methods has been applied in a number of areas, with early applications by @golden1982 to dementia, @young1982 to develop diagnostic criteria for schizophrenia and @rindskopf1986 for myocardial infarction. An advantage of using latent class analysis over other classification methods is that the classification is model based, allowing use of model selection techniques to determine which classification scheme is most appropriate. This compares with classifications developed from simple observation, that may give undue weight to one or more symptoms or outcomes. An example of the problems with this type of analysis is demonstrated by @nyholt2004 who used latent class analysis of headache symptoms to show that classification of migraine with and without aura as separate diagnoses is not supported. While latent class methods have been extended to any outcomes with a variety of distributions, binary is the most commonly used.
+
+The assumption of latent class models is conditional or local independence, where the outcomes are independent conditional on the latent class. This assumes that subjects within a class are homogeneous. Where this does not apply, that is the true classes are heterogeneous, a consequence of this will be to increase the number of latent classes required in attempting to explain the heterogeneity, with possible consequent difficulty in interpretation. A solution is to incorporate random effects so that the outcomes are independent conditional on the latent class and random effect or effects. 
+
+There are a number of packages capable of fitting latent class models in **R** [@r2015]. Two of these solely for fitting of latent class models are **poLCA** [@Linzer2011] and **BayesLCA** [@White2014a]. **BayesLCA** is particularly designed to perform Bayesian analyses, but also offers the choice of the EM algorithm and Variational Bayes, but has limited facilities for producing plots and summaries. **poLCA** is a more fully featured package which allows for polytomous outcomes and latent class regression, which are not available in **randomLCA**. The advantage of **randomLCA** over the other packages is that it will fit both standard latent class models and those incorporating random effects. This is important for use with diagnostic tests, as it allows for the variation of the test response between subjects, but may be also used to model heterogeneity in other applications, for example see @muthen2006b. Commercial software packages that also allow latent class with random effects are M*plus* [@muthen2015] and **Latent GOLD Syntax Module** [@Vermunt2013], both of which require the model to be defined using a symbolic language. 
+
+The purpose of this paper is to describe the **randomLCA** package. The remainder of the paper is organised as follows. Section 2 describes the models, starting with standard latent class and then continuing with the random effect extensions, including references allowing for further investigation. Section 3 describes three examples with explanation of how the features of the package may be used. Section 4 summarises the capabilities of the package and describes some areas in which the package could be extended.
+
+## Models
+
+### Latent class model
+
+The basis of latent class analysis is that each subject is assumed to belong to one of a finite number of classes, with each class described by a set of parameters that define the distribution of outcomes or manifest variables for a subject, and is a form of finite mixture model [@mclachlan2000]. Generally, the number of classes is unknown and must be determined from the data. For binary outcomes, the model is
+
+$$
+\begin{aligned}
+P\left(y_{i1}, y_{i2}, ..., y_{ik}\right|c_i=c)& = \prod_{j = 1}^k \pi_{cj}^{y_{ij}} \left(1-\pi_{cj}\right)^{1-y_{ij}}\\
+\end{aligned}
+$$
+  
+  where $y_{ij}$ is the $j$th binary outcome for subject $i$, $\pi_{cj}$ is the probability of the $j$th outcome equal to 1 for a subject in class $c$, $k$ is the number of outcomes and $c_i$ is the class corresponding to the $i$th subject. The marginal probability, obtained by summing over the classes, for each subject is
+$$
+\begin{aligned}
+P\left(y_{i1}, y_{i2}, ..., y_{ik}\right)& = \sum_{c = 1}^C \eta_c\prod_{j = 1}^k \pi_{cj}^{y_{ij}} \left(1-\pi_{cj}\right)^{1-y_{ij}}
+\end{aligned}
+$$
+  where $\eta_c$ is the probability of a subject being in class $c$ with $\sum_{c = 1}^C{\eta_c} = 1$ and $C$ is the number of classes. From this can be obtained the marginal likelihood.
+
+A requirement for the estimates of the probabilities $\pi_{cj}$ is that they be restricted to the interval zero to one, and that the $\eta_c$ sum to one, something that did not always occur with the original methods used for analysis. A solution developed by formann1978 and formann1982 is to use a logistic (or alternatively probit) transformation, allowing unconstrained estimation of parameters but correctly restricting the probabilities to between zero and one. This can be obtained for the logistic using the following relations $\pi_{cj} = {e^{a_{cj}}}/\left(1+e^{a_{cj}}\right)$ and $\eta_c = {e^{\theta_c}}/{\sum_{\ell = 1}^C e^{\theta_\ell}}$. Hence we estimate the $a_{cj}$ and $\theta_c$, rather than $\pi_{cj}$ and $\eta_c$. Similar equations apply for the probit transformation.
+
+When used as a classification algorithm the model does not simply return the most likely class for each subject but returns a probability of class membership, based on the observed outcomes. The posterior probability for a set of given observed outcomes can be obtained from Bayes theorem. Given the observed outcomes $y_{i1}, y_{i2}, \cdots, y_{ik}$ then the probability that the subject is in class $d$ is:
+$$
+\begin{aligned}
+P\left(d| y_{i1}, y_{i2}, ..., y_{ik}\right)&=\frac{ \eta_d P\left(y_{i1}, y_{i2}, ..., y_{ik}\right|d)}{\sum_{c = 1}^C \eta_c P\left(y_{i1}, y_{i2}, ..., y_{ik}\right|c)}\\
+& = \frac{ \eta_d\prod_{j = 1}^k \pi_{dj}^{y_{ij}} \left(1-\pi_{dj}\right)^{1-y_{ij}}}{\sum_{c = 1}^C \eta_c\prod_{j = 1}^k \pi_{cj}^{y_{ij}} \left(1-\pi_{cj}\right)^{1-y_{ij}}}.
+\end{aligned}
+$$
+  
+### Latent class with random effect model
+  
+  A major difficulty with latent class models is the requirement for local independence or equivalently homogeneity of the outcome probabilities within each class. When the classes are heterogeneous the assumption that the manifest outcomes are independent, conditional on the latent class, does not apply. @uebersax1999 describes the problems associated with conditional dependence as "to add spurious latent classes that are not truly present at the taxonic level" and @vacek1985 showed that ignoring the conditional dependence produced biased estimates in the context of diagnostic testing. @pickles2003 discuss the classification of diseases in psychology as categories or by severity, arguing that ``most forms of psychopathology (indeed, most forms of pathology of any sort) manifest both continuous and discontinuous relationships with other phenomena'', and provide examples of where this may occur.
+
+A solution to the problem of heterogeneity was developed by @qu1996 combining a latent class model with a random effect to explain the heterogeneity. The probabilities are transformed to the probit scale and a normally distributed random effect added for each subject, before transforming back to probabilities. An alternative to the probit scale is the logit scale.
+A model for latent class incorporating a random effect $~N(0, 1)$ is:
+$$
+\begin{aligned}
+P\left(y_{i1}, y_{i2}, ..., y_{ik}|c_i=c, \lambda_i=\lambda\right)& = \prod_{j = 1}^k \pi_{icj}^{y_{ij}} \left(1-\pi_{icj}\right)^{1-y_{ij}}
+\end{aligned}
+$$
+where, either, if a probit scaling of the random effect
+$$
+\begin{aligned}
+\pi_{icj} = \Phi^{-1}\left({a_{cj}+b_{cj}\lambda_i}\right)
+\end{aligned}
+$$
+or, if a logistic scaling
+$$
+\begin{aligned}
+\pi_{icj} = \frac{\exp \left({a_{cj}+b_{cj}\lambda_i}\right)}{1+\exp \left({a_{cj}+b_{cj}\lambda_i}\right)}.
+\end{aligned}
+$$
+  and $a_{cj}$ determines the conditional class probability for a value of zero for the random effect, and $b_{cj}$ scales the random effect, and is usually known as the loading or discriminant. The loadings will generally be constrained to be equal between classes, and either the same loading for each outcome ($b_{cj} = b$) or independent loading for each outcome ($b_{cj} = b_j$). The marginal likelihood is obtained by integrating over the random effect and summing over the latent classes, which is then maximised to obtain the parameter estimates. Posterior class probabilities can be obtained as for the standard latent class using Bayes theorem.
+
+### Two level latent class with random effect model
+
+The previously described models for latent class can be considered to be for a single time point. Where the outcomes are observed at multiple time points then consideration must be made for the correlation between time points. A method described for this is the mixed latent Markov model [@Langeheine1994]. This assumes that the population is a mixture of latent Markov models which consists of a Markov chain which is a latent class at each time point. An alternative model is that of @Beath2009 which extends the model to two levels with an additional random effect modelling the correlation between outcomes at each time point. This has some similarities to the model by @Muthen1999 for longitudinal normally distributed data.
+
+We now define $y_{ijt}$ as the $j$th binary outcome for subject $i$ at time $t$, $\pi_{cjt}$ is the probability of the $j$th outcome equal to 1 for a subject in class $c$ at time $t$, $k$ is the number of outcomes, $T$ is the number of time points and $c$ is the class corresponding to the $i$th subject. An additional random effect $\tau_{t} \sim N\left(0, 1\right)$ is incorporated to model the additional correlation between outcomes at a time point, and $\ell_c$ scales this to the appropriate variance.
+
+$$
+\begin{aligned}
+P\left(y_{i11},\ldots,y_{ikT}|c_i=c,\lambda_i=\lambda,\tau_{i1}=\tau_1,\ldots,\tau_{iT}=\tau_T\right)
+&=&\prod_{t=1}^T\prod_{j=1}^k \pi_{icjt}^{y_{ijt}} \left(1-\pi_{icjt}\right)^{1-y_{ijt}}
+\end{aligned}
+$$
+where
+$$
+\begin{aligned}
+\pi_{icjt}=\Phi^{-1}\left(a_{cjt}+b_{cj}\left(\lambda_i+\ell_c\tau_{it}\right)\right)
+\end{aligned}
+$$
+or
+$$
+\begin{aligned}
+\pi_{icjt}=\frac{\exp\left(a_{cjt}+b_{cj}\left(\lambda_i+\ell_c\tau_{it}\right)\right)}{1+\exp\left(a_{cjt}+b_{cj}\left(\lambda_i+\ell_c\tau_{it}\right)\right)}.
+\end{aligned}
+$$
+  
+Again, we usually constrain $b_{cj}=b_j$ and $\ell_c=\ell$.
+
+### Model selection
+
+An important aspect of using latent class and latent class with random effect models is the choice of the number of classes, and whether inclusion of a random effect is required.  This presents two difficulties. The first involves a test for a parameter on the boundary of the parameter space. For the number of classes, this is the proportion in a class that is zero, and for the random effect, that the random effect variance is zero. As a consequence asymptotic likelihood theory does not hold so other methods must be used. One method is the bootstrapped likelihood ratio test as described by @McLachlan1987. However, a second difficulty is that when models may include a random effect then comparisons must be made between non-nested models. As an example we may wish to compare a latent class model with two or more classes to a latent class with random effect model with a single class. This is equivalent to an item response theory (IRT) model, either the Rasch model when the loadings are constant and a two parameter logistic otherwise [@Bartholomew2002]. This is an important choice as it determines if the underlying latent variable is categorical or continuous [@muthen2006b].
+
+The usual method used is an information criterion [@Lin1997] with the two main ones that are used being the Akaike Information Criterion (AIC) and the Bayesian Information Criterion (BIC). @Nylund2007 showed using simulation that BIC is superior to AIC for selection in latent class models, and this is the method most often used in applied publications. With BIC the penalty is greater than for AIC and dependent on the number of observations, so will select models with a smaller number of classes. An alternative version of AIC, AIC3 with a penalty of 3 was shown to have better performance with latent class models by @Dias2006. This will select models with a complexity between BIC and AIC, and this was found with the examples. No evaluation of the criteria has been performed for latent class with random effects models, and it has seen little use in applied publications. An important point is that with any model selection it is desirable to make use of existing information. So for example, if it is already known there is at least 2 classes then the model choice should be restricted to these. In the paper I have used BIC for model selection, but as no research has been performed on model selection for random effect latent class models the other information criteria are provided.
+
+### Identifiability
+
+A difficulty that is sometimes encountered in fitting latent class models is lack of identifiability, which occurs when the value of the maximum likelihood occurs for more than one unique set of parameter estimates, that is there is not a single global maximum. A minimum condition is that the number of parameters is less than the number of patterns, but this is not always sufficient [@McHugh1956]. This prevents the fitting of even a 2 class latent class model with only two outcomes, as this requires 5 parameters with only 4 patterns. A 2 class model is just identifiable when fitted to data on 3 outcomes, as there are 7 parameters and 8 possible patterns, however if a random effect is included then 4 outcomes are required for identifiability. A check is made by **randomLCA** to determine if the model is identifiable based on the number of parameters. As this is not always sufficient, special cases, for example the requirement of at least 5 outcomes to fit a 3 class latent class model, are also flagged as non-identified. A further check is provided by determining that the rank of the Hessian is not less than the number of estimated parameters [pages 150-1, @skrondal2004], however this may also occur if a parameter is on the boundary of the parameter space.
+
+###  Computational methods {#lab:comp}
+
+The standard latent class methods are fitted using an EM algorithm, with multiple starting values, switching to a quasi-Newton method when near convergence. The multiple starting values increase the probability that the algorithm converges to the global maximum rather than a local maximum, with only the EM algorithm run to completion when selecting starting values to reduce execution time. For the latent class with random effects models it is necessary to integrate over the random effects for each subject, for which it is necessary to use an approximation. One of the methods that has been used for this is Gauss-Hermite quadrature, where the integral is approximated by a weighted sum of the function evaluated at defined points, which works well when the function is approximately standard normal. However, for random effects models the likelihood is not, but the standardised likelihood is. Therefore, Gauss-Hermite quadrature is applied to the standardised likelihood, known as adaptive Gauss-Hermite quadrature [@Liu1994]. This has the advantage over standard Gauss-Hermite quadrature that integration is only performed in the region of the mode, reducing the number of quadrature points required. For the two level random effects model, adaptive Gauss-Hermite quadrature is again used. An orthogonal transform is applied to reduce the integration to two one-dimensional integrations and the method of moments is used to determine the location of the modes, as described in @Rabe-Hesketh2005.
+
+The random effects latent class models are fitted using a generalized EM algorithm (GEM) [p173, @Little2002] with maximisation using a quasi-Newton method. At each expectation step the location of the modes for the adaptive quadrature are recalculated, and the maximisation step performed based on these locations. The maximisation is not run to convergence at each step, but terminated after a number of quasi-Newton steps. For all models, the EM or GEM algorithm switches to a quasi-Newton for all parameters when close to convergence. For the random effects models starting values are obtained from the model without random effects, and a search performed over possible starting values for the random effect variance.
+
+A difficulty with latent class models is the calculation of standard errors when the parameter estimates are near the boundary of the parameter space. There are several options, one of which is to use Bayesian maximum a posteriori (MAP) estimation [@Garre2006]. This is a form of Bayesian estimation in that a prior probability is placed on the parameters, however the posterior distribution is then maximised similar to maximum likelihood estimation. This is equivalent to the penalised likelihood described by @Firth1993 in which a penalty is placed on extreme values of the logit or probit scale outcome probabilities. The posterior distribution will consequently have a mode, whereas the likelihood may not. In **randomLCA** the prior distribution used is the Dirichlet as in @Garre2006 but with a much smaller default penalty, where the penalty argument is equal to the number of extra observations that are effectively added to each cell. A penalty of 0.01 is used, which reduces the risk of numerical problems, without greatly affecting the estimated probabilities. A sensible upper limit for the penalty is 0.5, which has been found to perform well by a number of authors, for example @Rubin1987 in application to binary proportions, and may be used when necessary. This will also produce results similar to the Latent GOLD software default settings [@Vermunt2013]. Setting the penalty to zero will produce results identical to maximum likelihood.
+
+
+## Examples
+
+### Myocardial infarction example
+
+This example demonstrates the fitting of data from @rindskopf1986, where latent class analysis is used to determine diagnostic classifications based on medical tests. Although this example is for medical data, the model is simply standard latent class so the methods can be applied to data from other areas, for example psychology and sociology. The maximum number of classes that can be fitted is limited to 2 due to identifiability, so we fit models for 1 and 2 classes, assuming that the outcome probabilities are homogenous in each class.
+
+The fitting function for **randomLCA** is the **randomLCA** function which fits both the standard and random effects models. The command, where only the **patterns** parameter is required, is:
+  
+```{r eval = FALSE}
+randomLCA(patterns, freq = NULL, nclass = 2, calcSE = TRUE, notrials = 20,
+          random = FALSE, byclass = FALSE, quadpoints = 21, constload = TRUE,
+          blocksize = dim(patterns)[2], level2 = FALSE, probit = FALSE,
+          level2size = blocksize, qniterations = 5, penalty = 0.01, EMtol = 1.0e-9,
+          verbose = FALSE, seed = as.integer(runif(1, 0, .Machine$integer.max)),
+          cores =  max(detectCores(logical = FALSE) \%/\% 2, 1))
+```
+
+For a standard latent class model the parameters of interest are
+
+* **patterns** Data frame or matrix of 0 and 1 defining the outcome patterns. This may be either raw data or summarised data with a frequency vector giving the corresponding frequency for each pattern. The patterns may also include missing values, with **randomLCA** using maximum likelihood to fit the models using all available data.
+* **freq** Vector containing frequencies for each outcome pattern. Where this is missing it is created within the **randomLCA** function and used in the fitting algorithm, substantially reducing execution time.
+* **nclass** Number of classes to be fitted.
+* **notrials** The number of random starting values used. It is necessary to use different starting values to reduce the risk that the global maximum of the likelihood is not found. This should be increased in increments of ten until there is no decrease in the maximum log-likelihood. While this does not guarantee a maximum likelihood, the parameter estimates found will usually be close to those at the true global maximum.
+* **penalty** Penalty applied to likelihood for outcome probabilities. See Section~\@ref(lab:comp) for details.
+* **cores** Number of cores to use in fitting multiple starting values.
+
+The remaining arguments will be considered when discussing the relevant models or may be obtained from the package documentation. Fitting the standard latent class models for one and two classes (note that a three class model is not identifiable) requires only the basic arguments:
+  
+```{r}
+data(myocardial)
+
+myocardial.lca1 <- randomLCA(myocardial[, 1:4], freq = myocardial$freq,
+                             nclass = 1)
+myocardial.lca2 <- randomLCA(myocardial[, 1:4], freq = myocardial$freq,
+                             nclass = 2)
+```
+
+The BIC values may be extracted from the fitted objects, and formed into a data frame:
+  
+```{r}
+myocardial.bic <- data.frame(classes = 1:2, bic = c(BIC(myocardial.lca1),
+                                                    BIC(myocardial.lca2)))
+print(myocardial.bic, row.names = FALSE)
+```
+
+
+Using BIC as a selection method, this selects the 2 class model, indicating a breakdown into diseased and non-diseased, which it is assumed represent those with and without myocardial infarction, although the true nature of classes is always debatable. A characteristic of this data is that a single class random effect model has a lower BIC than the 2 class standard latent class, so we need to assume that there are at least two classes, or that the underlying latent variable is categorical rather than continuous.
+
+An alternative is to use the parametric bootstrap [@McLachlan1987] to determine the number of classes, and this is easily performed using the **simulate** function to generate the samples under the null hypothesis and then **refit** to refit both models. The **simulate** function returns a list of data frames simulated from the specified model, and each of these can then be refitted using the specified null and alternative model, as shown in the following code.
+
+```{r}
+nsims <- 999
+obslrt <- 2 * (logLik(myocardial.lca2) - logLik(myocardial.lca1))
+thesims <- simulate(myocardial.lca1, nsim = nsims)
+simlrt <- as.vector(lapply(thesims, function(x) {
+  submodel <- refit(myocardial.lca1, newpatterns = x)
+  fullmodel <- refit(myocardial.lca2, newpatterns = x)
+  return(2 * (logLik(fullmodel) - logLik(submodel)))
+}))
+```
+A $p$-value is obtained by comparing the observed likelihood ratio test statistic to the simulated. This can be performed in a number of ways, of which the most commonly used is described by [page 148, @Davison1997].
+
+```{r}
+print((sum(simlrt >= obslrt) + 1)/(nsims +  1))
+```
+Showing again the clear evidence in favour of the 2 class model.
+
+Summary may be used to display the fitted results:
+  
+```{r}
+summary(myocardial.lca2)
+```
+
+From this it is clear that Class `r round(ifelse(myocardial.lca2$outcomep[2,1]>myocardial.lca2$outcomep[1,1], 2, 1))` is the diseased class and Class `r round(ifelse(myocardial.lca2$outcomep[2,1]>myocardial.lca2$outcomep[1,1], 1, 2))`  the non-diseased, where the disease is myocardial infarction, based on the higher outcome probabilities. Outcome probabilities are plotted using the **plot** function, and shown in Figure \@ref(fig:outcome2a). Note that **plot** is based on **xyplot** so the additional graphical arguments must be the appropriate **lattice** ones.
+
+
+```{r outcome2a,  fig.cap="Outcome probabilities for 2 class latent class model for myocardial infarction data."}
+plot(myocardial.lca2, type = "b", pch = 1:2, xlab = "Test",
+       ylab = "Outcome Probability",
+       scales = list(x = list(at = 1:4, labels = names(myocardial)[1:4])),
+       key = list(corner = c(0.05, .95), border = TRUE, cex = 1.2,
+                  text = list(c("Class 1", "Class 2")),
+                  col = trellis.par.get()$superpose.symbol$col[1:2],
+                  points = list(pch = 1:2)))
+```
+
+
+  Individual results may be obtained from summary, for example the outcome probabilities but may also be obtained using the **outcomeProbs** function, which will also give the 95\% confidence intervals.
+```{r}
+outcomeProbs(myocardial.lca2)
+```
+  
+  For Q.wave in Class `r round(ifelse(myocardial.lca2$classp[2]>myocardial.lca2$classp[1], 2, 1))` there appears to be a problem with the standard errors, as assumptions about the normal approximation to the likelihood do not apply close to the boundary. Using the parametric bootstrap with **boot = TRUE** will produce improved results or alternatively, the value of the **penalty** argument could be increased.
+  
+```{r}
+outcomeProbs(myocardial.lca2, boot = TRUE)
+```
+  
+  
+  The outcome probabilities give some interesting information. For example, in Class `r round(ifelse(myocardial.lca2$outcomep[2,1]>myocardial.lca2$outcomep[1,1], 1, 2))`, those without myocardial infarction, will have absence of Q.wave but in those with myocardial infarction it will only be present in 76.7\%. The class probabilities can be obtained as **classProbs(myocardial.lca2)** of `r round(classProbs(myocardial.lca2)[1], 2)` and `r round(classProbs(myocardial.lca2)[2], 2)` for Class 1 and 2 respectively.
+
+
+  One aspect of latent class is that no subject is uniquely allocated to a given class, although in some cases a subject may have an extremely high probability of being in a given class. The posterior class probabilities can be obtained as
+
+  ```{r}
+  print(postClassProbs(myocardial.lca2), row.names = FALSE)
+  ```
+
+  This shows subjects with 3 or 4 positive tests to be strongly classified as having myocardial infarction, and even some with 2 positive tests are well classified. Having only one positive test makes it unlikely that it is myocardial infarction.
+
+
+### Dentistry example
+
+An important area of application of latent class and random effects latent class is the development or comparison of diagnostic testing methods where there is no gold standard test. A gold standard test is one that is the best available and can usually be assumed to be close to perfect, but usually being more expensive or difficult to perform [@Kraemer1992]. Given a gold standard it is easy to construct new tests or compare existing tests, as we know the true disease status of each subject. Latent class methods allow the construction of tests based on the assumption that subjects fall in either two or more classes, with diseased or non-diseased as a minimum, except that the classes can only be inferred from the observed test results. This has the consequence that the status of the subjects is not known exactly, which reduces the accuracy and relies upon the assumptions made about the test result distribution.
+
+There are other methods that have been proposed, the major of which are discrepant resolution and composite reference [Chapter 7, @Pepe2003], both of which have disadvantages and advantages compared to latent class methods. The advantage of the latent class method is its statistical basis, however it has a disadvantage of dependency on assumptions about the diagnostic tests, especially the assumption of either conditional independence or normally distributed heterogeneity.
+
+The further arguments to the **randomLCA** function required for a random effects model are:
+
+**random** Specifies whether a random effect should be included.
+**byclass** Allow loadings for the random effect to vary by class.
+**quadpoints** Number of quadrature points for the adaptive quadrature. These specify how accurate the numerical approximation to the marginal likelihood is, and should be increased until there is negligible improvement in model fit.
+**constload** The same loading is used for all outcomes when using a random effects model.
+**blocksize** If the outcome loadings are broken into blocks what is the block size? This allows the number of $b_cj$ parameters associated with the $\lambda_i$ to be reduced when fitting models with a large number of outcomes and as tructure to the outcomes by placing constraints on the $b_cj$. This will be demonstrated in the symptoms example.
+***normalfont** Fit probit model rather than logistic for relationship between parameters and outcome probabilities. This is the relationship typically used in some disciplines.
+
+This example shows the fitting of the dentistry data from @qu1996. The data consists of the results of five dentists evaluating x-rays for presence or absence of caries. For consistency with the original paper I have also set **probit = TRUE** to give the probit link. Fitting first the three possible models for one class:
+
+```{r}
+dentistry.lca1 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, nclass = 1)
+dentistry.lca1random <- randomLCA(dentistry[, 1:5], freq = dentistry$freq,
+  nclass = 1, random = TRUE, probit = TRUE)
+dentistry.lca1random2 <- randomLCA(dentistry[,1:5],freq=dentistry$freq,
+  nclass = 1, random = TRUE, probit = TRUE, constload = FALSE)
+```
+
+This can then be repeated for 2 to 4 classes, and using `BIC` the BIC
+extracted for each model, and then formed into a data frame to
+summarise. Note that we cannot use a parametric bootstrap based
+likelihood ratio test to compare the standard to random effects latent
+class as the models are not nested. Here the number of quadrature points
+will need to be increased for some models to allow convergence.
+
+```{r}
+dentistry.lca2 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq, nclass=2)
+dentistry.lca3 <- randomLCA(dentistry[,1:5], freq= dentistry$freq, nclass = 3)
+dentistry.lca4 <- randomLCA(dentistry[, 1:5], freq = dentistry$freq,nclass=4)
+dentistry.lca2random <- randomLCA(dentistry[,1:5],freq= dentistry$freq,
+  nclass = 2, random = TRUE, probit = TRUE)
+dentistry.lca3random <- randomLCA(dentistry[, 1:5], freq =
+  dentistry$freq,nclass=3,random=TRUE,probit=TRUE)
+dentistry.lca4random <- randomLCA(dentistry[,1:5],freq= dentistry$freq,
+  nclass = 4, random = TRUE, quadpoints = 31, probit = TRUE)
+dentistry.lca2random2 <- randomLCA(dentistry[, 1:5], freq =
+  dentistry$freq,nclass=2,random=TRUE,quadpoints=41,probit=TRUE,constload=FALSE)
+  dentistry.lca3random2 <- randomLCA(dentistry[,1:5],freq= dentistry$freq,
+  nclass = 3, random = TRUE, quadpoints = 41, probit = TRUE,
+  constload = FALSE)
+```
+
+We can display the BIC values in a table, with the first column for
+standard latent class, second for random effects with a constant loading
+for each dentist, and the third with loading varying by dentist. Note
+that it is not possible to fit a 4 class random effects model with
+individual loadings for each dentist due to non-identifiability. As for
+the previous example we can form the BIC values into a table, where
+`bic`, `bicrandom` and `bicrandom2` are the BIC values from the
+standard, random effects with constant loading and random effects with
+non-constant loading latent class models.
+
+```{r}
+bic.data <- data.frame(classes = 1:4, bic = c(BIC(dentistry.lca1),
+  BIC(dentistry.lca2), BIC(dentistry.lca3), BIC(dentistry.lca4)),
+  bicrandom = c(BIC(dentistry.lca1random), BIC(dentistry.lca2random),
+  BIC(dentistry.lca3random), BIC(dentistry.lca4random)),
+  bicrandom2 = c(BIC(dentistry.lca1random2), BIC(dentistry.lca2random2),
+  BIC(dentistry.lca3random2), NA))
+```
+
+
+```{r diabetesbic, echo = TRUE, tab.cap="BIC for Dentistry Models"}
+kable(bic.data, format = "html")
+```
+
+For the standard latent class models the minimum BIC of
+`r round(BIC(dentistry.lca3), 1)` is obtained for the 3 class model.
+With addition of the random effect with constant loading, minimum BIC is
+obtained with a 2 class model with a decrease from the latent class
+model to `r round(BIC(dentistry.lca2random), 1)`. Allowing the loadings
+to vary by dentist (2LCR model obtained by @qu1996) minimum BIC of
+`r round(BIC(dentistry.lca1random2), 1)` was obtained using a single
+class model, equivalent to a single factor Item Response Theory (IRT)
+model [Chapter 7, @Bartholomew2002]. This assumes that rather than
+subjects being grouped into classes they simply have different levels of
+an underlying latent variable, possibly severity. In the absence of any
+assumptions about the appropriate model this would be the model to be
+used, and we could conclude that severity of caries was on a continuous
+scales with each dentist having different thresholds for determining the
+presence or absence. In the paper by @qu1996 the assumption is made
+that the underlying latent variable is categorical, that is that there
+are two distinct types of subjects, and so the 2 class with random
+effect with constant loading will be used.
+
+Summary may be used to display the fitted results:
+
+```{r}
+summary(dentistry.lca2random)
+```
+
+Clearly, based on the lower outcome probabilities, Class
+`r round(ifelse(myocardial.lca2$outcomep[1,1]>myocardial.lca2$outcomep[2,1], 2, 1))`
+is the non-diseased and Class
+`r round(ifelse(myocardial.lca2$outcomep[1,1]>myocardial.lca2$outcomep[2,1], 1, 2))`
+the diseased.
+
+For latent class models with random effects there are two additional
+arguments to **plot**
+
+**graphtype** Type of graph, either "marginal" or "conditional". For marginal the outcome probabilities integrated over the random effect are plotted, and for conditional they are plotted conditional on the random effect, with zero the default.
+
+**conditionalp** For a conditional graph the percentile corresponding to the random effect at which the outcome probability is to be calculated. Fifty percent is the default, corresponding to a random effect value of zero.
+
+The marginal outcome probabilities, obtained by integrating over the
+random effect can be plotted, as in Figure \@ref(fig:outcome2). The
+marginal outcome probabilities reflect the average probability for any
+subject in the class having a positive outcome. This differs from the
+conditional outcome probabilities which are for a subject with zero
+random effect, and thus represent a typical subject.
+
+```{r outcome2,  fig.cap="Marginal outcome probabilities for 2 class latent class with random effect (2LCR) model for dentistry data."}
+plot(dentistry.lca2random, graphtype = "marginal", type = "b", pch = 1:2,
+  xlab = "Dentist", ylab = "Marginal Outcome Probability",
+  key = list(corner = c(0.05, .95), border = TRUE, cex = 1.2,
+  text = list(c("Class 1", "Class 2")),
+  col = trellis.par.get()$superpose.symbol$col[1:2],
+  points = list(pch = 1:2)))
+```
+
+Adding the **boot = TRUE** parameter to the **outcomeProbs** function will
+obtain bootstrap confidence intervals. Differences from the Qu et al
+paper result from their use of an individual loading for each dentist
+when calculating Table 6.
+
+We can demonstrate the effect of the random effect by plotting the
+outcome probabilities by varying percentiles of the random effect, using
+the following code, which will place each percentile in a different
+panel.
+
+```{r condprob1,  fig.cap="Conditional outcome probabilities for 2 class latent class with random effect (2LCR) model for dentistry data."}
+plot(dentistry.lca2random, graphtype = "conditional", type = "b",
+  pch = 1:2, conditionalp = c(0.025, 0.5, 0.975),
+  scales = list(alternating = FALSE, x = list(cex = 0.8)),
+  xlab = "Dentist", ylab = "Conditional Outcome Probability",
+  key = list(corner = c(0.05, .9), border = TRUE, cex = 1.2,
+  text = list(c("Class 1", "Class 2")),
+  col = trellis.par.get()$superpose.symbol$col[1:2],
+  points = TRUE))
+```
+
+If it is desired to have the plots on a single graph, it requires using
+the **calcCondProb** function which returns a **data.frame** containing the
+conditional probabilities conditional on the random effect for each
+class and outcome. We use the 2.5th and 97.5th percentiles, and
+superpose the plots on the same graph, as shown in
+Figure \@ref(fig:dentistrycondprob1). As an alternative each class could
+be placed in a separate panel.
+
+```{r}
+probs <- calcCondProb(dentistry.lca2random, conditionalp =c(0.025, 0.5, 0.975))
+```
+
+Two important concepts in diagnostic testing are sensitivity and
+specificity. Sensitivity is the probability of obtaining a positive
+result given that the true state is positive, and specificity is the
+probability of a negative result given that the true state is negative.
+Calculation of sensitivity and specificity is shown in the following
+code, where the number of quadrature points have been increased to
+ensure convergence for all simulated datasets but may also be obtained
+by increasing the penalty. The default for evaluation of outcome
+probabilities for random effect models is marginal, and this is
+appropriate for obtaining sensitivity and specificity.
+
+```{r}
+dentistry.lca2random <- randomLCA(dentistry[, 1:5], freq = dentistry$freq,
+  nclass = 2, random = TRUE, quadpoints = 71, probit = TRUE)
+probs <- outcomeProbs(dentistry.lca2random, boot = TRUE)
+```
+
+It is necessary to determine which is the class with higher outcome probabilities, as it is the diseased class. The variable **diseased** gives the number of the diseased class, and **notdiseased** for the non-diseased, and is based on the outcome probabilities being lower for the non-diseased class.
+
+```{r}
+diseased <- ifelse(probs[[1]]$Outcome[1] < probs[[2]]$Outcome[1], 2, 1)
+notdiseased <- 3 - diseased
+sens <- apply(probs[[diseased]], 1, function(x)
+  sprintf("%3.2f (%3.2f, %3.2f)", x[1], x[2], x[3]))
+spec <- apply(probs[[notdiseased]], 1, function(x)
+  sprintf("%3.2f (%3.2f, %3.2f)", 1 - x[1], 1 - x[3], 1 - x[2]))
+
+stable <- data.frame(sens, spec)
+names(stable) <- c("Sensitivity", "Specificity")
+```
+
+```{r senstable, echo = TRUE, tab.cap="Sensitivity and Specificity for Dentistry data"}
+kable(stable, format = "html")
+```
+
+The true and false positive rates can be calculated from the outcome probabilities, similar to sensitivity and sensitivity, and plotted for each dentist, and are shown in Figure \@ref(fig:truefalse).
+
+```{r truefalse,  fig.cap="True and false positive rates by dentist."}
+rates <- data.frame(tpr=probs[[diseased]][, 1],
+  fpr=probs[[notdiseased]][, 1])
+plot(tpr~fpr, type= "p",
+  xlab= "False Positive Rate\n(1-Specificity)",
+  ylab= "True Positive Rate (Sensitivity)",
+  xlim=c(0.0, 0.35), ylim=c(0.35, 0.9), data=rates)
+text(rates$fpr, rates$tpr,labels=1:length(rates$fpr), pos=4)
+```
+
+This gives a better explanation. It appears that the difference between
+dentists is mainly related to the threshold for what they classify as
+diseased. Dentist 5 is more likely to correctly identify teeth as
+diseased but at the expense of being more likely to identify
+non-diseased teeth as diseased. Note that this is different from an ROC
+curve where the same data is used but the test threshold is adjusted.
+Here the dentists may choose different thresholds but may also have
+different levels of performance.
+
+Posterior class probabilities may again be obtained with **postClassProbs**
+```{r}
+print(postClassProbs(dentistry.lca2random), row.names = FALSE)
+```
+
+Clearly, as the number of dentists identifying the subject as diseased
+increases, the posterior probability of being diseased increases, until
+it is almost one when all dentists identify the subject as diseased. The
+observed and fitted values may be obtained using the fitted method which
+returns a data frame containing them. Again, differences from the Qu et
+al paper result from a model with different loading for each dentist. We
+can obtain the fitted values for the two models as follows:
+
+```{r}
+dentistry.lca2.fitted <- fitted(dentistry.lca2)
+dentistry.lca2random.fitted <- fitted(dentistry.lca2random)
+dentistry.fitted <- merge(dentistry.lca2.fitted,
+dentistry.lca2random.fitted, by = names(dentistry.lca2.fitted)[1:6])
+names(dentistry.fitted)[6:8] <- c("Obs", "Exp 2LC", "Exp 2LCR")
+print(dentistry.fitted, row.names = FALSE)
+```
+
+It can be seen how the random effects model more accurately models the
+data, with fitted values closer to the observed data.
+
+### Symptoms example
+
+This comprises data on the presence or absence of respiratory and
+allergy symptoms in the Childhood Asthma Prevention Study (CAPS)
+[@Mihrshahi2001] and was used as the example in @Beath2009. The
+symptoms of night cough, wheeze, itchy rash and flexural dermatitis
+since the previous visit were recorded at one month, then quarterly for
+the first year and then twice yearly until age two years. For analysis
+these are aggregated for each six month period to avoid numerical
+problems associated with very small probabilities. The aim of the
+analysis is to identify the number of classes of subjects based on their
+respiratory and allergy symptoms combined. As well as allowing for the
+classes to be defined by different levels of the symptoms it will also
+allow for changes over time.
+
+For **randomLCA** the data is required in wide format with the four
+outcomes repeated in order for the number of periods. While it is not
+necessary, each outcome is suffixed with a period and the corresponding
+time identifier. This makes interpretation of the results easier and
+also will be used in labelling of the graphs. The structure of the data
+is:
+
+```{r}
+names(symptoms)
+```
+
+The following two additional arguments to `randomLCA` are used to define
+the two level random effects model.
+
+**level2** Fit 2 level random effects model.
+
+**level2size** Size of level 2 blocks for fitting 2 level models.
+
+The first model fitted is a standard latent class, to allow for no
+subject or period effect.
+
+```{r}
+symptoms.lca2 <- randomLCA(symptoms[,1:16],
+  freq=symptoms$Freq,nclass=2)
+```
+
+A variation of the random effects latent class model can be fitted allowing the loadings ($b_cj$parameters$) for the outcomes to be repeated, that is wheeze at the different time points, for example, will always have the same loading, using the **blocksize** argument. This is equivalent to the 2 level model with the time-dependent random variable having a variance of zero, that is no time-dependent effect. The outcomes have been set to have non-constant loading, although in practice models for constant loading would also be fitted.
+
+```{r}
+symptoms.lca2random <- randomLCA(symptoms[,1:16], freq=symptoms$Freq,
+  random=TRUE, nclass=2, blocksize=4, constload=FALSE)
+```
+
+The two level models are specified through the `level2` argument and the
+number of outcomes at each time through the `level2size` argument. For
+these models the penalty is increased to 0.1 to reduce the execution
+time, but for a two class model will be about an hour and for a three
+class model about two hours.
+```{r}
+symptoms.lca2random2 <- randomLCA(symptoms[,1:16], freq=symptoms$Freq,
+  random=TRUE, level2=TRUE, nclass=2, level2size=4, constload=FALSE,
+  penalty=0.1)
+```
+
+```{r}
+symptoms.lca1 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=1)
+summary(symptoms.lca1)
+
+symptoms.lca2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=2)
+summary(symptoms.lca2)
+
+symptoms.lca3 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=3)
+summary(symptoms.lca3)
+
+symptoms.lca4 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=4)
+summary(symptoms.lca4)
+
+symptoms.lca5 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,nclass=5)
+summary(symptoms.lca5)
+
+symptoms.lca1random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,nclass=1,blocksize=4,constload=FALSE)
+summary(symptoms.lca1random)
+
+symptoms.lca2random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,nclass=2,blocksize=4,constload=FALSE)
+summary(symptoms.lca2random)
+
+symptoms.lca3random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,nclass=3,blocksize=4,constload=FALSE)
+summary(symptoms.lca3random)
+
+symptoms.lca4random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,nclass=4,blocksize=4,constload=FALSE)
+summary(symptoms.lca4random)
+
+symptoms.lca5random <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,nclass=5,blocksize=4,constload=FALSE)
+summary(symptoms.lca5random)
+
+symptoms.lca1random2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,level2=TRUE,nclass=1, level2size=4,constload=FALSE,
+  penalty=0.1)
+summary(symptoms.lca1random2)
+
+symptoms.lca2random2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,level2=TRUE,nclass=2, level2size=4,constload=FALSE, penalty=0.1)
+summary(symptoms.lca2random2)
+
+# these can take considerable execution time
+
+symptoms.lca3random2 <- randomLCA(symptoms[,1:16],freq=symptoms$Freq,
+  random=TRUE,level2=TRUE,nclass=3, level2size=4,constload=FALSE,
+  penalty=0.1)
+summary(symptoms.lca3random2)
+```
+
+Repeating for up to five classes or when the BIC increases gives the
+following results. It should be noted that the two level models can take
+considerable time to fit. This is due to the relatively large number of
+quadrature points required for this data, as a consequence of a large
+number of patterns consisting entirely of zeroes. As for the previous
+examples we can form the BIC values into a table, where `bic`,
+`bic.random` and `bic.random2` are the BIC values from the standard,
+random effects and 2 level random effects latent class models.
+
+```{r}
+symptoms.bic <- data.frame(class=1:5,
+  bic=c(BIC(symptoms.lca1),BIC(symptoms.lca2),BIC(symptoms.lca3), BIC(symptoms.lca4),
+    BIC(symptoms.lca5)),
+  bic.random=c(BIC(symptoms.lca1random),BIC(symptoms.lca2random),
+    BIC(symptoms.lca3random),BIC(symptoms.lca4random),BIC(symptoms.lca5random)),
+  bic.random2=c(BIC(symptoms.lca1random2),BIC(symptoms.lca2random2),
+    BIC(symptoms.lca3random2),NA,NA))
+```
+
+```{r symptomsbic, echo = TRUE, tab.cap="BIC for Symptoms models"}
+kable(symptoms.bic, format = "html")
+```
+
+
+This shows the optimal model is the 2 Class model with random effects for both subject and period.
+
+```{r}
+summary(symptoms.lca2random2)
+```
+
+The marginal outcome probabilities are plotted in Figure \@ref(fig:symplca2random2) as follows.
+
+```{r symplca2random2,  fig.cap="Marginal outcome probabilities for 2 class latent class for symptoms data."}
+plot(symptoms.lca2random2, type="b",
+  scales=list(x=list(at=1:4, labels=c(6, 12, 18, 24))), pch = 1:4,
+  xlab="Period",
+  key = list(corner = c(0.75, .85),
+    text = list(c("Night Cough", "Wheeze", "Itch Rash", "Flex. Derma.")),
+    points = list(pch= 1:4), 
+    col = trellis.par.get()$superpose.symbol$col[1:4], border = TRUE))
+```
+
+It can be seen that in
+Class `r round(ifelse(symptoms.lca2random2$outcomep[2]>symptoms.lca2random2$outcomep[1], 2, 1))`
+the outcome probabilities are greater than for
+Class `r round(ifelse(symptoms.lca2random2$outcomep[2]>symptoms.lca2random2$outcomep[1], 1, 2))`,
+with the difference greatest for the two respiratory symptoms night
+cough and wheeze. Also over time the outcome probabilities decrease.
+Similarly to the dentistry example the conditional probabilities can be
+obtained using **calcCond2Prob** and plotted.
+
+## Summary
+
+It has been shown how the **randomLCA** package may be used to determine
+classes of subjects based on observed binary data, and how this may be
+used to determine sensitivity and specificity for diagnostic tests. In
+the dentistry and symptoms examples an assumption of heterogeneous
+classes, where the outcome probabilities are allowed to vary within a
+class was shown to be an improvement over traditional latent class
+analysis. The **randomLCA** package also produces a range of plots for
+describing the classes, allows for bootstrapped standard errors,
+calculation of marginal outcome probabilities when using random effects
+models and the use of penalised likelihood. A further extension to
+**randomLCA** would be extension to latent class regression models
+[@dayton1988], where the class probabilities are determined by the
+covariates. Another extension is to allow for ordinal data using a
+Graded Response model [@Samejima1970]. A possible extension to the
+package is to allow for other data types. However for the random effects
+models it is difficult to extend the models except for ordinal data.
+
+
+## References

@@ -6,19 +6,19 @@ format_perc <- function(probs, digits)
         "%")
 
 outcomeProbs <- function(object,level = 0.95, boot=FALSE, type="perc",R=999,scale=c("prob","raw"),
-                         cores = max(detectCores() %/% 2, 1),...)
+                         cores = max(detectCores(logical = FALSE) %/% 2, 1),...)
   UseMethod("outcomeProbs")
 
 outcomeProbs.randomLCA <-
   function(object,level = 0.95, boot=FALSE, type="perc",R=999,scale=c("prob","raw"),
-           cores = max(detectCores() %/% 2, 1),...) {
+           cores = max(detectCores(logical = FALSE) %/% 2, 1),...) {
     if (!inherits(object, "randomLCA"))
       stop("Use only with 'randomLCA' objects.\n")
     if (object$random & !boot)
       stop("Not implemented for models with random effects. Use bootstrap option.\n")
     if (object$random & boot & !(type %in% c("perc","norm")))
       stop("Only bootstrap of type perc or normal available")
-    out <- list()
+     out <- list()
     nclass <- object$nclass
     if (boot) {
       dostatistic <- function(x,initmodel) {

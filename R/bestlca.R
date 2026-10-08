@@ -1,44 +1,58 @@
 `bestlca` <-
   function(patterns,freq,nclass,calcSE,notrials,probit,penalty,EMtol,verbose,cores) {
     
+    
+    thestatistic <- function(data, ...) {
+      
+      #browser()
+      
+      freq <- data[,1]
+      patterns <- data[,2:dim(data)[2]]
+      
+      # noutliers <- max(1,round(dim(data)[1]*0.2))
+      # outliers <- sample(c(rep(1,noutliers),rep(0,dim(data)[1]-noutliers)))
+      
+      #browser()
+      thefit <- fitFixed(patterns,freq,nclass=nclass,initoutcomep=NULL,
+               initclassp=NULL,calcSE=calcSE,justEM=FALSE,probit=probit,
+               penalty=penalty,EMtol=EMtol,verbose=verbose, fullresults=FALSE)
+      #browser()
+    }
+    
     if (!exists(".Random.seed", envir = .GlobalEnv, inherits = FALSE)) runif(1)
     seed <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
     
-    bics <- rep(NA,notrials)
-    maxll <- -Inf
     if (cores > 1) {
-      cl <- parallel::makeCluster(cores)
-      doParallel::registerDoParallel(cl)
-      res = foreach(i = 1:notrials, 
-                    .options.RNG=seed[1]) %dorng% {
-                      fitFixed(patterns,freq,nclass=nclass,calcSE=FALSE,justEM=TRUE,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose)
-                    }
-      parallel::stopCluster(cl)
-      for (i in 1:notrials) {
-        if (verbose) cat(i," logLik = ",res[[i]]$logLik,"\n")
-        bics[i] <- -2*(res[[i]]$logLik)+log(res[[i]]$nobs)*res[[i]]$np
-        if (res[[i]]$logLik>maxll) {
-          maxll <- res[[i]]$logLik
-          maxlca <- res[[i]]
-        }
-      }
-    } else {
-      for (i in 1:notrials) {
-        lca <- fitFixed(patterns,freq,nclass=nclass,calcSE=FALSE,justEM=TRUE,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose)
-        bics[i] <- -2*(lca$logLik)+log(lca$nobs)*lca$np
+      if(.Platform$OS.type=="unix")  parallel <- "multicore"
+      else parallel <- "snow" }
+    else parallel <- "no"
         #browser()
-        if (lca$logLik > maxll) {
-          maxll <- lca$logLik
-          maxlca <- lca
-        }
-        if (verbose)
-          cat("iteration ",i,"logLik = ",lca$logLik,"\n")
-      }
-    }
-    if (verbose) print("refitting to obtain SE")
+    theboot <- boot(cbind(freq,patterns), thestatistic, R=notrials, sim = "parametric",
+                    ran.gen = function(d, p) d,
+                    parallel = parallel,
+                    ncpus = cores,
+                    calcSE=calcSE,justEM=TRUE,probit=probit,
+                    penalty=penalty,EMtol=EMtol,verbose=verbose)
     #browser()
-    maxlca <- fitFixed(patterns,freq,nclass=nclass,initoutcomep=maxlca$outcomep,
-                       initclassp=maxlca$classp,calcSE=calcSE,justEM=FALSE,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose)
+    res <- theboot$t
+    if (verbose) for (i in 1:notrials) cat(c(res[i,2],res[[i]]$start.val),"\n")
+    nfails <- sum(is.na(res[,2]))
+    if (nfails > 0) warning(sprintf("Failed to obtain starting values for %i starting sets", nfails))
+    
+    bics <- -2*(res[,2])+log(res[,3])*res[,4]
+    
+    res <- res[order(res[,2], decreasing=TRUE),]
+    res <- res[1,]
+    
+    
+    #browser()
+
+    classp <- res[5:(5+nclass-1)]
+    outcomep <- matrix(res[(5+nclass):length(res)],nrow=nclass)
+    
+     maxlca <- fitFixed(patterns,freq,nclass=nclass,initoutcomep=outcomep,
+                       initclassp=classp,calcSE=calcSE,justEM=FALSE,probit=probit,
+                       penalty=penalty,EMtol=EMtol,verbose=verbose, fullresults=TRUE)
     if (verbose) {
       print("bic for class")
       print(bics)

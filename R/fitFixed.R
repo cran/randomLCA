@@ -9,7 +9,8 @@
            probit,
            penalty,
            EMtol,
-           verbose) {
+           verbose,
+           fullresults) {
     # parameters
     #   outcomes matrix of outcomes 0 or 1
     #   freq vector of frequencies corresponding to each outcome combination
@@ -48,8 +49,7 @@
       }
       maxll <- rowMaxs(ill, value=TRUE)
       ll <- sum((maxll+log(rowSums(exp(ill-maxll))))*freq)
-      #browser()
-      # penalise extreme outcome probabilities
+       # penalise extreme outcome probabilities
       if (penalty == 0.0)
         penll <- ll
       else {
@@ -64,9 +64,7 @@
           ll + penalty / (nclass * 2) * sum(log(outcomep)) + penalty / (nclass *
                                                                           2) * sum(log(noutcomep))
       }
-       # print(c(ll,penll,penalty/(nclass*2)*sum(log(outcomep))+penalty/(nclass*2)*sum(log(1.0-outcomep))))
-      #print(c(dbeta(outcomep,1+penalty,1+penalty,log=TRUE),sum(pen)))
-      if (is.nan(penll) ||
+       if (is.nan(penll) ||
           is.infinite(penll))
         penll <- -1.0 * .Machine$double.xmax
        return(list(logl = ll, penlogl = penll))
@@ -100,7 +98,6 @@
          ill[, i] <- .Call("bernoulliprob", patterns, loutcomep, lnoutcomep) + log(classp[i])
         # multiply by class probabilities
       }
-      #browser()
       maxll <- rowMaxs(ill, value=TRUE)
       ll <- sum((maxll+log(rowSums(exp(ill-maxll))))*freq)
       ill2 <- rowSums(exp(ill))
@@ -133,14 +130,14 @@
       ))
     }
     
-    if (missing(initclassp))
+    if (missing(initclassp) | is.null(initclassp))
       initclassp <- runif(nclass)
     initclassp <- ifelse(initclassp < 1.0e-3, 1.0e-3, initclassp)
     initclassp <-
       ifelse(initclassp > 1 - 1.0e-3, 1 - 1.0e-3, initclassp)
     classp <- initclassp / sum(initclassp)
     
-    if (missing(initoutcomep))
+    if (missing(initoutcomep) | is.null(initoutcomep))
       initoutcomep <- runif(nclass * nlevel1)
     initoutcomep <- ifelse(initoutcomep < 1.0e-5, 1.0e-5, initoutcomep)
     initoutcomep <- ifelse(initoutcomep > 1 - 1.0e-5, 1 - 1.0e-5, initoutcomep)
@@ -179,12 +176,8 @@
         classx[i - 1] <- log(classp[i] / classp[1])
     }
     
-    #optim.fit <- nlm(calcllfornlm,c(as.vector(classx),as.vector(outcomex)),hessian=calcSE,print.level=ifelse(verbose,2,0),
-    #		gradtol=1.0e-6,iterlim=1000)
-    # browser()
-    #print(c(as.vector(classx),as.vector(outcomex)))
-    if (justEM) {
-      fit <-
+     if (justEM) {
+      if (fullresults) fit <-
         list(
           nclass = nclass,
           np = (nclass - 1) + nclass * nlevel1,
@@ -192,11 +185,10 @@
           classp = classp,
           nobs = sum(freq),
           logLik = ll,
-          penlogLik = NA
-        )
+          penlogLik = NA)
+          else fit <- c(ll, np, classp, as.vector(outcomep))
     } else {
-      #browser()
-      classx <- ifelse(classx < -50, -50, classx)
+       classx <- ifelse(classx < -50, -50, classx)
       classx <- ifelse(classx > 50, 50, classx)
       outcomex <- ifelse(outcomex < -50, -50, outcomex)
       outcomex <- ifelse(outcomex > 50, 50, outcomex)
@@ -259,9 +251,8 @@
       }
       np <- (nclass - 1) + nclass * nlevel1
       nobs <- sum(freq)
-      #browser()
-      deviance <- 2 * sum(ifelse(freq == 0, 0, freq * log(freq / fitted)))
-      fit <-
+       deviance <- 2 * sum(ifelse(freq == 0, 0, freq * log(freq / fitted)))
+      if (fullresults) fit <-
         list(
           fit = optim.fit,
           nclass = nclass,
@@ -277,6 +268,7 @@
           deviance = deviance,
           classprob = classprob
         )
+      else fit <- c(final$logLik, final$penlogLik, nobs, np, classp, as.vector(outcomep))
     }
     return(fit)
   }

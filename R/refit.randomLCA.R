@@ -27,7 +27,9 @@ refit <-
     }
     if (useinit) {
       if (!object$random) newfit <- fitFixed(newpatterns,newfreq,object$outcomep,object$classp,
-                                             object$nclass,calcSE=FALSE,justEM=FALSE,object$probit,object$penalty,object$EMtol,verbose=FALSE)
+                                             object$nclass,calcSE=FALSE,justEM=FALSE
+                                             ,object$probit,object$penalty,object$EMtol,
+                                             verbose=FALSE, fullresults=TRUE)
       else {
         if (!object$level2) newfit <- fitAdaptRandom(newpatterns,newfreq,
                                                      nclass=object$nclass,calcSE=FALSE,initoutcomep=object$outcomep,
@@ -35,8 +37,10 @@ refit <-
                                                      initlambdacoef=object$lambdacoef,
                                                      blocksize=object$blocksize,
                                                      gh=norm.gauss.hermite(object$quadpoints),
-                                                     constload=object$constload,probit=object$probit,byclass=object$byclass,
-                                                     qniterations=object$qniterations,penalty=object$penalty,verbose=FALSE)
+                                                     constload=object$constload,probit=object$probit,
+                                                     byclass=object$byclass,
+                                                     qniterations=object$qniterations,
+                                                     penalty=object$penalty,verbose=FALSE)
         else newfit <- fitAdaptRandom2(newpatterns,newfreq,
                                        nclass=object$nclass,calcSE=FALSE,initoutcomep=object$outcomep,
                                        initclassp=object$classp,
@@ -66,13 +70,17 @@ refit <-
         newfit$qniterations <- object$qniterations
         newfit$EMtol <- object$EMtol
         newfit$penalty <- object$penalty
+        newfit$cores <- object$cores
         class(newfit) <- "randomLCA"
       }
-    } else newfit <- randomLCA(newpatterns,freq=newfreq,nclass=object$nclass,calcSE=TRUE,notrials=object$notrials,
-                               random=object$random,byclass=object$byclas,quadpoints=object$quadpoints,constload=object$constload,
-                               blocksize=object$blocksize,
-                               level2=object$level2,probit=object$probit,level2size=object$level2size,
-                               qniterations=object$qniterations,penalty=object$penalty,EMtol=object$EMtol,verbose=FALSE)
+    } else 
+       newfit <- randomLCA(newpatterns,freq=newfreq,nclass=object$nclass,calcSE=TRUE,
+       notrials=object$notrials, random=object$random,byclass=object$byclass,
+       quadpoints=object$quadpoints,constload=object$constload,
+       blocksize=object$blocksize,level2=object$level2,
+       probit=object$probit,level2size=object$level2size,
+    qniterations=object$qniterations,penalty=object$penalty,
+    EMtol=object$EMtol,verbose=FALSE,cores=object$cores)
     return(newfit)    
   }
 

@@ -10,10 +10,15 @@
   function(patterns,freq=NULL,nclass=2,calcSE=TRUE,notrials=20,
            random=FALSE,byclass=FALSE,quadpoints=21,constload=TRUE,blocksize=dim(patterns)[2],
            level2=FALSE,probit=FALSE,level2size=blocksize,
-           qniterations=5,penalty=0.01,EMtol=1.0e-5,verbose=FALSE,seed = as.integer(runif(1, 0, .Machine$integer.max)),
-           cores = max(detectCores() %/% 2, 1)) {
+           qniterations=5,penalty=0.01,EMtol=1.0e-5,verbose=FALSE,
+           seed = as.integer(runif(1, 0, .Machine$integer.max)),
+           cores = max(detectCores(logical = FALSE) %/% 2, 1)) {
     set.seed(seed)
-    if(!random) cores <- 1
+    if (cores > max(detectCores(logical = FALSE)-1, 1)) {
+      cores <- max(detectCores(logical = FALSE)-1, 1)
+      warning(sprintf("cores greater than available, setting to %i cores",max(detectCores(logical = FALSE)-1, 1)))
+    }
+    
     if (quadpoints > 190)
       stop("Maximum of 190 quadrature points\n")
     cl <- match.call()
@@ -45,12 +50,7 @@
     else {
       # check that freq doesn't contain missing
       if (any(is.na(freq))) stop("freq cannot contain missing values")
-      # remove any observations with frequency of zero
-#       patterns <- patterns[freq!=0,]
-#       freq <- freq[freq!=0]
     }
-	# patterns <- as.matrix(patterns)
-	# mode(patterns) <- "integer"
 # determine df
     nparams <- dim(patterns)[2]*nclass
     nparams <- nparams+nclass-1
@@ -70,11 +70,13 @@
     if (nonident) stop("Model is not identifiable - decrease classes or random effects")
     if ((Sys.info()['sysname']=="Windows") & (cores>1)) Sys.sleep(0.1)
     if (!random) initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-            calcSE=calcSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose, cores=cores)
+            calcSE=calcSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,
+            verbose=verbose, cores=cores)
     else {
       if (!level2) {
         initmodel <- bestlca(patterns,freq=freq,nclass=nclass,
-                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,EMtol=EMtol,verbose=verbose, cores=cores)
+                             calcSE=FALSE,notrials=notrials,probit=probit,penalty=penalty,
+                             EMtol=EMtol,verbose=verbose, cores=cores)
         # work out how many lambda coefs there are
         if (constload) nlambda <- 1
         else nlambda <- min(dim(patterns)[2],blocksize)
@@ -173,6 +175,7 @@
     fit$qniterations <- qniterations
     fit$penalty <- penalty
     fit$EMtol <- EMtol
+    fit$cores <- cores
     class(fit) <- "randomLCA"
     return(fit)
   }

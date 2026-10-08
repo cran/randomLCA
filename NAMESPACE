@@ -39,13 +39,7 @@ importFrom(Matrix, "rankMatrix")
 
 importFrom(Rfast, "rowMaxs")
 
-importFrom(parallel, "detectCores", "makeCluster","stopCluster")
-
-importFrom("doParallel", "registerDoParallel")
-
-importFrom("foreach", "foreach", "%dopar%")
-
-importFrom("doRNG", "%dorng%")
+importFrom(parallel, "detectCores")
 
 # S3 methods
 S3method(plot, randomLCA)

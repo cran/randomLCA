@@ -1,3 +1,11 @@
+Changes in randomLCA version 1.1-5
+
+  o vignettes changed to use RMarkdown
+  
+  o Default cores for a fit is now half of physical cores.
+
+  o parallel processing is now performed using boot. 
+
 Changes in randomLCA version 1.1-4
 
  o fixed error in outcomeProbs manual entry causing CRAN check failure

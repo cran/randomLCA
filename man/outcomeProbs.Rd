@@ -7,7 +7,7 @@ Extract outcome probabilities and confidence intervals for a randomLCA object.
 }
 \usage{
 \method{outcomeProbs}{randomLCA}(object, level = 0.95, boot=FALSE, type="perc", R=999,
-    scale=c("prob","raw"), cores = max(detectCores() \%/\% 2, 1), \ldots)
+    scale=c("prob","raw"), cores = max(detectCores(logical = FALSE) \%/\% 2, 1), \ldots)
 }
 \arguments{
   \item{object}{randomLCA object}
